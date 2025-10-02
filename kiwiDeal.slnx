@@ -1,0 +1,43 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/kiwiDeal.Api/kiwiDeal.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Auctions/">
+    <Project Path="src/Modules/Auctions/kiwiDeal.Auctions.Api/kiwiDeal.Auctions.Api.csproj" />
+    <Project Path="src/Modules/Auctions/kiwiDeal.Auctions.Application/kiwiDeal.Auctions.Application.csproj" />
+    <Project Path="src/Modules/Auctions/kiwiDeal.Auctions.Domain/kiwiDeal.Auctions.Domain.csproj" />
+    <Project Path="src/Modules/Auctions/kiwiDeal.Auctions.Infrastructure/kiwiDeal.Auctions.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Listings/">
+    <Project Path="src/Modules/Listings/kiwiDeal.Listings.Api/kiwiDeal.Listings.Api.csproj" />
+    <Project Path="src/Modules/Listings/kiwiDeal.Listings.Application/kiwiDeal.Listings.Application.csproj" />
+    <Project Path="src/Modules/Listings/kiwiDeal.Listings.Domain/kiwiDeal.Listings.Domain.csproj" />
+    <Project Path="src/Modules/Listings/kiwiDeal.Listings.Infrastructure/kiwiDeal.Listings.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/kiwiDeal.Notifications.Api/kiwiDeal.Notifications.Api.csproj" />
+    <Project Path="src/Modules/Notifications/kiwiDeal.Notifications.Application/kiwiDeal.Notifications.Application.csproj" />
+    <Project Path="src/Modules/Notifications/kiwiDeal.Notifications.Domain/kiwiDeal.Notifications.Domain.csproj" />
+    <Project Path="src/Modules/Notifications/kiwiDeal.Notifications.Infrastructure/kiwiDeal.Notifications.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Payments/">
+    <Project Path="src/Modules/Payments/kiwiDeal.Payments.Api/kiwiDeal.Payments.Api.csproj" />
+    <Project Path="src/Modules/Payments/kiwiDeal.Payments.Application/kiwiDeal.Payments.Application.csproj" />
+    <Project Path="src/Modules/Payments/kiwiDeal.Payments.Domain/kiwiDeal.Payments.Domain.csproj" />
+    <Project Path="src/Modules/Payments/kiwiDeal.Payments.Infrastructure/kiwiDeal.Payments.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Users/">
+    <Project Path="src/Modules/Users/kiwiDeal.Users.Api/kiwiDeal.Users.Api.csproj" />
+    <Project Path="src/Modules/Users/kiwiDeal.Users.Application/kiwiDeal.Users.Application.csproj" />
+    <Project Path="src/Modules/Users/kiwiDeal.Users.Domain/kiwiDeal.Users.Domain.csproj" />
+    <Project Path="src/Modules/Users/kiwiDeal.Users.Infrastructure/kiwiDeal.Users.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/SharedKernel/">
+    <Project Path="src/SharedKernel/kiwiDeal.SharedKernel/kiwiDeal.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/kiwiDeal.Tests.Integration/kiwiDeal.Tests.Integration.csproj" />
+    <Project Path="tests/kiwiDeal.Tests.Unit/kiwiDeal.Tests.Unit.csproj" />
+  </Folder>
+</Solution>

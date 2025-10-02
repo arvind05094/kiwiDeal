@@ -1,0 +1,6 @@
+@kiwiDeal.Api_HostAddress = http://localhost:5158
+
+GET {{kiwiDeal.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

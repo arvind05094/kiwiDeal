@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: kiwi_deal_db
+    environment:
+      POSTGRES_USER: kiwiadmin
+      POSTGRES_PASSWORD: kiwipassword
+      POSTGRES_DB: kiwidealddb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-schemas.sql:/docker-entrypoint-initdb.d/init-schemas.sql
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

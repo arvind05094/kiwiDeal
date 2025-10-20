@@ -31,7 +31,7 @@ public sealed class LoginCommandHandler(
 
         var accessToken = jwtTokenGenerator.GenerateAccessToken(user);
         var refreshTokenValue = jwtTokenGenerator.GenerateRefreshToken();
-        var refreshToken = user.AddRefreshToken(refreshTokenValue, DateTimeOffset.UtcNow.AddDays(7));
+        user.AddRefreshToken(refreshTokenValue, DateTimeOffset.UtcNow.AddDays(7));
 
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -40,6 +40,7 @@ public sealed class LoginCommandHandler(
 
         return Result.Success(new AuthResponse(
             accessToken,
+            refreshTokenValue,
             new UserResponse(
                 user.Id.Value,
                 user.Email,

@@ -2,9 +2,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Modules\Users\kiwiDeal.Users.Infrastructure\kiwiDeal.Users.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Users\kiwiDeal.Users.Api\kiwiDeal.Users.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

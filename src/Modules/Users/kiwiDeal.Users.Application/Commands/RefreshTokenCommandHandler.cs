@@ -49,6 +49,7 @@ public sealed class RefreshTokenCommandHandler(
 
         return Result.Success(new AuthResponse(
             accessToken,
+            newRefreshTokenValue,
             new UserResponse(
                 user.Id.Value,
                 user.Email,

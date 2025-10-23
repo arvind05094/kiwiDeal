@@ -1,16 +1,18 @@
 using Asp.Versioning;
 using kiwiDeal.SharedKernel.Behaviours;
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.Users.Api;
 using kiwiDeal.Users.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddOpenApi();
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -50,6 +52,16 @@ builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("kiwiDeal API");
+        options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

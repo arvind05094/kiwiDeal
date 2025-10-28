@@ -1,7 +1,7 @@
 using Asp.Versioning;
+using FluentValidation;
 using kiwiDeal.SharedKernel.Behaviours;
 using kiwiDeal.Users.Api;
-using kiwiDeal.Users.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -20,6 +20,9 @@ builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
 });
+
+builder.Services.AddValidatorsFromAssembly(
+    typeof(kiwiDeal.Users.Application.Commands.RegisterCommand).Assembly);
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -70,3 +73,5 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+public partial class Program { }

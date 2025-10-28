@@ -32,14 +32,21 @@ public sealed class ValidationBehaviour<TRequest, TResponse>(
             return await next();
 
         var errorMessage = string.Join("; ", failures.Select(f => f.ErrorMessage));
-
         var error = Error.ValidationFailed(errorMessage);
 
-        var result = Result.Failure<TResponse>(error);
+        var resultType = typeof(TResponse);
 
-        if (result.Value is TResponse typedResponse)
-            return typedResponse;
+        if (resultType.IsGenericType && resultType.GetGenericTypeDefinition() == typeof(Result<>))
+        {
+            var valueType = resultType.GetGenericArguments()[0];
+            var failureMethod = typeof(Result)
+                .GetMethods()
+                .First(m => m.Name == "Failure" && m.IsGenericMethod)
+                .MakeGenericMethod(valueType);
 
-        throw new ValidationException(failures);
+            return (TResponse)failureMethod.Invoke(null, [error])!;
+        }
+
+        return (TResponse)(object)Result.Failure(error);
     }
 }

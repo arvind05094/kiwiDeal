@@ -12,7 +12,7 @@ using kiwiDeal.Users.Infrastructure.Persistence;
 namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20260526012446_InitialCreate")]
+    [Migration("20260526020247_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -57,10 +57,6 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
-                    b.Property<Guid?>("user_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_refresh_tokens");
 
@@ -71,14 +67,7 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_refresh_tokens_user_id");
 
-                    b.HasIndex("user_id")
-                        .HasDatabaseName("ix_refresh_tokens_user_id1");
-
-                    b.ToTable("refresh_tokens", "users", t =>
-                        {
-                            t.Property("user_id")
-                                .HasColumnName("user_id1");
-                        });
+                    b.ToTable("refresh_tokens", "users");
                 });
 
             modelBuilder.Entity("kiwiDeal.Users.Domain.Entities.User", b =>
@@ -147,8 +136,9 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("kiwiDeal.Users.Domain.Entities.User", null)
                         .WithMany("RefreshTokens")
-                        .HasForeignKey("user_id")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("fk_refresh_tokens_users");
                 });
 

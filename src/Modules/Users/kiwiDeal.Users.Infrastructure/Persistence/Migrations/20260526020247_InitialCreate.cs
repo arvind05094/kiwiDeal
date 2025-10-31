@@ -45,7 +45,6 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                     token = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
                     expires_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
                     is_revoked = table.Column<bool>(type: "boolean", nullable: false),
-                    user_id1 = table.Column<Guid>(type: "uuid", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),
                     updated_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false)
                 },
@@ -54,7 +53,7 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                     table.PrimaryKey("pk_refresh_tokens", x => x.id);
                     table.ForeignKey(
                         name: "fk_refresh_tokens_users",
-                        column: x => x.user_id1,
+                        column: x => x.user_id,
                         principalSchema: "users",
                         principalTable: "users",
                         principalColumn: "id",
@@ -66,12 +65,6 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                 schema: "users",
                 table: "refresh_tokens",
                 column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_refresh_tokens_user_id1",
-                schema: "users",
-                table: "refresh_tokens",
-                column: "user_id1");
 
             migrationBuilder.CreateIndex(
                 name: "uq_refresh_tokens_token",

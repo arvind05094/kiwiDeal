@@ -70,7 +70,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasMany(u => u.RefreshTokens)
             .WithOne()
-            .HasForeignKey("user_id")
+            .HasForeignKey(r => r.UserId)
             .HasConstraintName("fk_refresh_tokens_users")
             .OnDelete(DeleteBehavior.Cascade);
 

@@ -37,11 +37,7 @@ public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, 
             listing.UpdatedAt,
             listing.Images.Select(i => new ListingImageDto(i.Url, i.DisplayOrder)).ToList())).ToList();
 
-        var result = new PagedResult<ListingDto>(
-            dtos,
-            pagedListings.TotalCount,
-            pagedListings.PageNumber,
-            pagedListings.PageSize);
+        var result = PagedResult<ListingDto>.Create(dtos, pagedListings.TotalCount, pagination);
 
         return Result.Success(result);
     }

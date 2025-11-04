@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
     <ProjectReference Include="..\Modules\Users\kiwiDeal.Users.Infrastructure\kiwiDeal.Users.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Users\kiwiDeal.Users.Api\kiwiDeal.Users.Api.csproj" />
+    <ProjectReference Include="..\Modules\Listings\kiwiDeal.Listings.Infrastructure\kiwiDeal.Listings.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Listings\kiwiDeal.Listings.Api\kiwiDeal.Listings.Api.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
@@ -18,12 +18,10 @@
     </PackageReference>
     <PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />
   </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>d04e7ac2-e1c3-482c-b830-2ed462b47ef0</UserSecretsId>
   </PropertyGroup>
-
 </Project>

@@ -5,8 +5,9 @@ using kiwiDeal.SharedKernel.Results;
 
 namespace kiwiDeal.Listings.Domain.Entities;
 
-public sealed class Listing : AggregateRoot<ListingId>
+public sealed class Listing : AggregateRoot
 {
+    public ListingId Id { get; private set; } = default!;
     public SellerId SellerId { get; private set; } = default!;
     public string Title { get; private set; } = default!;
     public string Description { get; private set; } = default!;
@@ -27,43 +28,13 @@ public sealed class Listing : AggregateRoot<ListingId>
         decimal startingPrice)
     {
         if (string.IsNullOrWhiteSpace(title))
-            return Result.Failure<Listing>(Error.Validation("Listings.InvalidTitle", "TitlSet-Content -Path "src/Modules/Listings/kiwiDeal.Listings.Domain/Entities/Listing.cs" -Value @'
-using kiwiDeal.Listings.Domain.Errors;
-using kiwiDeal.Listings.Domain.ValueObjects;
-using kiwiDeal.SharedKernel.Entities;
-using kiwiDeal.SharedKernel.Results;
-
-namespace kiwiDeal.Listings.Domain.Entities;
-
-public sealed class Listing : AggregateRoot<ListingId>
-{
-    public SellerId SellerId { get; private set; } = default!;
-    public string Title { get; private set; } = default!;
-    public string Description { get; private set; } = default!;
-    public decimal StartingPrice { get; private set; }
-    public ListingStatus Status { get; private set; }
-    public DateTimeOffset CreatedAt { get; private set; }
-    public DateTimeOffset UpdatedAt { get; private set; }
-
-    private readonly List<ListingImage> _images = [];
-    public IReadOnlyList<ListingImage> Images => _images.AsReadOnly();
-
-    private Listing() { }
-
-    public static Result<Listing> Create(
-        SellerId sellerId,
-        string title,
-        string description,
-        decimal startingPrice)
-    {
-        if (string.IsNullOrWhiteSpace(title))
-            return Result.Failure<Listing>(Error.Validation("Listings.InvalidTitle", "Title is required."));
+            return Result.Failure<Listing>(Error.ValidationFailed("Title is required."));
 
         if (string.IsNullOrWhiteSpace(description))
-            return Result.Failure<Listing>(Error.Validation("Listings.InvalidDescription", "Description is required."));
+            return Result.Failure<Listing>(Error.ValidationFailed("Description is required."));
 
         if (startingPrice < 0)
-            return Result.Failure<Listing>(Error.Validation("Listings.InvalidPrice", "Starting price must be zero or greater."));
+            return Result.Failure<Listing>(Error.ValidationFailed("Starting price must be zero or greater."));
 
         var now = DateTimeOffset.UtcNow;
 
@@ -88,13 +59,13 @@ public sealed class Listing : AggregateRoot<ListingId>
             return Result.Failure(ListingErrors.AlreadyClosed());
 
         if (string.IsNullOrWhiteSpace(title))
-            return Result.Failure(Error.Validation("Listings.InvalidTitle", "Title is required."));
+            return Result.Failure(Error.ValidationFailed("Title is required."));
 
         if (string.IsNullOrWhiteSpace(description))
-            return Result.Failure(Error.Validation("Listings.InvalidDescription", "Description is required."));
+            return Result.Failure(Error.ValidationFailed("Description is required."));
 
         if (startingPrice < 0)
-            return Result.Failure(Error.Validation("Listings.InvalidPrice", "Starting price must be zero or greater."));
+            return Result.Failure(Error.ValidationFailed("Starting price must be zero or greater."));
 
         Title = title;
         Description = description;

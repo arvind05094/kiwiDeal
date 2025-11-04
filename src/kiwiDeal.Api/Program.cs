@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using FluentValidation;
+using kiwiDeal.Listings.Api;
 using kiwiDeal.SharedKernel.Behaviours;
 using kiwiDeal.Users.Api;
 using MediatR;
@@ -11,9 +12,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
 builder.Services.AddOpenApi();
-
 builder.Services.AddApiVersioning(options =>
 {
     options.DefaultApiVersion = new ApiVersion(1, 0);
@@ -24,10 +23,15 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Users.Application.Commands.RegisterCommand).Assembly);
 
+builder.Services.AddValidatorsFromAssembly(
+    typeof(kiwiDeal.Listings.Application.Commands.CreateListingCommand).Assembly);
+
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(
         typeof(kiwiDeal.Users.Application.Commands.RegisterCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(
+        typeof(kiwiDeal.Listings.Application.Commands.CreateListingCommand).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 });
@@ -49,9 +53,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddUsersModule(builder.Configuration);
-
+builder.Services.AddListingsModule(builder.Configuration);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
@@ -68,10 +71,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapHealthChecks("/health");
-
 app.Run();
 
 public partial class Program { }

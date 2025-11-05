@@ -13,5 +13,16 @@ services:
       - ./scripts/init-schemas.sql:/docker-entrypoint-initdb.d/init-schemas.sql
     restart: unless-stopped
 
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: kiwi_deal_storage
+    ports:
+      - "10000:10000"
+    volumes:
+      - azurite_data:/data
+    command: azurite-blob --blobHost 0.0.0.0 --blobPort 10000
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  azurite_data:

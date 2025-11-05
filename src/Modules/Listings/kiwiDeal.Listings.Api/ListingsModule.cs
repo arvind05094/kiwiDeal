@@ -1,4 +1,5 @@
 using kiwiDeal.Listings.Domain.Repositories;
+using kiwiDeal.Listings.Infrastructure;
 using kiwiDeal.Listings.Infrastructure.Persistence;
 using kiwiDeal.Listings.Infrastructure.Persistence.Repositories;
 using kiwiDeal.SharedKernel.Interfaces;
@@ -21,6 +22,7 @@ public static class ListingsModule
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ListingsDbContext>());
         services.AddScoped<IListingRepository, ListingRepository>();
+        services.AddScoped<IImageService, AzureBlobImageService>();
 
         return services;
     }

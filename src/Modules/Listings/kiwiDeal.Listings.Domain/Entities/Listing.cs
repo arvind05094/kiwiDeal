@@ -13,8 +13,6 @@ public sealed class Listing : AggregateRoot
     public string Description { get; private set; } = default!;
     public decimal StartingPrice { get; private set; }
     public ListingStatus Status { get; private set; }
-    public DateTimeOffset CreatedAt { get; private set; }
-    public DateTimeOffset UpdatedAt { get; private set; }
 
     private readonly List<ListingImage> _images = [];
     public IReadOnlyList<ListingImage> Images => _images.AsReadOnly();

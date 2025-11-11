@@ -1,11 +1,11 @@
 using kiwiDeal.Listings.Domain.Entities;
-using kiwiDeal.SharedKernel.Interfaces;
+using kiwiDeal.Listings.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace kiwiDeal.Listings.Infrastructure.Persistence;
 
 public sealed class ListingsDbContext(DbContextOptions<ListingsDbContext> options)
-    : DbContext(options), IUnitOfWork
+    : DbContext(options), IListingsUnitOfWork
 {
     public DbSet<Listing> Listings => Set<Listing>();
 

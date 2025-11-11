@@ -14,8 +14,7 @@ public class LoginCommandHandlerTests
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
     private readonly IPasswordHasher _passwordHasher = Substitute.For<IPasswordHasher>();
     private readonly IJwtTokenGenerator _jwtTokenGenerator = Substitute.For<IJwtTokenGenerator>();
-    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
-
+    private readonly IUsersUnitOfWork _unitOfWork = Substitute.For<IUsersUnitOfWork>();
     private readonly LoginCommandHandler _handler;
 
     public LoginCommandHandlerTests()

@@ -1,7 +1,6 @@
 using FluentValidation;
 using kiwiDeal.Listings.Domain.Errors;
 using kiwiDeal.Listings.Domain.Repositories;
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
 
@@ -17,9 +16,8 @@ public sealed record UpdateListingCommand(
 public sealed class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand, Result>
 {
     private readonly IListingRepository _listingRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public UpdateListingCommandHandler(IListingRepository listingRepository, IUnitOfWork unitOfWork)
+    private readonly IListingsUnitOfWork _unitOfWork;
+    public UpdateListingCommandHandler(IListingRepository listingRepository, IListingsUnitOfWork unitOfWork)
     {
         _listingRepository = listingRepository;
         _unitOfWork = unitOfWork;

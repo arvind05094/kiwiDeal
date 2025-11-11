@@ -1,4 +1,3 @@
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Users.Application.DTOs;
 using kiwiDeal.Users.Domain.Errors;
@@ -11,7 +10,7 @@ namespace kiwiDeal.Users.Application.Commands;
 public sealed class RefreshTokenCommandHandler(
     IUserRepository userRepository,
     IJwtTokenGenerator jwtTokenGenerator,
-    IUnitOfWork unitOfWork,
+    IUsersUnitOfWork unitOfWork,
     ILogger<RefreshTokenCommandHandler> logger) : IRequestHandler<RefreshTokenCommand, Result<AuthResponse>>
 {
     public async Task<Result<AuthResponse>> Handle(

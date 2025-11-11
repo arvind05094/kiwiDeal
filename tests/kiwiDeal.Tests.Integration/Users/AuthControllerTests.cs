@@ -1,31 +1,51 @@
 using FluentAssertions;
-using System.Net;
-using System.Net.Http.Json;
 using kiwiDeal.Users.Api.Requests;
 using kiwiDeal.Users.Application.DTOs;
+using kiwiDeal.Users.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace kiwiDeal.Tests.Integration.Users;
 
-public class AuthControllerTests : IClassFixture<KiwiDealWebApplicationFactory>
+[Collection("Integration Tests")]
+public class AuthControllerTests : IAsyncLifetime
 {
-    private readonly HttpClient _client;
+    private readonly KiwiDealWebApplicationFactory _factory;
+    private HttpClient _client = null!;
 
     public AuthControllerTests(KiwiDealWebApplicationFactory factory)
     {
-        _client = factory.CreateClient();
+        _factory = factory;
+    }
+
+    public async Task InitializeAsync()
+    {
+        _client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
+        await db.Database.ExecuteSqlRawAsync("TRUNCATE TABLE users.users RESTART IDENTITY CASCADE");
+    }
+
+    public Task DisposeAsync()
+    {
+        _client.Dispose();
+        return Task.CompletedTask;
     }
 
     [Fact]
     public async Task Register_ValidRequest_Returns201()
     {
-        var request = new RegisterRequest("newuser@test.com", "Password123", "New", "User");
+        var request = new RegisterRequest("validuser@test.com", "Password123", "New", "User");
 
         var response = await _client.PostAsJsonAsync("/api/v1/auth/register", request);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var body = await response.Content.ReadFromJsonAsync<UserResponse>();
-        body!.Email.Should().Be("newuser@test.com");
+        body!.Email.Should().Be("validuser@test.com");
         body.Role.Should().Be("Buyer");
     }
 
@@ -54,14 +74,22 @@ public class AuthControllerTests : IClassFixture<KiwiDealWebApplicationFactory>
     public async Task Login_ValidCredentials_Returns200WithToken()
     {
         var registerRequest = new RegisterRequest("login@test.com", "Password123", "Login", "User");
-        await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
+        var registerResponse = await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
+        registerResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
+            var userExists = await dbContext.Users.AnyAsync(u => u.Email == "login@test.com");
+            userExists.Should().BeTrue();
+        }
 
         var loginRequest = new LoginRequest("login@test.com", "Password123");
-        var response = await _client.PostAsJsonAsync("/api/v1/auth/login", loginRequest);
+        var loginResponse = await _client.PostAsJsonAsync("/api/v1/auth/login", loginRequest);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var body = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        var body = await loginResponse.Content.ReadFromJsonAsync<AuthResponse>();
         body!.AccessToken.Should().NotBeNullOrEmpty();
     }
 
@@ -72,9 +100,9 @@ public class AuthControllerTests : IClassFixture<KiwiDealWebApplicationFactory>
         await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
 
         var loginRequest = new LoginRequest("wrongpass@test.com", "WrongPassword");
-        var response = await _client.PostAsJsonAsync("/api/v1/auth/login", loginRequest);
+        var loginResponse = await _client.PostAsJsonAsync("/api/v1/auth/login", loginRequest);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        loginResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]

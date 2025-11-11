@@ -1,4 +1,3 @@
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Users.Application.DTOs;
 using kiwiDeal.Users.Domain.Entities;
@@ -11,7 +10,7 @@ namespace kiwiDeal.Users.Application.Commands;
 
 public sealed class RegisterCommandHandler(
     IUserRepository userRepository,
-    IUnitOfWork unitOfWork,
+    IUsersUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher,
     ILogger<RegisterCommandHandler> logger) : IRequestHandler<RegisterCommand, Result<UserResponse>>
 {

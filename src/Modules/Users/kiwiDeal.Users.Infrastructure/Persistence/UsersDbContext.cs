@@ -1,11 +1,12 @@
 using kiwiDeal.SharedKernel.Interfaces;
+using kiwiDeal.Users.Domain.Repositories;
 using kiwiDeal.Users.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace kiwiDeal.Users.Infrastructure.Persistence;
 
 public sealed class UsersDbContext(DbContextOptions<UsersDbContext> options)
-    : DbContext(options), IUnitOfWork
+    : DbContext(options), IUsersUnitOfWork
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();

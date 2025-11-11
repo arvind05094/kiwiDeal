@@ -1,4 +1,3 @@
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.Users.Domain.Repositories;
 using kiwiDeal.Users.Infrastructure;
 using kiwiDeal.Users.Infrastructure.Persistence;
@@ -20,8 +19,7 @@ public static class UsersModule
                 .UseNpgsql(configuration.GetConnectionString("UsersConnection"))
                 .UseSnakeCaseNamingConvention());
 
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UsersDbContext>());
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUsersUnitOfWork>(sp => sp.GetRequiredService<UsersDbContext>()); services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));

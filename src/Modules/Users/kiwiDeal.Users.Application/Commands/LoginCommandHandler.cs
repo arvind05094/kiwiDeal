@@ -1,4 +1,3 @@
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Users.Application.DTOs;
 using kiwiDeal.Users.Domain.Errors;
@@ -12,7 +11,7 @@ public sealed class LoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     IJwtTokenGenerator jwtTokenGenerator,
-    IUnitOfWork unitOfWork,
+    IUsersUnitOfWork unitOfWork,
     ILogger<LoginCommandHandler> logger) : IRequestHandler<LoginCommand, Result<AuthResponse>>
 {
     public async Task<Result<AuthResponse>> Handle(

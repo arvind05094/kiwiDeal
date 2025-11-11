@@ -1,5 +1,4 @@
 using FluentAssertions;
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Users.Application.Commands;
 using kiwiDeal.Users.Domain.Entities;
@@ -12,7 +11,7 @@ namespace kiwiDeal.Tests.Unit.Users.Application;
 public class RegisterCommandHandlerTests
 {
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
-    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly IUsersUnitOfWork _unitOfWork = Substitute.For<IUsersUnitOfWork>();
     private readonly IPasswordHasher _passwordHasher = Substitute.For<IPasswordHasher>();
 
     private readonly RegisterCommandHandler _handler;

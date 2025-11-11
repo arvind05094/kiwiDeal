@@ -1,7 +1,6 @@
 using FluentValidation;
 using kiwiDeal.Listings.Domain.Entities;
 using kiwiDeal.Listings.Domain.Repositories;
-using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
 
@@ -16,9 +15,8 @@ public sealed record CreateListingCommand(
 public sealed class CreateListingCommandHandler : IRequestHandler<CreateListingCommand, Result<Guid>>
 {
     private readonly IListingRepository _listingRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public CreateListingCommandHandler(IListingRepository listingRepository, IUnitOfWork unitOfWork)
+    private readonly IListingsUnitOfWork _unitOfWork;
+    public CreateListingCommandHandler(IListingRepository listingRepository, IListingsUnitOfWork unitOfWork)
     {
         _listingRepository = listingRepository;
         _unitOfWork = unitOfWork;

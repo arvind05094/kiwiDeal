@@ -53,7 +53,6 @@ public sealed class RefreshTokenCommandHandler(
                 user.Id.Value,
                 user.Email,
                 user.FirstName,
-                user.LastName,
-                user.Role)));
+                user.LastName)));
     }
 }

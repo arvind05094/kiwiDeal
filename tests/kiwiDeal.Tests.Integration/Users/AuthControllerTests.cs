@@ -46,7 +46,8 @@ public class AuthControllerTests : IAsyncLifetime
 
         var body = await response.Content.ReadFromJsonAsync<UserResponse>();
         body!.Email.Should().Be("validuser@test.com");
-        body.Role.Should().Be("Buyer");
+        body.FirstName.Should().Be("New");
+        body.LastName.Should().Be("User");
     }
 
     [Fact]

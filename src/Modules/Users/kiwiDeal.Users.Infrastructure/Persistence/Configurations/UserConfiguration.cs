@@ -39,11 +39,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(u => u.Role)
-            .HasColumnName("role")
-            .HasMaxLength(50)
-            .IsRequired();
-
         builder.Property(u => u.IsDeleted)
             .HasColumnName("is_deleted")
             .IsRequired();

@@ -24,7 +24,6 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                     password_hash = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
                     first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    role = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     is_deleted = table.Column<bool>(type: "boolean", nullable: false),
                     deleted_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: true),
                     created_at = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false),

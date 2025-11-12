@@ -34,8 +34,7 @@ public sealed class RegisterCommandHandler(
             request.Email,
             passwordHash,
             request.FirstName,
-            request.LastName,
-            Roles.Buyer);
+            request.LastName);
 
         if (result.IsFailure)
             return Result.Failure<UserResponse>(result.Error);
@@ -51,7 +50,6 @@ public sealed class RegisterCommandHandler(
             user.Id.Value,
             user.Email,
             user.FirstName,
-            user.LastName,
-            user.Role));
+            user.LastName));
     }
 }

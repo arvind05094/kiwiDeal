@@ -12,7 +12,7 @@ using kiwiDeal.Users.Infrastructure.Persistence;
 namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    [Migration("20260526020247_InitialCreate")]
+    [Migration("20260526214200_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -111,12 +111,6 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
                         .HasColumnName("password_hash");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("role");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamptz")

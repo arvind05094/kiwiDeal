@@ -41,7 +41,6 @@ public class RegisterCommandHandlerTests
         result.Value.Email.Should().Be("test@test.com");
         result.Value.FirstName.Should().Be("John");
         result.Value.LastName.Should().Be("Doe");
-        result.Value.Role.Should().Be(Roles.Buyer);
 
         await _userRepository.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
         await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -52,7 +51,7 @@ public class RegisterCommandHandlerTests
     {
         var command = new RegisterCommand("test@test.com", "Password123", "John", "Doe");
 
-        var existingUser = User.Create("test@test.com", "hashedpassword", "John", "Doe", Roles.Buyer).Value;
+        var existingUser = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
 
         _userRepository.GetByEmailAsync(command.Email, Arg.Any<CancellationToken>())
             .Returns(existingUser);

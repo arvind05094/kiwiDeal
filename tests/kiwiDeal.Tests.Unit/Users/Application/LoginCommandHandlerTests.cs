@@ -31,7 +31,7 @@ public class LoginCommandHandlerTests
     public async Task Handle_ValidCredentials_ReturnsSuccess()
     {
         var command = new LoginCommand("test@test.com", "Password123");
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Roles.Buyer).Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
 
         _userRepository.GetByEmailAsync(command.Email, Arg.Any<CancellationToken>())
             .Returns(user);
@@ -70,7 +70,7 @@ public class LoginCommandHandlerTests
     public async Task Handle_WrongPassword_ReturnsFailure()
     {
         var command = new LoginCommand("test@test.com", "WrongPassword");
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Roles.Buyer).Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
 
         _userRepository.GetByEmailAsync(command.Email, Arg.Any<CancellationToken>())
             .Returns(user);

@@ -14,7 +14,6 @@ public sealed class User : AggregateRoot, ISoftDeletable
     public string PasswordHash { get; private set; } = string.Empty;
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
-    public string Role { get; private set; } = string.Empty;
     public bool IsDeleted { get; private set; }
     public DateTimeOffset? DeletedAt { get; private set; }
 
@@ -26,8 +25,7 @@ public sealed class User : AggregateRoot, ISoftDeletable
         string email,
         string passwordHash,
         string firstName,
-        string lastName,
-        string role)
+        string lastName)
     {
         if (string.IsNullOrWhiteSpace(email))
             return Result.Failure<User>(Error.ValidationFailed("Email is required."));
@@ -48,7 +46,6 @@ public sealed class User : AggregateRoot, ISoftDeletable
             PasswordHash = passwordHash,
             FirstName = firstName.Trim(),
             LastName = lastName.Trim(),
-            Role = role,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };

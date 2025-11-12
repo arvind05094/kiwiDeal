@@ -1,5 +1,6 @@
 using kiwiDeal.Listings.Application.DTOs;
 using kiwiDeal.Listings.Domain.Repositories;
+using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Pagination;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
@@ -9,7 +10,7 @@ namespace kiwiDeal.Listings.Application.Queries;
 public sealed record GetListingsQuery(
     int PageNumber,
     int PageSize,
-    string? SearchTerm) : IRequest<Result<PagedResult<ListingDto>>>;
+    string? SearchTerm) : IRequest<Result<PagedResult<ListingDto>>>, IPublicRequest;
 
 public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, Result<PagedResult<ListingDto>>>
 {
@@ -23,7 +24,6 @@ public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, 
     public async Task<Result<PagedResult<ListingDto>>> Handle(GetListingsQuery query, CancellationToken cancellationToken)
     {
         var pagination = new PaginationParams(query.PageNumber, query.PageSize);
-
         var pagedListings = await _listingRepository.GetAllAsync(pagination, query.SearchTerm, cancellationToken);
 
         var dtos = pagedListings.Items.Select(listing => new ListingDto(
@@ -38,7 +38,6 @@ public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, 
             listing.Images.Select(i => new ListingImageDto(i.Url, i.DisplayOrder)).ToList())).ToList();
 
         var result = PagedResult<ListingDto>.Create(dtos, pagedListings.TotalCount, pagination);
-
         return Result.Success(result);
     }
 }

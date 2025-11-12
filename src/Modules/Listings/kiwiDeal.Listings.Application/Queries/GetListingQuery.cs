@@ -1,12 +1,13 @@
 using kiwiDeal.Listings.Application.DTOs;
 using kiwiDeal.Listings.Domain.Errors;
 using kiwiDeal.Listings.Domain.Repositories;
+using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
 
 namespace kiwiDeal.Listings.Application.Queries;
 
-public sealed record GetListingQuery(Guid ListingId) : IRequest<Result<ListingDto>>;
+public sealed record GetListingQuery(Guid ListingId) : IRequest<Result<ListingDto>>, IPublicRequest;
 
 public sealed class GetListingQueryHandler : IRequestHandler<GetListingQuery, Result<ListingDto>>
 {

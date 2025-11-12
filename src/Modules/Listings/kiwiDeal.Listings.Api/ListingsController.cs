@@ -3,6 +3,7 @@ using kiwiDeal.Listings.Api.Requests;
 using kiwiDeal.Listings.Application.Commands;
 using kiwiDeal.Listings.Application.Queries;
 using kiwiDeal.Listings.Domain.Repositories;
+using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,22 +15,18 @@ namespace kiwiDeal.Listings.Api;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/listings")]
-public sealed class ListingsController(ISender sender, IImageService imageService) : ControllerBase
+public sealed class ListingsController(ISender sender, IImageService imageService, ICurrentUser currentUser) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Roles = "Seller")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateListing(
         [FromBody] CreateListingRequest request,
         CancellationToken cancellationToken)
     {
-        var sellerIdClaim = User.FindFirst("sub")?.Value;
-        if (sellerIdClaim is null || !Guid.TryParse(sellerIdClaim, out var sellerId))
-            return Unauthorized();
-
         var command = new CreateListingCommand(
-            sellerId,
+            currentUser.Id!.Value,
             request.Title,
             request.Description,
             request.StartingPrice);
@@ -43,7 +40,7 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Seller")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -53,13 +50,9 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
         [FromBody] UpdateListingRequest request,
         CancellationToken cancellationToken)
     {
-        var sellerIdClaim = User.FindFirst("sub")?.Value;
-        if (sellerIdClaim is null || !Guid.TryParse(sellerIdClaim, out var sellerId))
-            return Unauthorized();
-
         var command = new UpdateListingCommand(
             id,
-            sellerId,
+            currentUser.Id!.Value,
             request.Title,
             request.Description,
             request.StartingPrice);
@@ -73,7 +66,7 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Seller")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -81,11 +74,7 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
         Guid id,
         CancellationToken cancellationToken)
     {
-        var sellerIdClaim = User.FindFirst("sub")?.Value;
-        if (sellerIdClaim is null || !Guid.TryParse(sellerIdClaim, out var sellerId))
-            return Unauthorized();
-
-        var command = new DeleteListingCommand(id, sellerId);
+        var command = new DeleteListingCommand(id, currentUser.Id!.Value);
         var result = await sender.Send(command, cancellationToken);
 
         if (result.IsFailure)
@@ -130,7 +119,7 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
     }
 
     [HttpPost("{id:guid}/images")]
-    [Authorize(Roles = "Seller")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -139,10 +128,6 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
         IFormFile file,
         CancellationToken cancellationToken)
     {
-        var sellerIdClaim = User.FindFirst("sub")?.Value;
-        if (sellerIdClaim is null || !Guid.TryParse(sellerIdClaim, out var sellerId))
-            return Unauthorized();
-
         if (file.Length == 0)
             return BadRequest("No file provided.");
 

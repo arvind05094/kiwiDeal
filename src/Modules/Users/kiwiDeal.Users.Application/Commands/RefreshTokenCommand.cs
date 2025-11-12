@@ -1,3 +1,4 @@
+using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Users.Application.DTOs;
 using MediatR;
@@ -5,4 +6,4 @@ using MediatR;
 namespace kiwiDeal.Users.Application.Commands;
 
 public sealed record RefreshTokenCommand(
-    string RefreshToken) : IRequest<Result<AuthResponse>>;
+    string RefreshToken) : IRequest<Result<AuthResponse>>, IPublicRequest;

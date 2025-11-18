@@ -4,6 +4,8 @@
     <ProjectReference Include="..\Modules\Users\kiwiDeal.Users.Api\kiwiDeal.Users.Api.csproj" />
     <ProjectReference Include="..\Modules\Listings\kiwiDeal.Listings.Infrastructure\kiwiDeal.Listings.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Listings\kiwiDeal.Listings.Api\kiwiDeal.Listings.Api.csproj" />
+    <ProjectReference Include="..\Modules\Auctions\kiwiDeal.Auctions.Infrastructure\kiwiDeal.Auctions.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Auctions\kiwiDeal.Auctions.Api\kiwiDeal.Auctions.Api.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />

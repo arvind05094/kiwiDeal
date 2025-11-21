@@ -1,0 +1,113 @@
+using Asp.Versioning;
+using kiwiDeal.Auctions.Api.Requests;
+using kiwiDeal.Auctions.Application.Commands;
+using kiwiDeal.Auctions.Application.Queries;
+using kiwiDeal.SharedKernel.Interfaces;
+using kiwiDeal.SharedKernel.Results;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace kiwiDeal.Auctions.Api;
+
+[ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/auctions")]
+public sealed class AuctionsController(ISender sender, ICurrentUser currentUser) : ControllerBase
+{
+    [HttpPost]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateAuction(
+        [FromBody] CreateAuctionRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new CreateAuctionCommand(
+            request.ListingId,
+            currentUser.Id!.Value,
+            request.StartingPrice,
+            request.StartTime,
+            request.EndTime);
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return CreatedAtAction(nameof(GetAuction), new { id = result.Value }, result.Value);
+    }
+
+    [HttpPost("{id:guid}/bids")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PlaceBid(
+        Guid id,
+        [FromBody] PlaceBidRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new PlaceBidCommand(id, currentUser.Id!.Value, request.Amount);
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/close")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CloseAuction(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var command = new CloseAuctionCommand(id, currentUser.Id!.Value);
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpGet("{id:guid}")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAuction(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetAuctionQuery(id);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAuctions(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAuctionsQuery(pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
+    }
+}

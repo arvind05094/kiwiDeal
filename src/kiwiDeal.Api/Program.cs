@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using FluentValidation;
 using kiwiDeal.Api.Infrastructure;
+using kiwiDeal.Auctions.Api;
 using kiwiDeal.Listings.Api;
 using kiwiDeal.SharedKernel.Behaviours;
 using kiwiDeal.SharedKernel.Interfaces;
@@ -15,7 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-
 builder.Services.AddApiVersioning(options =>
 {
     options.DefaultApiVersion = new ApiVersion(1, 0);
@@ -30,6 +30,8 @@ builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Users.Application.Commands.RegisterCommand).Assembly);
 builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Listings.Application.Commands.CreateListingCommand).Assembly);
+builder.Services.AddValidatorsFromAssembly(
+    typeof(kiwiDeal.Auctions.Application.Commands.CreateAuctionCommand).Assembly);
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -37,6 +39,8 @@ builder.Services.AddMediatR(cfg =>
         typeof(kiwiDeal.Users.Application.Commands.RegisterCommand).Assembly);
     cfg.RegisterServicesFromAssembly(
         typeof(kiwiDeal.Listings.Application.Commands.CreateListingCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(
+        typeof(kiwiDeal.Auctions.Application.Commands.CreateAuctionCommand).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
@@ -65,10 +69,9 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddListingsModule(builder.Configuration);
-
+builder.Services.AddAuctionsModule(builder.Configuration);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
@@ -85,10 +88,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapHealthChecks("/health");
-
 app.Run();
 
 public partial class Program { }

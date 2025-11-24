@@ -1,7 +1,9 @@
 using Asp.Versioning;
 using FluentValidation;
+using kiwiDeal.Api.Hubs;
 using kiwiDeal.Api.Infrastructure;
 using kiwiDeal.Auctions.Api;
+using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Listings.Api;
 using kiwiDeal.SharedKernel.Behaviours;
 using kiwiDeal.SharedKernel.Interfaces;
@@ -16,6 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
 builder.Services.AddApiVersioning(options =>
 {
     options.DefaultApiVersion = new ApiVersion(1, 0);
@@ -25,6 +28,7 @@ builder.Services.AddApiVersioning(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<IAuctionHubContext, AuctionHubContext>();
 
 builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Users.Application.Commands.RegisterCommand).Assembly);
@@ -89,6 +93,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<AuctionHub>("/hubs/auctions");
 app.MapHealthChecks("/health");
 app.Run();
 

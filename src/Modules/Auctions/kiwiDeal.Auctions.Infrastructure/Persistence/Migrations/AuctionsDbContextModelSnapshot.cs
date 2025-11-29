@@ -85,6 +85,41 @@ namespace kiwiDeal.Auctions.Infrastructure.Persistence.Migrations
                     b.ToTable("auctions", "auctions");
                 });
 
+            modelBuilder.Entity("kiwiDeal.SharedKernel.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTimeOffset>("OccurredOn")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("occurred_on");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTimeOffset?>("ProcessedOn")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("processed_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outbox_messages");
+
+                    b.HasIndex("ProcessedOn")
+                        .HasDatabaseName("ix_outbox_messages_processed_on")
+                        .HasFilter("processed_on IS NULL");
+
+                    b.ToTable("outbox_messages", "auctions");
+                });
+
             modelBuilder.Entity("kiwiDeal.Auctions.Domain.Entities.Auction", b =>
                 {
                     b.OwnsMany("kiwiDeal.Auctions.Domain.Entities.AuctionBid", "Bids", b1 =>

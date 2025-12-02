@@ -3,6 +3,7 @@ using kiwiDeal.Listings.Infrastructure;
 using kiwiDeal.Listings.Infrastructure.Persistence;
 using kiwiDeal.Listings.Infrastructure.Persistence.Repositories;
 using kiwiDeal.SharedKernel.Interfaces;
+using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +21,9 @@ public static class ListingsModule
                 .UseNpgsql(configuration.GetConnectionString("ListingsConnection"))
                 .UseSnakeCaseNamingConvention());
 
-        services.AddScoped<IListingsUnitOfWork>(sp => sp.GetRequiredService<ListingsDbContext>()); services.AddScoped<IListingRepository, ListingRepository>();
+        services.AddScoped<IListingsUnitOfWork>(sp => sp.GetRequiredService<ListingsDbContext>());
+        services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<ListingsDbContext>());
+        services.AddScoped<IListingRepository, ListingRepository>();
         services.AddScoped<IImageService, AzureBlobImageService>();
 
         return services;

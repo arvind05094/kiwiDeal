@@ -1,4 +1,5 @@
 using kiwiDeal.Listings.Domain.Errors;
+using kiwiDeal.Listings.Domain.Events;
 using kiwiDeal.Listings.Domain.ValueObjects;
 using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Results;
@@ -48,6 +49,12 @@ public sealed class Listing : AggregateRoot
             UpdatedAt = now
         };
 
+        listing.RaiseDomainEvent(new ListingCreatedEvent(
+            listing.Id.Value,
+            listing.SellerId.Value,
+            listing.Title,
+            listing.StartingPrice));
+
         return Result.Success(listing);
     }
 
@@ -91,6 +98,10 @@ public sealed class Listing : AggregateRoot
 
         Status = ListingStatus.Cancelled;
         UpdatedAt = DateTimeOffset.UtcNow;
+
+        RaiseDomainEvent(new ListingClosedEvent(
+            Id.Value,
+            SellerId.Value));
 
         return Result.Success();
     }

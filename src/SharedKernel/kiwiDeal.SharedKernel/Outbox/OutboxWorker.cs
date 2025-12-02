@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace kiwiDeal.SharedKernel.Outbox;
 
-public abstract class OutboxWorker(
+public sealed class OutboxWorker(
     IServiceScopeFactory scopeFactory,
     ILogger<OutboxWorker> logger) : BackgroundService
 {
@@ -25,51 +25,47 @@ public abstract class OutboxWorker(
     {
         using var scope = scopeFactory.CreateScope();
         var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
+        var providers = scope.ServiceProvider.GetServices<IOutboxMessageProvider>();
 
-        var messages = await GetUnprocessedMessagesAsync(scope, cancellationToken);
-
-        foreach (var message in messages)
+        foreach (var provider in providers)
         {
-            try
+            var messages = await provider.GetUnprocessedMessagesAsync(cancellationToken);
+
+            foreach (var message in messages)
             {
-                var eventType = Type.GetType(message.EventType);
-
-                if (eventType is null)
+                try
                 {
-                    logger.LogWarning("Outbox worker could not resolve type {EventType}", message.EventType);
-                    continue;
+                    var eventType = Type.GetType(message.EventType);
+
+                    if (eventType is null)
+                    {
+                        logger.LogWarning("Outbox worker could not resolve type {EventType}", message.EventType);
+                        continue;
+                    }
+
+                    var domainEvent = JsonConvert.DeserializeObject(message.Payload, eventType);
+
+                    if (domainEvent is null)
+                    {
+                        logger.LogWarning("Outbox worker could not deserialise message {MessageId}", message.Id);
+                        continue;
+                    }
+
+                    await publisher.Publish(domainEvent, cancellationToken);
+
+                    message.MarkProcessed(DateTimeOffset.UtcNow);
+
+                    await provider.SaveChangesAsync(cancellationToken);
+
+                    logger.LogInformation("Outbox message {MessageId} of type {EventType} processed successfully",
+                        message.Id, message.EventType);
                 }
-
-                var domainEvent = JsonConvert.DeserializeObject(message.Payload, eventType);
-
-                if (domainEvent is null)
+                catch (Exception ex)
                 {
-                    logger.LogWarning("Outbox worker could not deserialise message {MessageId}", message.Id);
-                    continue;
+                    logger.LogWarning(ex, "Outbox worker failed to process message {MessageId}. Will retry on next cycle",
+                        message.Id);
                 }
-
-                await publisher.Publish(domainEvent, cancellationToken);
-
-                message.MarkProcessed(DateTimeOffset.UtcNow);
-
-                await SaveChangesAsync(scope, cancellationToken);
-
-                logger.LogInformation("Outbox message {MessageId} of type {EventType} processed successfully",
-                    message.Id, message.EventType);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Outbox worker failed to process message {MessageId}. Will retry on next cycle",
-                    message.Id);
             }
         }
     }
-
-    protected abstract Task<IReadOnlyList<OutboxMessage>> GetUnprocessedMessagesAsync(
-        IServiceScope scope,
-        CancellationToken cancellationToken);
-
-    protected abstract Task SaveChangesAsync(
-        IServiceScope scope,
-        CancellationToken cancellationToken);
 }

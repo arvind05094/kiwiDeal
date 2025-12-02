@@ -7,6 +7,7 @@ using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Listings.Api;
 using kiwiDeal.SharedKernel.Behaviours;
 using kiwiDeal.SharedKernel.Interfaces;
+using kiwiDeal.SharedKernel.Outbox;
 using kiwiDeal.Users.Api;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,6 +77,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddListingsModule(builder.Configuration);
 builder.Services.AddAuctionsModule(builder.Configuration);
+builder.Services.AddHostedService<OutboxWorker>();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();

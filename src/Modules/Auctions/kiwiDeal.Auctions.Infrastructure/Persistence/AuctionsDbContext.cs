@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace kiwiDeal.Auctions.Infrastructure.Persistence;
 
 public sealed class AuctionsDbContext(DbContextOptions<AuctionsDbContext> options)
-    : DbContext(options), IAuctionsUnitOfWork
+    : DbContext(options), IAuctionsUnitOfWork, IOutboxMessageProvider
 {
     public DbSet<Auction> Auctions => Set<Auction>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
@@ -23,6 +23,15 @@ public sealed class AuctionsDbContext(DbContextOptions<AuctionsDbContext> option
     {
         FlushDomainEventsToOutbox();
         return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<OutboxMessage>> GetUnprocessedMessagesAsync(CancellationToken cancellationToken = default)
+    {
+        return await OutboxMessages
+            .Where(m => m.ProcessedOn == null)
+            .OrderBy(m => m.OccurredOn)
+            .Take(20)
+            .ToListAsync(cancellationToken);
     }
 
     private void FlushDomainEventsToOutbox()

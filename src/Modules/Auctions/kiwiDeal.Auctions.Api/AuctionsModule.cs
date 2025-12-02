@@ -1,6 +1,7 @@
 using kiwiDeal.Auctions.Domain.Repositories;
 using kiwiDeal.Auctions.Infrastructure.Persistence;
 using kiwiDeal.Auctions.Infrastructure.Persistence.Repositories;
+using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +21,7 @@ public static class AuctionsModule
 
         services.AddScoped<IAuctionsUnitOfWork>(sp => sp.GetRequiredService<AuctionsDbContext>());
         services.AddScoped<IAuctionRepository, AuctionRepository>();
-        services.AddHostedService<AuctionsOutboxWorker>();
+        services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<AuctionsDbContext>());
 
         return services;
     }

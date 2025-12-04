@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -24,6 +24,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Modules\Users\kiwiDeal.Users.Domain\kiwiDeal.Users.Domain.csproj" />
     <ProjectReference Include="..\..\src\Modules\Users\kiwiDeal.Users.Application\kiwiDeal.Users.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Auctions\kiwiDeal.Auctions.Domain\kiwiDeal.Auctions.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Auctions\kiwiDeal.Auctions.Application\kiwiDeal.Auctions.Application.csproj" />
     <ProjectReference Include="..\..\src\SharedKernel\kiwiDeal.SharedKernel\kiwiDeal.SharedKernel.csproj" />
   </ItemGroup>
 

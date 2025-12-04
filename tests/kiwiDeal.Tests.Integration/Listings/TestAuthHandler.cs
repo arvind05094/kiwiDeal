@@ -9,6 +9,7 @@ namespace kiwiDeal.Tests.Integration.Listings;
 public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public static Guid SellerId { get; } = Guid.NewGuid();
+    public static Guid BidderId { get; } = Guid.NewGuid();
 
     public TestAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -19,6 +20,19 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        if (Request.Headers.TryGetValue("X-Integration-Bidder", out _))
+        {
+            var bidderClaims = new[]
+            {
+                new Claim("sub", BidderId.ToString()),
+                new Claim(ClaimTypes.Role, "Bidder")
+            };
+            var bidderIdentity = new ClaimsIdentity(bidderClaims, "Test");
+            var bidderPrincipal = new ClaimsPrincipal(bidderIdentity);
+            var bidderTicket = new AuthenticationTicket(bidderPrincipal, "Test");
+            return Task.FromResult(AuthenticateResult.Success(bidderTicket));
+        }
+
         if (!Request.Headers.ContainsKey("X-Integration-Test"))
             return Task.FromResult(AuthenticateResult.NoResult());
 

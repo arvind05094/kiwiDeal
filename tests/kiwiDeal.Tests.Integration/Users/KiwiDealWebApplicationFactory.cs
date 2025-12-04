@@ -1,3 +1,4 @@
+using kiwiDeal.Auctions.Infrastructure.Persistence;
 using kiwiDeal.Listings.Infrastructure.Persistence;
 using kiwiDeal.Tests.Integration.Listings;
 using kiwiDeal.Users.Infrastructure.Persistence;
@@ -17,6 +18,7 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
     private PostgreSqlContainer? _container;
 
     public string ConnectionString => _container!.GetConnectionString() + ";Pooling=false";
+
     public async Task InitializeAsync()
     {
         _container = new PostgreSqlBuilder("postgres:17")
@@ -42,6 +44,14 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
 
         await using var listingsDb = new ListingsDbContext(listingsOptions);
         await listingsDb.Database.MigrateAsync();
+
+        var auctionsOptions = new DbContextOptionsBuilder<AuctionsDbContext>()
+            .UseNpgsql(ConnectionString)
+            .UseSnakeCaseNamingConvention()
+            .Options;
+
+        await using var auctionsDb = new AuctionsDbContext(auctionsOptions);
+        await auctionsDb.Database.MigrateAsync();
     }
 
     public new async Task DisposeAsync()
@@ -59,9 +69,11 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
             {
                 ["ConnectionStrings:UsersConnection"] = ConnectionString,
                 ["ConnectionStrings:ListingsConnection"] = ConnectionString,
+                ["ConnectionStrings:AuctionsConnection"] = ConnectionString,
                 ["ConnectionStrings:AzureBlobStorage"] = "UseDevelopmentStorage=true"
             });
         });
+
         builder.ConfigureServices(services =>
         {
             var usersDescriptors = services.Where(
@@ -86,6 +98,17 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
                     .UseNpgsql(ConnectionString)
                     .UseSnakeCaseNamingConvention());
 
+            var auctionsDescriptors = services.Where(
+                d => d.ServiceType == typeof(DbContextOptions<AuctionsDbContext>)
+                  || d.ServiceType == typeof(AuctionsDbContext)).ToList();
+            foreach (var d in auctionsDescriptors)
+                services.Remove(d);
+
+            services.AddDbContext<AuctionsDbContext>(options =>
+                options
+                    .UseNpgsql(ConnectionString)
+                    .UseSnakeCaseNamingConvention());
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Test";
@@ -98,6 +121,7 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
                 kiwiDeal.Users.Infrastructure.Persistence.Repositories.UserRepository>();
             services.AddScoped<kiwiDeal.Users.Domain.Repositories.IUsersUnitOfWork, IntegrationTestUsersUnitOfWork>();
             services.AddScoped<kiwiDeal.Listings.Domain.Repositories.IListingsUnitOfWork, IntegrationTestListingsUnitOfWork>();
+            services.AddScoped<kiwiDeal.Auctions.Domain.Repositories.IAuctionsUnitOfWork, IntegrationTestAuctionsUnitOfWork>();
         });
 
         builder.UseSetting("JwtSettings:Secret", "this-is-a-super-secret-key-for-kiwi-deal-change-in-production");
@@ -106,6 +130,7 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
         builder.UseSetting("JwtSettings:ExpiryMinutes", "15");
         builder.UseSetting("ConnectionStrings:UsersConnection", ConnectionString);
         builder.UseSetting("ConnectionStrings:ListingsConnection", ConnectionString);
+        builder.UseSetting("ConnectionStrings:AuctionsConnection", ConnectionString);
     }
 
     public HttpClient CreateSellerClient()
@@ -115,9 +140,13 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
         return client;
     }
 
-
+    public HttpClient CreateBidderClient()
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add("X-Integration-Bidder", "true");
+        return client;
+    }
 }
-
 
 public sealed class IntegrationTestUsersUnitOfWork(UsersDbContext usersDb)
     : kiwiDeal.Users.Domain.Repositories.IUsersUnitOfWork
@@ -131,4 +160,11 @@ public sealed class IntegrationTestListingsUnitOfWork(ListingsDbContext listings
 {
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => await listingsDb.SaveChangesAsync(cancellationToken);
+}
+
+public sealed class IntegrationTestAuctionsUnitOfWork(AuctionsDbContext auctionsDb)
+    : kiwiDeal.Auctions.Domain.Repositories.IAuctionsUnitOfWork
+{
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => await auctionsDb.SaveChangesAsync(cancellationToken);
 }

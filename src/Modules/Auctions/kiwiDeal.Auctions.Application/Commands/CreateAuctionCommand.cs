@@ -36,10 +36,15 @@ public sealed class CreateAuctionCommandHandler : IRequestHandler<CreateAuctionC
         if (result.IsFailure)
             return Result.Failure<Guid>(result.Error);
 
-        _auctionRepository.Add(result.Value);
+        var auction = result.Value;
+
+        if (command.StartTime <= DateTimeOffset.UtcNow)
+            auction.Activate();
+
+        _auctionRepository.Add(auction);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(result.Value.Id.Value);
+        return Result.Success(auction.Id.Value);
     }
 }
 

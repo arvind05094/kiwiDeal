@@ -1,9 +1,7 @@
 namespace kiwiDeal.SharedKernel.Results;
-
 public sealed record Error(ErrorCode Code, string Message)
 {
     public static readonly Error None = new(ErrorCode.Unexpected, string.Empty);
-
     public static Error NotFound(string message) => new(ErrorCode.NotFound, message);
     public static Error Forbidden(string message) => new(ErrorCode.Forbidden, message);
     public static Error Unauthorised(string message) => new(ErrorCode.Unauthorised, message);
@@ -14,4 +12,5 @@ public sealed record Error(ErrorCode Code, string Message)
     public static Error AuctionNotStarted(string message) => new(ErrorCode.AuctionNotStarted, message);
     public static Error BidTooLow(string message) => new(ErrorCode.BidTooLow, message);
     public static Error BidderIsSeller(string message) => new(ErrorCode.BidderIsSeller, message);
+    public static Error PaymentAlreadyProcessed(string message) => new(ErrorCode.PaymentAlreadyProcessed, message);
 }

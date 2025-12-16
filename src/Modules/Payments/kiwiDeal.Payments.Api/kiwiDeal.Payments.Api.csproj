@@ -1,9 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\kiwiDeal.Payments.Application\kiwiDeal.Payments.Application.csproj" />
+    <ProjectReference Include="..\..\..\SharedKernel\kiwiDeal.SharedKernel\kiwiDeal.SharedKernel.csproj" />
+    <ProjectReference Include="..\kiwiDeal.Payments.Infrastructure\kiwiDeal.Payments.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />
+  </ItemGroup>
 </Project>

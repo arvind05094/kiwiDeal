@@ -1,5 +1,8 @@
 using kiwiDeal.Auctions.Infrastructure.Persistence;
 using kiwiDeal.Listings.Infrastructure.Persistence;
+using kiwiDeal.Payments.Application;
+using kiwiDeal.Payments.Infrastructure.Persistence;
+using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Tests.Integration.Listings;
 using kiwiDeal.Users.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
@@ -52,6 +55,14 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
 
         await using var auctionsDb = new AuctionsDbContext(auctionsOptions);
         await auctionsDb.Database.MigrateAsync();
+
+        var paymentsOptions = new DbContextOptionsBuilder<PaymentsDbContext>()
+            .UseNpgsql(ConnectionString)
+            .UseSnakeCaseNamingConvention()
+            .Options;
+
+        await using var paymentsDb = new PaymentsDbContext(paymentsOptions);
+        await paymentsDb.Database.MigrateAsync();
     }
 
     public new async Task DisposeAsync()
@@ -70,7 +81,8 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
                 ["ConnectionStrings:UsersConnection"] = ConnectionString,
                 ["ConnectionStrings:ListingsConnection"] = ConnectionString,
                 ["ConnectionStrings:AuctionsConnection"] = ConnectionString,
-                ["ConnectionStrings:AzureBlobStorage"] = "UseDevelopmentStorage=true"
+                ["ConnectionStrings:AzureBlobStorage"] = "UseDevelopmentStorage=true",
+                ["ConnectionStrings:PaymentsConnection"] = ConnectionString,
             });
         });
 
@@ -109,6 +121,26 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
                     .UseNpgsql(ConnectionString)
                     .UseSnakeCaseNamingConvention());
 
+            var paymentsDescriptors = services.Where(
+                d => d.ServiceType == typeof(DbContextOptions<PaymentsDbContext>)
+                  || d.ServiceType == typeof(PaymentsDbContext)).ToList();
+            foreach (var d in paymentsDescriptors)
+                services.Remove(d);
+
+            services.AddDbContext<PaymentsDbContext>(options =>
+                options
+                    .UseNpgsql(ConnectionString)
+                    .UseSnakeCaseNamingConvention());
+
+            var stripeDescriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(IStripeService));
+            if (stripeDescriptor is not null)
+                services.Remove(stripeDescriptor);
+
+            services.AddScoped<IStripeService, FakeStripeService>();
+
+
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Test";
@@ -122,6 +154,8 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
             services.AddScoped<kiwiDeal.Users.Domain.Repositories.IUsersUnitOfWork, IntegrationTestUsersUnitOfWork>();
             services.AddScoped<kiwiDeal.Listings.Domain.Repositories.IListingsUnitOfWork, IntegrationTestListingsUnitOfWork>();
             services.AddScoped<kiwiDeal.Auctions.Domain.Repositories.IAuctionsUnitOfWork, IntegrationTestAuctionsUnitOfWork>();
+            services.AddScoped<kiwiDeal.Payments.Domain.Repositories.IPaymentsUnitOfWork, IntegrationTestPaymentsUnitOfWork>();
+
         });
 
         builder.UseSetting("JwtSettings:Secret", "this-is-a-super-secret-key-for-kiwi-deal-change-in-production");
@@ -131,6 +165,7 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
         builder.UseSetting("ConnectionStrings:UsersConnection", ConnectionString);
         builder.UseSetting("ConnectionStrings:ListingsConnection", ConnectionString);
         builder.UseSetting("ConnectionStrings:AuctionsConnection", ConnectionString);
+        builder.UseSetting("ConnectionStrings:PaymentsConnection", ConnectionString);
     }
 
     public HttpClient CreateSellerClient()
@@ -167,4 +202,23 @@ public sealed class IntegrationTestAuctionsUnitOfWork(AuctionsDbContext auctions
 {
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => await auctionsDb.SaveChangesAsync(cancellationToken);
+}
+
+public sealed class FakeStripeService : IStripeService
+{
+    public Task<Result<string>> CreateCheckoutSessionAsync(
+        Guid paymentId,
+        decimal amount,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult(Result.Success("https://checkout.stripe.com/test/session"));
+}
+
+public sealed class IntegrationTestPaymentsUnitOfWork(PaymentsDbContext paymentsDb)
+    : kiwiDeal.Payments.Domain.Repositories.IPaymentsUnitOfWork
+{
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await paymentsDb.SaveChangesAsync(cancellationToken);
+        return 0;
+    }
 }

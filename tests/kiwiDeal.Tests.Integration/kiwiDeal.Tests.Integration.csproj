@@ -1,12 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="FluentAssertions" Version="7.0.0" />
@@ -18,16 +16,14 @@
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
   </ItemGroup>
-
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\kiwiDeal.Api\kiwiDeal.Api.csproj" />
     <ProjectReference Include="..\..\src\Modules\Users\kiwiDeal.Users.Infrastructure\kiwiDeal.Users.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Listings\kiwiDeal.Listings.Infrastructure\kiwiDeal.Listings.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Auctions\kiwiDeal.Auctions.Infrastructure\kiwiDeal.Auctions.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Payments\kiwiDeal.Payments.Infrastructure\kiwiDeal.Payments.Infrastructure.csproj" />
   </ItemGroup>
-
 </Project>

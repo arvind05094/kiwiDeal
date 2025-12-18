@@ -5,6 +5,7 @@ using kiwiDeal.Api.Infrastructure;
 using kiwiDeal.Auctions.Api;
 using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Listings.Api;
+using kiwiDeal.Payments.Api;
 using kiwiDeal.SharedKernel.Behaviours;
 using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Outbox;
@@ -37,6 +38,8 @@ builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Listings.Application.Commands.CreateListingCommand).Assembly);
 builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Auctions.Application.Commands.CreateAuctionCommand).Assembly);
+builder.Services.AddValidatorsFromAssembly(
+    typeof(kiwiDeal.Payments.Application.Commands.CreateCheckoutSession.CreateCheckoutSessionCommand).Assembly);
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -46,6 +49,8 @@ builder.Services.AddMediatR(cfg =>
         typeof(kiwiDeal.Listings.Application.Commands.CreateListingCommand).Assembly);
     cfg.RegisterServicesFromAssembly(
         typeof(kiwiDeal.Auctions.Application.Commands.CreateAuctionCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(
+    typeof(kiwiDeal.Payments.Application.Commands.CreateCheckoutSession.CreateCheckoutSessionCommand).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
@@ -77,6 +82,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddListingsModule(builder.Configuration);
 builder.Services.AddAuctionsModule(builder.Configuration);
+builder.Services.AddPaymentsModule(builder.Configuration);
 builder.Services.AddHostedService<OutboxWorker>();
 builder.Services.AddHealthChecks();
 

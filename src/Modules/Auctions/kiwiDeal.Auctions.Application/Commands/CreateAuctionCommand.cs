@@ -30,8 +30,8 @@ public sealed class CreateAuctionCommandHandler : IRequestHandler<CreateAuctionC
             command.ListingId,
             command.SellerId,
             command.StartingPrice,
-            command.StartTime,
-            command.EndTime);
+            command.StartTime.ToUniversalTime(),
+            command.EndTime.ToUniversalTime());
 
         if (result.IsFailure)
             return Result.Failure<Guid>(result.Error);

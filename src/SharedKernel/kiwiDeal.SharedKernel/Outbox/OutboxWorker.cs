@@ -35,7 +35,9 @@ public sealed class OutboxWorker(
             {
                 try
                 {
-                    var eventType = Type.GetType(message.EventType);
+                    var eventType = AppDomain.CurrentDomain.GetAssemblies()
+                        .Select(a => a.GetType(message.EventType))
+                        .FirstOrDefault(t => t is not null);
 
                     if (eventType is null)
                     {

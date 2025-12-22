@@ -107,6 +107,7 @@ public sealed class Auction : AggregateRoot
 
         RaiseDomainEvent(new AuctionClosedEvent(
             Id.Value,
+            SellerId,
             CurrentHighestBidderId,
             CurrentHighestBid));
 

@@ -4,9 +4,7 @@ using kiwiDeal.Payments.Domain.Repositories;
 using kiwiDeal.SharedKernel.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
-
 namespace kiwiDeal.Payments.Application.Events;
-
 public sealed class AuctionClosedEventHandler(
     IPaymentRepository paymentRepository,
     IPaymentsUnitOfWork unitOfWork,
@@ -21,10 +19,8 @@ public sealed class AuctionClosedEventHandler(
                 notification.AuctionId);
             return;
         }
-
         var existing = await paymentRepository.GetByAuctionIdAsync(
             notification.AuctionId, cancellationToken);
-
         if (existing is not null)
         {
             logger.LogWarning(
@@ -32,13 +28,11 @@ public sealed class AuctionClosedEventHandler(
                 notification.AuctionId);
             return;
         }
-
         var result = Payment.Create(
             notification.AuctionId,
             notification.WinningBidderId.Value,
-            Guid.Empty, // SellerId not carried on AuctionClosedEvent — resolved at checkout
+            notification.SellerId,
             notification.WinningAmount.Value);
-
         if (result.IsFailure)
         {
             logger.LogWarning(
@@ -46,10 +40,8 @@ public sealed class AuctionClosedEventHandler(
                 notification.AuctionId, result.Error.Message);
             return;
         }
-
         paymentRepository.Add(result.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         logger.LogInformation(
             "Payment {PaymentId} created for auction {AuctionId}",
             result.Value.Id, notification.AuctionId);

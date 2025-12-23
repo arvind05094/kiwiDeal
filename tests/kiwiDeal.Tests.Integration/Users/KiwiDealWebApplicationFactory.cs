@@ -137,6 +137,13 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
             if (stripeDescriptor is not null)
                 services.Remove(stripeDescriptor);
 
+            var webhookVerifierDescriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(IStripeWebhookVerifier));
+            if (webhookVerifierDescriptor is not null)
+                services.Remove(webhookVerifierDescriptor);
+
+            services.AddScoped<IStripeWebhookVerifier, FakeStripeWebhookVerifier>();
+
             services.AddScoped<IStripeService, FakeStripeService>();
 
 
@@ -166,6 +173,7 @@ public class KiwiDealWebApplicationFactory : WebApplicationFactory<Program>, IAs
         builder.UseSetting("ConnectionStrings:ListingsConnection", ConnectionString);
         builder.UseSetting("ConnectionStrings:AuctionsConnection", ConnectionString);
         builder.UseSetting("ConnectionStrings:PaymentsConnection", ConnectionString);
+        builder.UseSetting("Stripe:WebhookSecret", "whsec_test_secret");
     }
 
     public HttpClient CreateSellerClient()
@@ -220,5 +228,27 @@ public sealed class IntegrationTestPaymentsUnitOfWork(PaymentsDbContext payments
     {
         await paymentsDb.SaveChangesAsync(cancellationToken);
         return 0;
+    }
+}
+
+public sealed class FakeStripeWebhookVerifier : IStripeWebhookVerifier
+{
+    public Result<StripeWebhookEvent> VerifyAndParse(string payload, string stripeSignature)
+    {
+        try
+        {
+            var json = System.Text.Json.JsonDocument.Parse(payload);
+            var eventType = json.RootElement.GetProperty("type").GetString()!;
+            var sessionId = json.RootElement
+                .GetProperty("data")
+                .GetProperty("object")
+                .GetProperty("id")
+                .GetString()!;
+            return Result.Success(new StripeWebhookEvent(sessionId, eventType));
+        }
+        catch
+        {
+            return Result.Failure<StripeWebhookEvent>(Error.ValidationFailed("Invalid webhook payload."));
+        }
     }
 }

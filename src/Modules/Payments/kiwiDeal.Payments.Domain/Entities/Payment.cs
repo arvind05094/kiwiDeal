@@ -40,6 +40,15 @@ public sealed class Payment : AggregateRoot
         return Result.Success(payment);
     }
 
+    public Result SetStripeSessionId(string stripeSessionId)
+    {
+        if (string.IsNullOrWhiteSpace(stripeSessionId))
+            return Result.Failure(Error.ValidationFailed("Stripe session ID cannot be empty."));
+        StripeSessionId = stripeSessionId;
+        UpdatedAt = DateTimeOffset.UtcNow;
+        return Result.Success();
+    }
+
     public Result Complete(string stripeSessionId)
     {
         if (Status == PaymentStatus.Completed)

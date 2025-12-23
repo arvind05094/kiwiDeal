@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using kiwiDeal.Payments.Api.Requests;
+using kiwiDeal.Payments.Application;
 using kiwiDeal.Payments.Application.Commands.CreateCheckoutSession;
 using kiwiDeal.Payments.Application.Commands.HandleWebhook;
 using kiwiDeal.Payments.Application.Queries.GetPayment;
@@ -37,10 +38,20 @@ public sealed class PaymentsController(ISender sender) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> HandleWebhook(
-        [FromBody] HandleWebhookRequest request,
+        [FromServices] IStripeWebhookVerifier verifier,
         CancellationToken cancellationToken)
     {
-        var command = new HandleWebhookCommand(request.StripeSessionId, request.EventType);
+        string payload;
+        using (var reader = new StreamReader(HttpContext.Request.Body))
+            payload = await reader.ReadToEndAsync(cancellationToken);
+
+        var stripeSignature = Request.Headers["Stripe-Signature"].ToString();
+
+        var verifyResult = verifier.VerifyAndParse(payload, stripeSignature);
+        if (verifyResult.IsFailure)
+            return BadRequest(new { error = verifyResult.Error.Message });
+
+        var command = new HandleWebhookCommand(verifyResult.Value.SessionId, verifyResult.Value.EventType);
         var result = await sender.Send(command, cancellationToken);
         if (result.IsFailure)
             return result.Error.ToProblemDetails();

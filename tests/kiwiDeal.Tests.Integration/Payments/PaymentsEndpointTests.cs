@@ -5,6 +5,8 @@ using kiwiDeal.Tests.Integration.Users;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace kiwiDeal.Tests.Integration.Payments;
 
@@ -131,44 +133,64 @@ public class PaymentsEndpointTests : IAsyncLifetime
         await using var db = new PaymentsDbContext(options);
         var payment = await db.Payments.FirstAsync();
 
-        var request = new
-        {
-            StripeSessionId = "cs_test_webhook123",
-            EventType = "checkout.session.completed"
-        };
-
-        // First update the payment to have the stripe session id by going through checkout
+        // Go through checkout to set the stripe session id
         var checkoutRequest = new { AuctionId = payment.AuctionId };
         await _client.PostAsJsonAsync("/api/v1/payments/checkout", checkoutRequest);
 
-        // Seed a payment that already has a stripe session id via direct db manipulation
-        var payment2 = Payment.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 150m).Value;
-        await db.Payments.AddAsync(payment2);
-        await db.SaveChangesAsync();
+        // Reload payment to get the stripe session id
+        await db.Entry(payment).ReloadAsync();
+        var sessionId = payment.StripeSessionId!;
 
-        // Use the webhook with the known session id from FakeStripeService
-        var webhookRequest = new
+        // Build a signed Stripe webhook payload
+        var payload = $$"""
         {
-            StripeSessionId = "https://checkout.stripe.com/test/session",
-            EventType = "checkout.session.completed"
+            "id": "evt_test",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "{{sessionId}}",
+                    "object": "checkout.session"
+                }
+            }
+        }
+        """;
+        var stripeSignature = CreateMockStripeSignature(payload, "whsec_test_secret");
+        var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments/webhook")
+        {
+            Content = content
         };
+        request.Headers.Add("Stripe-Signature", stripeSignature);
 
-        var response = await _client.PostAsJsonAsync("/api/v1/payments/webhook", webhookRequest);
-
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var response = await _client.SendAsync(request);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
     public async Task HandleWebhook_UnknownSessionId_Returns404()
     {
-        var request = new
+        var sessionId = "cs_test_unknown_session";
+        var payload = $$"""
         {
-            StripeSessionId = "cs_test_unknown",
-            EventType = "checkout.session.completed"
+            "id": "evt_test",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "{{sessionId}}",
+                    "object": "checkout.session"
+                }
+            }
+        }
+        """;
+        var stripeSignature = CreateMockStripeSignature(payload, "whsec_test_secret");
+        var content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments/webhook")
+        {
+            Content = content
         };
+        request.Headers.Add("Stripe-Signature", stripeSignature);
 
-        var response = await _client.PostAsJsonAsync("/api/v1/payments/webhook", request);
-
+        var response = await _client.SendAsync(request);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -189,5 +211,23 @@ public class PaymentsEndpointTests : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    private static string CreateMockStripeSignature(string jsonPayload, string secret)
+    {
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+        var signedPayload = $"{timestamp}.{jsonPayload}";
+        var rawSecret = secret.StartsWith("whsec_") ? secret["whsec_".Length..] : secret;
+
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(rawSecret));
+        var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(signedPayload));
+
+        var sb = new StringBuilder();
+        foreach (var b in hashBytes)
+            sb.Append(b.ToString("x2"));
+
+        return $"t={timestamp},v1={sb}";
+    }
+
 }
+
 

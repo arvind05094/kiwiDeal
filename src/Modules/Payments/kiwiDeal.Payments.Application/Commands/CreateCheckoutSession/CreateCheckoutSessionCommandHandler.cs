@@ -34,6 +34,7 @@ public sealed class CreateCheckoutSessionCommandHandler(
         if (sessionResult.IsFailure)
             return Result.Failure<string>(sessionResult.Error);
 
+        payment.SetStripeSessionId(sessionResult.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation(

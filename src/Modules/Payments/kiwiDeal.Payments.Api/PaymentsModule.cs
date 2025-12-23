@@ -25,6 +25,7 @@ public static class PaymentsModule
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<PaymentsDbContext>());
         services.AddScoped<IStripeService, StripeService>();
+        services.AddScoped<IStripeWebhookVerifier, StripeWebhookVerifier>();
 
         services.AddOptions<StripeOptions>()
             .BindConfiguration(StripeOptions.SectionName)

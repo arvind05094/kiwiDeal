@@ -1,22 +1,14 @@
 using kiwiDeal.Payments.Application;
 using kiwiDeal.SharedKernel.Results;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
 namespace kiwiDeal.Payments.Infrastructure;
 
-public sealed class StripeWebhookVerifier(
-    IOptions<StripeOptions> options,
-    ILogger<StripeWebhookVerifier> logger) : IStripeWebhookVerifier
+public sealed class StripeWebhookVerifier(IOptions<StripeOptions> options) : IStripeWebhookVerifier
 {
     public Result<StripeWebhookEvent> VerifyAndParse(string payload, string stripeSignature)
     {
-        logger.LogWarning("WebhookSecret length: {Length}, PayloadLength: {PayloadLength}, SigLength: {SigLength}",
-            options.Value.WebhookSecret?.Length ?? 0,
-            payload?.Length ?? 0,
-            stripeSignature?.Length ?? 0);
-
         try
         {
             var stripeEvent = EventUtility.ConstructEvent(
@@ -30,7 +22,6 @@ public sealed class StripeWebhookVerifier(
         }
         catch (StripeException ex)
         {
-            logger.LogWarning("StripeException: {Message}", ex.Message);
             return Result.Failure<StripeWebhookEvent>(Error.ValidationFailed(ex.Message));
         }
     }

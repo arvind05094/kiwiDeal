@@ -214,11 +214,11 @@ public sealed class IntegrationTestAuctionsUnitOfWork(AuctionsDbContext auctions
 
 public sealed class FakeStripeService : IStripeService
 {
-    public Task<Result<string>> CreateCheckoutSessionAsync(
+    public Task<Result<StripeCheckoutSession>> CreateCheckoutSessionAsync(
         Guid paymentId,
         decimal amount,
         CancellationToken cancellationToken = default)
-        => Task.FromResult(Result.Success("https://checkout.stripe.com/test/session"));
+        => Task.FromResult(Result.Success(new StripeCheckoutSession("cs_test_fake_session_id", "https://checkout.stripe.com/test/session")));
 }
 
 public sealed class IntegrationTestPaymentsUnitOfWork(PaymentsDbContext paymentsDb)

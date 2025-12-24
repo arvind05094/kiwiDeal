@@ -11,7 +11,7 @@ public sealed class StripeService(
     IOptions<StripeOptions> options,
     ILogger<StripeService> logger) : IStripeService
 {
-    public async Task<Result<string>> CreateCheckoutSessionAsync(
+    public async Task<Result<StripeCheckoutSession>> CreateCheckoutSessionAsync(
         Guid paymentId,
         decimal amount,
         CancellationToken cancellationToken = default)
@@ -51,12 +51,12 @@ public sealed class StripeService(
             var service = new SessionService();
             var session = await service.CreateAsync(sessionOptions, cancellationToken: cancellationToken);
 
-            return Result.Success(session.Url);
+            return Result.Success(new StripeCheckoutSession(session.Id, session.Url));
         }
         catch (StripeException ex)
         {
             logger.LogWarning(ex, "Stripe error creating checkout session for payment {PaymentId}", paymentId);
-            return Result.Failure<string>(Error.Unexpected(ex.Message));
+            return Result.Failure<StripeCheckoutSession>(Error.Unexpected(ex.Message));
         }
     }
 }

@@ -19,6 +19,8 @@ public sealed class HandleWebhookCommandHandler(
         HandleWebhookCommand request,
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(request.StripeSessionId))
+            return Result.Success();
         var payment = await paymentRepository.GetByStripeSessionIdAsync(
             request.StripeSessionId, cancellationToken);
 

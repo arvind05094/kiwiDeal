@@ -34,13 +34,9 @@ public sealed class CreateCheckoutSessionCommandHandler(
         if (sessionResult.IsFailure)
             return Result.Failure<string>(sessionResult.Error);
 
-        payment.SetStripeSessionId(sessionResult.Value);
+        payment.SetStripeSessionId(sessionResult.Value.SessionId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        logger.LogInformation(
-            "Stripe checkout session created for payment {PaymentId}",
-            payment.Id);
-
-        return Result.Success(sessionResult.Value);
+        logger.LogInformation("Stripe checkout session created for payment {PaymentId}", payment.Id);
+        return Result.Success(sessionResult.Value.Url);
     }
 }

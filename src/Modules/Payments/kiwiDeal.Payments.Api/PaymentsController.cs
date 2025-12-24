@@ -41,8 +41,11 @@ public sealed class PaymentsController(ISender sender) : ControllerBase
         [FromServices] IStripeWebhookVerifier verifier,
         CancellationToken cancellationToken)
     {
+        HttpContext.Request.EnableBuffering();
+        HttpContext.Request.Body.Position = 0;
+
         string payload;
-        using (var reader = new StreamReader(HttpContext.Request.Body))
+        using (var reader = new StreamReader(HttpContext.Request.Body, leaveOpen: true))
             payload = await reader.ReadToEndAsync(cancellationToken);
 
         var stripeSignature = Request.Headers["Stripe-Signature"].ToString();

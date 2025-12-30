@@ -44,10 +44,11 @@ public class AuthControllerTests : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        var body = await response.Content.ReadFromJsonAsync<UserResponse>();
-        body!.Email.Should().Be("validuser@test.com");
-        body.FirstName.Should().Be("New");
-        body.LastName.Should().Be("User");
+        var body = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        body!.AccessToken.Should().NotBeNullOrEmpty();
+        body.User.Email.Should().Be("validuser@test.com");
+        body.User.FirstName.Should().Be("New");
+        body.User.LastName.Should().Be("User");
     }
 
     [Fact]

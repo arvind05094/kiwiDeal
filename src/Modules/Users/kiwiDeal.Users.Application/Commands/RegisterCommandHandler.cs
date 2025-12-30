@@ -12,9 +12,10 @@ public sealed class RegisterCommandHandler(
     IUserRepository userRepository,
     IUsersUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher,
-    ILogger<RegisterCommandHandler> logger) : IRequestHandler<RegisterCommand, Result<UserResponse>>
+    IJwtTokenGenerator jwtTokenGenerator,
+    ILogger<RegisterCommandHandler> logger) : IRequestHandler<RegisterCommand, Result<AuthResponse>>
 {
-    public async Task<Result<UserResponse>> Handle(
+    public async Task<Result<AuthResponse>> Handle(
         RegisterCommand request,
         CancellationToken cancellationToken)
     {
@@ -25,7 +26,7 @@ public sealed class RegisterCommandHandler(
         if (existing is not null)
         {
             logger.LogWarning("Registration failed. Email {Email} already in use", request.Email);
-            return Result.Failure<UserResponse>(UserErrors.EmailAlreadyInUse);
+            return Result.Failure<AuthResponse>(UserErrors.EmailAlreadyInUse);
         }
 
         var passwordHash = passwordHasher.Hash(request.Password);
@@ -37,19 +38,26 @@ public sealed class RegisterCommandHandler(
             request.LastName);
 
         if (result.IsFailure)
-            return Result.Failure<UserResponse>(result.Error);
+            return Result.Failure<AuthResponse>(result.Error);
 
         var user = result.Value;
+
+        var accessToken = jwtTokenGenerator.GenerateAccessToken(user);
+        var refreshTokenValue = jwtTokenGenerator.GenerateRefreshToken();
+        user.AddRefreshToken(refreshTokenValue, DateTimeOffset.UtcNow.AddDays(7));
 
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("User {UserId} registered successfully", user.Id);
 
-        return Result.Success(new UserResponse(
-            user.Id.Value,
-            user.Email,
-            user.FirstName,
-            user.LastName));
+        return Result.Success(new AuthResponse(
+            accessToken,
+            refreshTokenValue,
+            new UserResponse(
+                user.Id.Value,
+                user.Email,
+                user.FirstName,
+                user.LastName)));
     }
 }

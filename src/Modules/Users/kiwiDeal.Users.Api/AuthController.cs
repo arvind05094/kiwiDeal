@@ -34,7 +34,9 @@ public sealed class AuthController(ISender sender) : ControllerBase
         if (result.IsFailure)
             return result.Error.ToProblemDetails();
 
-        return CreatedAtAction(nameof(Register), result.Value);
+        AppendRefreshTokenCookie(result.Value.RefreshToken);
+
+        return CreatedAtAction(nameof(Register), new { result.Value.AccessToken, result.Value.User });
     }
 
     [HttpPost("login")]

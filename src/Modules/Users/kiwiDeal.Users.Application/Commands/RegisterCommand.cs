@@ -9,4 +9,4 @@ public sealed record RegisterCommand(
     string Email,
     string Password,
     string FirstName,
-    string LastName) : IRequest<Result<UserResponse>>, IPublicRequest;
+    string LastName) : IRequest<Result<AuthResponse>>, IPublicRequest;

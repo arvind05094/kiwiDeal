@@ -15,13 +15,14 @@ public class RegisterCommandHandlerTests
     private readonly IPasswordHasher _passwordHasher = Substitute.For<IPasswordHasher>();
 
     private readonly RegisterCommandHandler _handler;
-
+    private readonly IJwtTokenGenerator _jwtTokenGenerator = Substitute.For<IJwtTokenGenerator>();
     public RegisterCommandHandlerTests()
     {
         _handler = new RegisterCommandHandler(
             _userRepository,
             _unitOfWork,
             _passwordHasher,
+            _jwtTokenGenerator,
             NullLogger<RegisterCommandHandler>.Instance);
     }
 
@@ -34,14 +35,15 @@ public class RegisterCommandHandlerTests
             .Returns((User?)null);
 
         _passwordHasher.Hash(command.Password).Returns("hashedpassword");
-
+        _jwtTokenGenerator.GenerateAccessToken(Arg.Any<User>()).Returns("access-token");
+        _jwtTokenGenerator.GenerateRefreshToken().Returns("refresh-token");
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Email.Should().Be("test@test.com");
-        result.Value.FirstName.Should().Be("John");
-        result.Value.LastName.Should().Be("Doe");
-
+        result.Value.User.Email.Should().Be("test@test.com");
+        result.Value.User.FirstName.Should().Be("John");
+        result.Value.User.LastName.Should().Be("Doe");
+        result.Value.AccessToken.Should().Be("access-token");
         await _userRepository.Received(1).AddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>());
         await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }

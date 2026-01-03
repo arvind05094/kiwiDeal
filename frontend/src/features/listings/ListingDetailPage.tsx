@@ -18,7 +18,15 @@ export default function ListingDetailPage() {
 
   const listing = data?.data;
   const isSeller = user?.id === listing?.sellerId;
-
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this listing?")) return;
+    try {
+      await listingsApi.deleteListing(listing!.id);
+      navigate("/listings");
+    } catch {
+      alert("Failed to delete listing.");
+    }
+  };
   if (isLoading)
     return (
       <div className="min-h-screen bg-gray-100">
@@ -94,6 +102,13 @@ export default function ListingDetailPage() {
                   onClick={() => navigate(`/listings/${listing.id}/edit`)}
                 >
                   Edit Listing
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-red-500 border-red-300 hover:bg-red-50"
+                  onClick={handleDelete}
+                >
+                  Delete Listing
                 </Button>
               </div>
             )}

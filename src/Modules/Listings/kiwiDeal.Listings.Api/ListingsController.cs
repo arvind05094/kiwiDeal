@@ -83,6 +83,23 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
         return NoContent();
     }
 
+    [HttpGet("mine")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyListings(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetMyListingsQuery(currentUser.Id!.Value, pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
+    }
+
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]

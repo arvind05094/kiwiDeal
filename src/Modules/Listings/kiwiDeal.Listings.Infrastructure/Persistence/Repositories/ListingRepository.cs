@@ -29,7 +29,21 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+            .Take(pagination.PageSize)
+            .ToListAsync(cancellationToken);
 
+        return PagedResult<Listing>.Create(items, totalCount, pagination);
+    }
+
+    public async Task<PagedResult<Listing>> GetBySellerIdAsync(Guid sellerId, PaginationParams pagination, CancellationToken cancellationToken = default)
+    {
+        var query = context.Listings
+            .Include(l => l.Images)
+            .Where(l => l.SellerId.Value == sellerId);
+        var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
             .OrderByDescending(l => l.CreatedAt)
             .Skip((pagination.PageNumber - 1) * pagination.PageSize)

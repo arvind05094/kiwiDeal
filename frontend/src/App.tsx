@@ -8,6 +8,7 @@ import CreateListingPage from "./features/listings/CreateListingPage";
 import ListingDetailPage from "./features/listings/ListingDetailPage";
 import EditListingPage from "./features/listings/EditListingPage";
 import { ProtectedRoute } from "./shared/components/ProtectedRoute";
+import MyListingsPage from "./features/listings/MyListingsPage";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/listings/new" element={<CreateListingPage />} />
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/listings/:id/edit" element={<EditListingPage />} />
+            <Route path="/my-listings" element={<MyListingsPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

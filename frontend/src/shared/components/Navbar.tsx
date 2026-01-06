@@ -39,6 +39,15 @@ export default function Navbar() {
         <span className="text-sm border-l border-orange-300 pl-4">
           Hi, {user?.firstName}
         </span>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-white hover:bg-orange-600"
+          onClick={() => navigate("/my-listings")}
+        >
+          My Listings
+        </Button>
         <Button
           variant="outline"
           size="sm"

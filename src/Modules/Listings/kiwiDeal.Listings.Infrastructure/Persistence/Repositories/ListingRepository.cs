@@ -42,7 +42,7 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
     {
         var query = context.Listings
             .Include(l => l.Images)
-            .Where(l => l.SellerId.Value == sellerId);
+             .Where(l => l.SellerId == SellerId.From(sellerId));
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
             .OrderByDescending(l => l.CreatedAt)

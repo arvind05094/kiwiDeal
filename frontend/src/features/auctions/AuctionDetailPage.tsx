@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/AuthContext";
 import { auctionsApi } from "./api";
 import { useAuctionHub } from "./hooks/useAuctionHub";
 import { AuctionDto, BidDto } from "./types";
 import Navbar from "@/shared/components/Navbar";
+import { paymentsApi } from "../payments/api";
 
 export default function AuctionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [bidAmount, setBidAmount] = useState("");
   const [bidError, setBidError] = useState("");
@@ -71,6 +73,13 @@ export default function AuctionDetailPage() {
     onError: () => setCloseError("Failed to close auction."),
   });
 
+  const checkout = useMutation({
+    mutationFn: () => paymentsApi.checkout({ auctionId: id! }),
+    onSuccess: (res) => {
+      window.location.href = res.data.checkoutUrl;
+    },
+  });
+
   if (isLoading)
     return <div className="p-8 text-center">Loading auction...</div>;
   if (isError || !auction)
@@ -81,6 +90,9 @@ export default function AuctionDetailPage() {
   const isSeller = user?.id === auction.sellerId;
   const canBid = auction.status === "Active" && !isSeller;
   const canClose = auction.status === "Active" && isSeller;
+
+  const isWinner =
+    auction.status === "Closed" && user?.id === auction.currentHighestBidderId;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -164,6 +176,32 @@ export default function AuctionDetailPage() {
             {closeError && (
               <p className="text-red-500 text-sm mt-2">{closeError}</p>
             )}
+          </div>
+        )}
+
+        {isWinner && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-3">
+              You won this auction!
+            </h2>
+            <button
+              onClick={() => checkout.mutate()}
+              disabled={checkout.isPending}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              {checkout.isPending ? "Redirecting..." : "Pay Now"}
+            </button>
+            {checkout.isError && (
+              <p className="text-red-500 text-sm mt-2">
+                Failed to start checkout.
+              </p>
+            )}
+            <button
+              onClick={() => navigate(`/payments/${id}`)}
+              className="ml-3 text-sm text-blue-600 underline"
+            >
+              View payment status
+            </button>
           </div>
         )}
 

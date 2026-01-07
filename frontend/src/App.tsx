@@ -11,6 +11,7 @@ import { ProtectedRoute } from "./shared/components/ProtectedRoute";
 import MyListingsPage from "./features/listings/MyListingsPage";
 import AuctionDetailPage from "./features/auctions/AuctionDetailPage";
 import AuctionsPage from "./features/auctions/AuctionsPage";
+import PaymentStatusPage from "./features/payments/PaymentStatusPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,10 @@ export default function App() {
             <Route path="/my-listings" element={<MyListingsPage />} />
             <Route path="/auctions" element={<AuctionsPage />} />
             <Route path="/auctions/:id" element={<AuctionDetailPage />} />
+            <Route
+              path="/payments/:auctionId"
+              element={<PaymentStatusPage />}
+            />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

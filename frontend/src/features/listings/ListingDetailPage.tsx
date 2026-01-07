@@ -5,6 +5,8 @@ import Navbar from "@/shared/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/AuthContext";
+import { useState } from "react";
+import CreateAuctionModal from "../auctions/CreateAuctionModal";
 
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +29,9 @@ export default function ListingDetailPage() {
       alert("Failed to delete listing.");
     }
   };
+
+  const [showAuctionModal, setShowAuctionModal] = useState(false);
+
   if (isLoading)
     return (
       <div className="min-h-screen bg-gray-100">
@@ -96,7 +101,7 @@ export default function ListingDetailPage() {
               })}
             </p>
             {isSeller && (
-              <div className="flex gap-3 pt-2 border-t">
+              <div className="flex gap-3 pt-2 border-t flex-wrap">
                 <Button
                   className="bg-orange-500 hover:bg-orange-600 text-white"
                   onClick={() => navigate(`/listings/${listing.id}/edit`)}
@@ -110,7 +115,21 @@ export default function ListingDetailPage() {
                 >
                   Delete Listing
                 </Button>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => setShowAuctionModal(true)}
+                >
+                  Start Auction
+                </Button>
               </div>
+            )}
+
+            {showAuctionModal && (
+              <CreateAuctionModal
+                listingId={listing.id}
+                startingPrice={listing.startingPrice}
+                onClose={() => setShowAuctionModal(false)}
+              />
             )}
           </CardContent>
         </Card>

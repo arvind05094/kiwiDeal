@@ -9,6 +9,8 @@ import ListingDetailPage from "./features/listings/ListingDetailPage";
 import EditListingPage from "./features/listings/EditListingPage";
 import { ProtectedRoute } from "./shared/components/ProtectedRoute";
 import MyListingsPage from "./features/listings/MyListingsPage";
+import AuctionDetailPage from "./features/auctions/AuctionDetailPage";
+import AuctionsPage from "./features/auctions/AuctionsPage";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,8 @@ export default function App() {
             <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route path="/listings/:id/edit" element={<EditListingPage />} />
             <Route path="/my-listings" element={<MyListingsPage />} />
+            <Route path="/auctions" element={<AuctionsPage />} />
+            <Route path="/auctions/:id" element={<AuctionDetailPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

@@ -36,26 +36,48 @@ export default function Navbar() {
         >
           Auctions
         </Button>
-        <span className="text-sm border-l border-orange-300 pl-4">
-          Hi, {user?.firstName}
-        </span>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-white hover:bg-orange-600"
-          onClick={() => navigate("/my-listings")}
-        >
-          My Listings
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-white border-white bg-transparent hover:bg-orange-600 hover:text-white"
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
+        {user ? (
+          <>
+            <span className="text-sm border-l border-orange-300 pl-4">
+              Hi, {user.firstName}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-orange-600"
+              onClick={() => navigate("/my-listings")}
+            >
+              My Listings
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-white border-white bg-transparent hover:bg-orange-600 hover:text-white"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-orange-600"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-white border-white bg-transparent hover:bg-orange-600 hover:text-white"
+              onClick={() => navigate("/register")}
+            >
+              Register
+            </Button>
+          </>
+        )}
       </div>
     </nav>
   );

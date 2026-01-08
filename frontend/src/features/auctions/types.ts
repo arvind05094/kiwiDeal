@@ -35,3 +35,10 @@ export interface CreateAuctionRequest {
 export interface PlaceBidRequest {
   amount: number;
 }
+
+export interface BidPlacedEvent {
+  auctionId: string;
+  bidderId: string;
+  amount: number;
+  newEndTime: string;
+}

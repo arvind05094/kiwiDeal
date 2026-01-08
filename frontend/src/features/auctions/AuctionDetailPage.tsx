@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/AuthContext";
 import { auctionsApi } from "./api";
 import { useAuctionHub } from "./hooks/useAuctionHub";
-import { AuctionDto, BidDto } from "./types";
+import { AuctionDto, BidDto, BidPlacedEvent } from "./types";
 import Navbar from "@/shared/components/Navbar";
 import { paymentsApi } from "../payments/api";
 
@@ -26,10 +26,8 @@ export default function AuctionDetailPage() {
     queryFn: () => auctionsApi.getAuction(id!).then((r) => r.data),
     enabled: !!id,
   });
-
-  useAuctionHub({
-    auctionId: id!,
-    onBidPlaced: (event) => {
+  const handleBidPlaced = useCallback(
+    (event: BidPlacedEvent) => {
       queryClient.setQueryData<AuctionDto>(["auction", id], (old) => {
         if (!old) return old;
         const newBid: BidDto = {
@@ -47,7 +45,10 @@ export default function AuctionDetailPage() {
         };
       });
     },
-  });
+    [id, queryClient],
+  );
+
+  useAuctionHub({ auctionId: id!, onBidPlaced: handleBidPlaced });
 
   const placeBid = useMutation({
     mutationFn: () =>
@@ -88,7 +89,7 @@ export default function AuctionDetailPage() {
     );
 
   const isSeller = user?.id === auction.sellerId;
-  const canBid = auction.status === "Active" && !isSeller;
+  const canBid = auction.status === "Active" && !isSeller && !!user;
   const canClose = auction.status === "Active" && isSeller;
 
   const isWinner =
@@ -229,6 +230,20 @@ export default function AuctionDetailPage() {
             </ul>
           )}
         </div>
+
+        {auction.status === "Active" && !user && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 text-sm">
+              <a
+                href="/login"
+                className="text-orange-500 hover:underline font-medium"
+              >
+                Sign in
+              </a>{" "}
+              to place a bid.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

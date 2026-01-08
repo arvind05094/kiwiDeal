@@ -1,12 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
-
-interface BidPlacedEvent {
-  auctionId: string;
-  bidderId: string;
-  amount: number;
-  newEndTime: string;
-}
+import { BidPlacedEvent } from "../types";
 
 interface UseAuctionHubOptions {
   auctionId: string;
@@ -21,7 +15,7 @@ export function useAuctionHub({
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5158/hubs/auction", {
+      .withUrl(`${import.meta.env.VITE_API_URL}/hubs/auction`, {
         accessTokenFactory: () => localStorage.getItem("access_token") ?? "",
       })
       .withAutomaticReconnect()
@@ -39,7 +33,7 @@ export function useAuctionHub({
     return () => {
       connection.stop();
     };
-  }, [auctionId]);
+  }, [auctionId, onBidPlaced]);
 
   return connectionRef;
 }

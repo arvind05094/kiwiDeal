@@ -6,12 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/shared/components/Navbar";
+import { useAuth } from "../auth/AuthContext";
 
 export default function ListingsPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const { user } = useAuth();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["listings", page, searchTerm],
@@ -49,12 +51,14 @@ export default function ListingsPage() {
               Search
             </Button>
           </form>
-          <Button
-            className="bg-orange-500 hover:bg-orange-600 text-white"
-            onClick={() => navigate("/listings/new")}
-          >
-            + Post Listing
-          </Button>
+          {user && (
+            <Button
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={() => navigate("/listings/new")}
+            >
+              + Post Listing
+            </Button>
+          )}
         </div>
 
         {isLoading && (

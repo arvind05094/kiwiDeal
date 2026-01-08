@@ -75,7 +75,13 @@ export default function CreateAuctionModal({
             Cancel
           </button>
           <button
-            onClick={() => createAuction.mutate()}
+            onClick={() => {
+              if (new Date(endTime) <= new Date(startTime)) {
+                setError("End time must be after start time.");
+                return;
+              }
+              createAuction.mutate();
+            }}
             disabled={!startTime || !endTime || createAuction.isPending}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >

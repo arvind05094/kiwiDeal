@@ -23,20 +23,20 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/listings" element={<ListingsPage />} />
+            <Route path="/listings/:id" element={<ListingDetailPage />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/listings" element={<ListingsPage />} />
+              <Route path="/listings/new" element={<CreateListingPage />} />
+              <Route path="/listings/:id/edit" element={<EditListingPage />} />
+              <Route path="/my-listings" element={<MyListingsPage />} />
+              <Route path="/auctions" element={<AuctionsPage />} />
+              <Route path="/auctions/:id" element={<AuctionDetailPage />} />
+              <Route
+                path="/payments/:auctionId"
+                element={<PaymentStatusPage />}
+              />
             </Route>
             <Route path="*" element={<Navigate to="/listings" replace />} />
-            <Route path="/listings/new" element={<CreateListingPage />} />
-            <Route path="/listings/:id" element={<ListingDetailPage />} />
-            <Route path="/listings/:id/edit" element={<EditListingPage />} />
-            <Route path="/my-listings" element={<MyListingsPage />} />
-            <Route path="/auctions" element={<AuctionsPage />} />
-            <Route path="/auctions/:id" element={<AuctionDetailPage />} />
-            <Route
-              path="/payments/:auctionId"
-              element={<PaymentStatusPage />}
-            />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

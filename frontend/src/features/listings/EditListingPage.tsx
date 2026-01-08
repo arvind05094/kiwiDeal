@@ -7,43 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { ListingDto } from "./types";
 
 export default function EditListingPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const { data, isLoading } = useQuery({
     queryKey: ["listing", id],
     queryFn: () => listingsApi.getListing(id!),
   });
-
-  const listing = data?.data;
-
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startingPrice, setStartingPrice] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      await listingsApi.updateListing(id!, {
-        title: title || listing?.title || "",
-        description: description || listing?.description || "",
-        startingPrice: parseFloat(
-          startingPrice || listing?.startingPrice.toString() || "0",
-        ),
-      });
-      navigate(`/listings/${id}`);
-    } catch {
-      setError("Failed to update listing. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (isLoading)
     return (
@@ -52,6 +23,45 @@ export default function EditListingPage() {
         <p className="text-center py-12 text-gray-500">Loading...</p>
       </div>
     );
+
+  if (!data?.data)
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Navbar />
+        <p className="text-center py-12 text-red-500">Listing not found.</p>
+      </div>
+    );
+
+  return <EditListingForm listing={data.data} id={id!} />;
+}
+
+function EditListingForm({ listing, id }: { listing: ListingDto; id: string }) {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState(listing.title);
+  const [description, setDescription] = useState(listing.description);
+  const [startingPrice, setStartingPrice] = useState(
+    listing.startingPrice.toString(),
+  );
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await listingsApi.updateListing(id, {
+        title,
+        description,
+        startingPrice: parseFloat(startingPrice),
+      });
+      navigate(`/listings/${id}`);
+    } catch {
+      setError("Failed to update listing. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -69,7 +79,7 @@ export default function EditListingPage() {
                 <Label htmlFor="title">Title</Label>
                 <Input
                   id="title"
-                  value={title || listing?.title || ""}
+                  value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
@@ -78,7 +88,7 @@ export default function EditListingPage() {
                 <Label htmlFor="description">Description</Label>
                 <textarea
                   id="description"
-                  value={description || listing?.description || ""}
+                  value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
                   rows={5}
@@ -92,9 +102,7 @@ export default function EditListingPage() {
                   type="number"
                   min="0"
                   step="0.01"
-                  value={
-                    startingPrice || listing?.startingPrice.toString() || ""
-                  }
+                  value={startingPrice}
                   onChange={(e) => setStartingPrice(e.target.value)}
                   required
                 />

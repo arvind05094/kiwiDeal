@@ -20,13 +20,13 @@ export default function ListingDetailPage() {
 
   const listing = data?.data;
   const isSeller = user?.id === listing?.sellerId;
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this listing?")) return;
+  const handleCancel = async () => {
+    if (!confirm("Are you sure you want to cancel this listing?")) return;
     try {
-      await listingsApi.deleteListing(listing!.id);
-      navigate("/listings");
+      await listingsApi.cancelListing(listing!.id);
+      navigate("/my-listings");
     } catch {
-      alert("Failed to delete listing.");
+      alert("Failed to cancel listing.");
     }
   };
 
@@ -80,7 +80,9 @@ export default function ListingDetailPage() {
                 className={`text-xs px-2 py-1 rounded-full font-medium ${
                   listing.status === "Active"
                     ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-600"
+                    : listing.status === "Sold"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-600"
                 }`}
               >
                 {listing.status}
@@ -100,7 +102,7 @@ export default function ListingDetailPage() {
                 year: "numeric",
               })}
             </p>
-            {isSeller && (
+            {isSeller && listing.status === "Active" && (
               <div className="flex gap-3 pt-2 border-t flex-wrap">
                 <Button
                   className="bg-orange-500 hover:bg-orange-600 text-white"
@@ -111,9 +113,9 @@ export default function ListingDetailPage() {
                 <Button
                   variant="outline"
                   className="text-red-500 border-red-300 hover:bg-red-50"
-                  onClick={handleDelete}
+                  onClick={handleCancel}
                 >
-                  Delete Listing
+                  Cancel Listing
                 </Button>
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -123,10 +125,21 @@ export default function ListingDetailPage() {
                 </Button>
               </div>
             )}
+            {isSeller && listing.status === "Cancelled" && (
+              <p className="text-sm text-gray-500 pt-2 border-t">
+                This listing has been cancelled.
+              </p>
+            )}
+            {isSeller && listing.status === "Sold" && (
+              <p className="text-sm text-gray-500 pt-2 border-t">
+                This listing has been sold.
+              </p>
+            )}
 
             {showAuctionModal && (
               <CreateAuctionModal
                 listingId={listing.id}
+                listingTitle={listing.title}
                 startingPrice={listing.startingPrice}
                 onClose={() => setShowAuctionModal(false)}
               />

@@ -9,7 +9,7 @@ export interface ListingDto {
   title: string;
   description: string;
   startingPrice: number;
-  status: 'Active' | 'Closed';
+  status: "Active" | "Cancelled" | "Sold";
   createdAt: string;
   updatedAt: string | null;
   images: ListingImage[];

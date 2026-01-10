@@ -10,10 +10,11 @@ import { ListingDto } from "./types";
 export default function MyListingsPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
+  const [statuses, setStatuses] = useState<string[]>(["Active", "Sold"]);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["my-listings", page],
-    queryFn: () => listingsApi.getMyListings(page, 10),
+    queryKey: ["my-listings", page, statuses],
+    queryFn: () => listingsApi.getMyListings(page, 10, statuses),
   });
 
   const listings = data?.data.items ?? [];
@@ -27,6 +28,28 @@ export default function MyListingsPage() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-800">My Listings</h1>
+          <div className="flex gap-2">
+            {(["Active", "Sold", "Cancelled"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => {
+                  setStatuses((prev) =>
+                    prev.includes(s)
+                      ? prev.filter((x) => x !== s)
+                      : [...prev, s],
+                  );
+                  setPage(1);
+                }}
+                className={`text-xs px-3 py-1 rounded-full border font-medium transition ${
+                  statuses.includes(s)
+                    ? "bg-orange-500 text-white border-orange-500"
+                    : "bg-white text-gray-600 border-gray-300 hover:border-orange-400"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
           <Button
             className="bg-orange-500 hover:bg-orange-600 text-white"
             onClick={() => navigate("/listings/new")}
@@ -89,7 +112,9 @@ export default function MyListingsPage() {
                   className={`text-xs inline-block px-2 py-0.5 rounded-full font-medium w-fit ${
                     listing.status === "Active"
                       ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-600"
+                      : listing.status === "Sold"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   {listing.status}

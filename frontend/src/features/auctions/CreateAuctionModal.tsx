@@ -4,12 +4,14 @@ import { auctionsApi } from "./api";
 
 interface Props {
   listingId: string;
+  listingTitle: string;
   startingPrice: number;
   onClose: () => void;
 }
 
 export default function CreateAuctionModal({
   listingId,
+  listingTitle,
   startingPrice,
   onClose,
 }: Props) {
@@ -22,6 +24,7 @@ export default function CreateAuctionModal({
     mutationFn: () =>
       auctionsApi.createAuction({
         listingId,
+        listingTitle,
         startingPrice,
         startTime: new Date(startTime).toISOString(),
         endTime: new Date(endTime).toISOString(),

@@ -1,10 +1,10 @@
 export interface BidDto {
   id: string;
   bidderId: string;
+  bidderName: string;
   amount: number;
   createdAt: string;
 }
-
 export interface AuctionDto {
   id: string;
   listingId: string;
@@ -16,6 +16,7 @@ export interface AuctionDto {
   endTime: string;
   status: "Scheduled" | "Active" | "Closed";
   bids: BidDto[];
+  listingTitle: string;
 }
 
 export interface PagedResult<T> {
@@ -30,6 +31,7 @@ export interface CreateAuctionRequest {
   startingPrice: number;
   startTime: string;
   endTime: string;
+  listingTitle: string;
 }
 
 export interface PlaceBidRequest {
@@ -39,6 +41,7 @@ export interface PlaceBidRequest {
 export interface BidPlacedEvent {
   auctionId: string;
   bidderId: string;
+  bidderName: string;
   amount: number;
   newEndTime: string;
 }

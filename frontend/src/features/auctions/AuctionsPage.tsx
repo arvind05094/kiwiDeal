@@ -41,13 +41,10 @@ export default function AuctionsPage() {
             >
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">
-                    Listing ID: {auction.listingId}
-                  </p>
-                  <p className="mt-1 font-semibold">
-                    Current bid:{" "}
+                  <p className="font-medium">{auction.listingTitle}</p>
+                  <p className="mt-1 text-sm text-gray-600">
                     {auction.currentHighestBid != null
-                      ? `$${auction.currentHighestBid.toFixed(2)}`
+                      ? `Current bid: $${auction.currentHighestBid.toFixed(2)}`
                       : `Starting at $${auction.startingPrice.toFixed(2)}`}
                   </p>
                   <p className="text-sm text-gray-500">

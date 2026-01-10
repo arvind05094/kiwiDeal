@@ -15,9 +15,10 @@ export const listingsApi = {
   updateListing: (id: string, data: CreateListingRequest) =>
     client.put(`/api/v1/listings/${id}`, data),
 
-  deleteListing: (id: string) => client.delete(`/api/v1/listings/${id}`),
-  getMyListings: (pageNumber = 1, pageSize = 10) =>
+  cancelListing: (id: string) => client.post(`/api/v1/listings/${id}/cancel`),
+
+  getMyListings: (pageNumber = 1, pageSize = 10, statuses?: string[]) =>
     client.get<PagedResult<ListingDto>>("/api/v1/listings/mine", {
-      params: { pageNumber, pageSize },
+      params: { pageNumber, pageSize, statuses },
     }),
 };

@@ -26,6 +26,7 @@ export default function AuctionDetailPage() {
     queryFn: () => auctionsApi.getAuction(id!).then((r) => r.data),
     enabled: !!id,
   });
+
   const handleBidPlaced = useCallback(
     (event: BidPlacedEvent) => {
       queryClient.setQueryData<AuctionDto>(["auction", id], (old) => {
@@ -33,6 +34,7 @@ export default function AuctionDetailPage() {
         const newBid: BidDto = {
           id: crypto.randomUUID(),
           bidderId: event.bidderId,
+          bidderName: event.bidderName,
           amount: event.amount,
           createdAt: new Date().toISOString(),
         };
@@ -91,7 +93,6 @@ export default function AuctionDetailPage() {
   const isSeller = user?.id === auction.sellerId;
   const canBid = auction.status === "Active" && !isSeller && !!user;
   const canClose = auction.status === "Active" && isSeller;
-
   const isWinner =
     auction.status === "Closed" && user?.id === auction.currentHighestBidderId;
 
@@ -103,8 +104,8 @@ export default function AuctionDetailPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm text-gray-500">
-                Listing ID: {auction.listingId}
+              <p className="font-semibold text-gray-800">
+                {auction.listingTitle}
               </p>
               <p className="mt-2 text-2xl font-bold">
                 {auction.currentHighestBid != null
@@ -180,6 +181,7 @@ export default function AuctionDetailPage() {
           </div>
         )}
 
+        {/* Winner — Pay Now */}
         {isWinner && (
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-3">
@@ -206,7 +208,7 @@ export default function AuctionDetailPage() {
           </div>
         )}
 
-        {/* Bid Feed */}
+        {/* Bid History */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-3">Bid History</h2>
           {auction.bids.length === 0 ? (
@@ -218,7 +220,9 @@ export default function AuctionDetailPage() {
                   key={bid.id}
                   className="flex justify-between text-sm border-b pb-2 last:border-0"
                 >
-                  <span className="text-gray-600 truncate">{bid.bidderId}</span>
+                  <span className="text-gray-600 truncate">
+                    {bid.bidderName}
+                  </span>
                   <span className="font-semibold">
                     ${bid.amount.toFixed(2)}
                   </span>
@@ -231,6 +235,7 @@ export default function AuctionDetailPage() {
           )}
         </div>
 
+        {/* Guest prompt */}
         {auction.status === "Active" && !user && (
           <div className="bg-white rounded-lg shadow p-6">
             <p className="text-gray-600 text-sm">

@@ -48,6 +48,12 @@ namespace kiwiDeal.Auctions.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("listing_id");
 
+                    b.Property<string>("ListingTitle")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("listing_title");
+
                     b.Property<Guid>("SellerId")
                         .HasColumnType("uuid")
                         .HasColumnName("seller_id");
@@ -135,6 +141,12 @@ namespace kiwiDeal.Auctions.Infrastructure.Persistence.Migrations
                             b1.Property<Guid>("BidderId")
                                 .HasColumnType("uuid")
                                 .HasColumnName("bidder_id");
+
+                            b1.Property<string>("BidderName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("bidder_name");
 
                             b1.Property<DateTimeOffset>("CreatedAt")
                                 .HasColumnType("timestamptz")

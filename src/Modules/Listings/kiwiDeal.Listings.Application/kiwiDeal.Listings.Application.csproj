@@ -12,5 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\SharedKernel\kiwiDeal.SharedKernel\kiwiDeal.SharedKernel.csproj" />
     <ProjectReference Include="..\kiwiDeal.Listings.Domain\kiwiDeal.Listings.Domain.csproj" />
+    <ProjectReference Include="..\..\Auctions\kiwiDeal.Auctions.Domain\kiwiDeal.Auctions.Domain.csproj" />
   </ItemGroup>
 </Project>

@@ -26,6 +26,7 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
     {
         var command = new CreateAuctionCommand(
             request.ListingId,
+            request.ListingTitle,
             currentUser.Id!.Value,
             request.StartingPrice,
             request.StartTime,
@@ -49,7 +50,7 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
         [FromBody] PlaceBidRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new PlaceBidCommand(id, currentUser.Id!.Value, request.Amount);
+        var command = new PlaceBidCommand(id, currentUser.Id!.Value, currentUser.Name ?? "Unknown", request.Amount);
         var result = await sender.Send(command, cancellationToken);
 
         if (result.IsFailure)

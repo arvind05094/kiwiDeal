@@ -22,5 +22,19 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
     public string? Email => _httpContext?.User?.FindFirst(JwtRegisteredClaimNames.Email)?.Value
         ?? _httpContext?.User?.FindFirst(ClaimTypes.Email)?.Value;
 
+    public string? Name
+    {
+        get
+        {
+            var given = _httpContext?.User?.FindFirst(JwtRegisteredClaimNames.GivenName)?.Value;
+            var family = _httpContext?.User?.FindFirst(JwtRegisteredClaimNames.FamilyName)?.Value;
+            return (given, family) switch
+            {
+                (null, null) => null,
+                _ => $"{given} {family}".Trim()
+            };
+        }
+    }
+
     public bool IsAuthenticated => _httpContext?.User?.Identity?.IsAuthenticated ?? false;
 }

@@ -18,6 +18,7 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
     {
         var query = context.Listings
             .Include(l => l.Images)
+            .Where(l => l.Status == ListingStatus.Active)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -38,11 +39,15 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
         return PagedResult<Listing>.Create(items, totalCount, pagination);
     }
 
-    public async Task<PagedResult<Listing>> GetBySellerIdAsync(Guid sellerId, PaginationParams pagination, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Listing>> GetBySellerIdAsync(Guid sellerId, PaginationParams pagination, ListingStatus[]? statuses, CancellationToken cancellationToken = default)
     {
         var query = context.Listings
             .Include(l => l.Images)
-             .Where(l => l.SellerId == SellerId.From(sellerId));
+            .Where(l => l.SellerId == SellerId.From(sellerId));
+
+        if (statuses is { Length: > 0 })
+            query = query.Where(l => statuses.Contains(l.Status));
+
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
             .OrderByDescending(l => l.CreatedAt)
@@ -61,10 +66,5 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
     public void Update(Listing listing)
     {
         context.Listings.Update(listing);
-    }
-
-    public void Delete(Listing listing)
-    {
-        context.Listings.Remove(listing);
     }
 }

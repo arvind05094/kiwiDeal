@@ -23,6 +23,11 @@ public sealed class AuctionConfiguration : IEntityTypeConfiguration<Auction>
             .HasColumnName("listing_id")
             .IsRequired();
 
+        builder.Property(a => a.ListingTitle)
+            .HasColumnName("listing_title")
+            .HasMaxLength(200)
+            .IsRequired();
+
         builder.Property(a => a.SellerId)
             .HasColumnName("seller_id")
             .IsRequired();
@@ -85,6 +90,11 @@ public sealed class AuctionConfiguration : IEntityTypeConfiguration<Auction>
 
             bidBuilder.Property(b => b.BidderId)
                 .HasColumnName("bidder_id")
+                .IsRequired();
+
+            bidBuilder.Property(b => b.BidderName)
+                .HasColumnName("bidder_name")
+                .HasMaxLength(200)
                 .IsRequired();
 
             bidBuilder.Property(b => b.Amount)

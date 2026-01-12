@@ -1,13 +1,15 @@
 using kiwiDeal.Payments.Application.DTOs;
 using kiwiDeal.Payments.Domain.Errors;
 using kiwiDeal.Payments.Domain.Repositories;
+using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
 
 namespace kiwiDeal.Payments.Application.Queries.GetPayment;
 
 public sealed class GetPaymentQueryHandler(
-    IPaymentRepository paymentRepository) : IRequestHandler<GetPaymentQuery, Result<PaymentDto>>
+    IPaymentRepository paymentRepository,
+    ICurrentUser currentUser) : IRequestHandler<GetPaymentQuery, Result<PaymentDto>>
 {
     public async Task<Result<PaymentDto>> Handle(
         GetPaymentQuery request,
@@ -18,6 +20,10 @@ public sealed class GetPaymentQueryHandler(
 
         if (payment is null)
             return Result.Failure<PaymentDto>(PaymentErrors.NotFound);
+
+        var callerId = currentUser.Id;
+        if (callerId != payment.WinnerId && callerId != payment.SellerId)
+            return Result.Failure<PaymentDto>(Error.Forbidden("You do not have permission to view this payment."));
 
         var dto = new PaymentDto(
             payment.Id.Value,

@@ -2,6 +2,7 @@ using Asp.Versioning;
 using kiwiDeal.Listings.Api.Requests;
 using kiwiDeal.Listings.Application.Commands;
 using kiwiDeal.Listings.Application.Queries;
+using kiwiDeal.Listings.Domain.Entities;
 using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
@@ -65,16 +66,16 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
         return NoContent();
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpPost("{id:guid}/cancel")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteListing(
+    public async Task<IActionResult> CancelListing(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var command = new DeleteListingCommand(id, currentUser.Id!.Value);
+        var command = new CancelListingCommand(id, currentUser.Id!.Value);
         var result = await sender.Send(command, cancellationToken);
 
         if (result.IsFailure)
@@ -89,9 +90,10 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
     public async Task<IActionResult> GetMyListings(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
+        [FromQuery] ListingStatus[]? statuses = null,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetMyListingsQuery(currentUser.Id!.Value, pageNumber, pageSize);
+        var query = new GetMyListingsQuery(currentUser.Id!.Value, pageNumber, pageSize, statuses);
         var result = await sender.Send(query, cancellationToken);
 
         if (result.IsFailure)

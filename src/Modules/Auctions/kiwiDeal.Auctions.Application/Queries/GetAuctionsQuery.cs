@@ -26,6 +26,7 @@ public sealed class GetAuctionsQueryHandler : IRequestHandler<GetAuctionsQuery, 
         var dtos = pagedAuctions.Items.Select(a => new AuctionDto(
             a.Id.Value,
             a.ListingId,
+            a.ListingTitle,
             a.SellerId,
             a.StartingPrice,
             a.CurrentHighestBid,
@@ -36,6 +37,7 @@ public sealed class GetAuctionsQueryHandler : IRequestHandler<GetAuctionsQuery, 
             a.Bids.Select(b => new AuctionBidDto(
                 b.Id.Value,
                 b.BidderId,
+                b.BidderName,
                 b.Amount,
                 b.CreatedAt)).ToList())).ToList();
 

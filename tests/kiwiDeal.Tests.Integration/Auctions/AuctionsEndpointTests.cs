@@ -61,6 +61,7 @@ public class AuctionsEndpointTests : IAsyncLifetime
         var request = new
         {
             ListingId = listingId,
+            ListingTitle = "Auction Test Listing",
             StartingPrice = 100.00m,
             StartTime = DateTimeOffset.UtcNow.AddSeconds(-1),
             EndTime = DateTimeOffset.UtcNow.AddDays(1)
@@ -81,6 +82,7 @@ public class AuctionsEndpointTests : IAsyncLifetime
         var request = new
         {
             ListingId = listingId,
+            ListingTitle = "Auction Test Listing",
             StartingPrice = 100.00m,
             StartTime = DateTimeOffset.UtcNow.AddSeconds(-1),
             EndTime = DateTimeOffset.UtcNow.AddDays(1)

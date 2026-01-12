@@ -1,6 +1,7 @@
 using FluentAssertions;
 using kiwiDeal.Payments.Domain.Entities;
 using kiwiDeal.Payments.Infrastructure.Persistence;
+using kiwiDeal.Tests.Integration.Listings;
 using kiwiDeal.Tests.Integration.Users;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -197,7 +198,7 @@ public class PaymentsEndpointTests : IAsyncLifetime
     [Fact]
     public async Task GetPayment_ExistingPayment_Returns200()
     {
-        var auctionId = await SeedPaymentAsync();
+        var auctionId = await SeedPaymentAsync(sellerId: TestAuthHandler.SellerId);
 
         var response = await _client.GetAsync($"/api/v1/payments/{auctionId}");
 

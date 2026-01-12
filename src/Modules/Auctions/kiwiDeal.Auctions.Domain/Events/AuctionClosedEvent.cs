@@ -1,7 +1,10 @@
 using kiwiDeal.SharedKernel.Events;
+
 namespace kiwiDeal.Auctions.Domain.Events;
+
 public sealed record AuctionClosedEvent(
     Guid AuctionId,
+    Guid ListingId,
     Guid SellerId,
     Guid? WinningBidderId,
     decimal? WinningAmount) : IDomainEvent

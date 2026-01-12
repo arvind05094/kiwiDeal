@@ -126,8 +126,7 @@ public class ListingsEndpointTests : IAsyncLifetime
 
         var id = await createResponse.Content.ReadAsStringAsync();
         id = id.Trim('"');
-        var response = await _client.DeleteAsync($"/api/v1/listings/{id}");
-
+        var response = await _client.PostAsync($"/api/v1/listings/{id}/cancel", null);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 }

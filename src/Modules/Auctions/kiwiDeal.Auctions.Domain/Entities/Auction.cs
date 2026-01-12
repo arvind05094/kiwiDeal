@@ -12,6 +12,7 @@ public sealed class Auction : AggregateRoot
 
     public AuctionId Id { get; private set; } = default!;
     public Guid ListingId { get; private set; }
+    public string ListingTitle { get; private set; } = default!;
     public Guid SellerId { get; private set; }
     public decimal StartingPrice { get; private set; }
     public decimal? CurrentHighestBid { get; private set; }
@@ -27,11 +28,14 @@ public sealed class Auction : AggregateRoot
 
     public static Result<Auction> Create(
         Guid listingId,
+        string listingTitle,
         Guid sellerId,
         decimal startingPrice,
         DateTimeOffset startTime,
         DateTimeOffset endTime)
     {
+        if (string.IsNullOrWhiteSpace(listingTitle))
+            return Result.Failure<Auction>(Error.ValidationFailed("Listing title is required."));
         if (startingPrice < 0)
             return Result.Failure<Auction>(Error.ValidationFailed("Starting price must be zero or greater."));
         if (endTime <= startTime)
@@ -42,6 +46,7 @@ public sealed class Auction : AggregateRoot
         {
             Id = AuctionId.New(),
             ListingId = listingId,
+            ListingTitle = listingTitle,
             SellerId = sellerId,
             StartingPrice = startingPrice,
             StartTime = startTime,
@@ -54,7 +59,7 @@ public sealed class Auction : AggregateRoot
         return Result.Success(auction);
     }
 
-    public Result PlaceBid(Guid bidderId, decimal amount)
+    public Result PlaceBid(Guid bidderId, string bidderName, decimal amount)
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -74,13 +79,12 @@ public sealed class Auction : AggregateRoot
         if (amount <= minimumBid)
             return Result.Failure(AuctionErrors.BidTooLow(minimumBid));
 
-        var bid = AuctionBid.Create(Id, bidderId, amount);
+        var bid = AuctionBid.Create(Id, bidderId, bidderName, amount);
         _bids.Add(bid);
 
         CurrentHighestBid = amount;
         CurrentHighestBidderId = bidderId;
 
-        // Extend end time if bid placed in final 5 minutes — mirrors Trade Me exactly
         var timeRemaining = EndTime - now;
         if (timeRemaining.TotalMinutes < BidExtensionThresholdMinutes)
             EndTime = EndTime.AddMinutes(BidExtensionMinutes);
@@ -107,6 +111,7 @@ public sealed class Auction : AggregateRoot
 
         RaiseDomainEvent(new AuctionClosedEvent(
             Id.Value,
+            ListingId,
             SellerId,
             CurrentHighestBidderId,
             CurrentHighestBid));
@@ -125,3 +130,4 @@ public sealed class Auction : AggregateRoot
         return Result.Success();
     }
 }
+

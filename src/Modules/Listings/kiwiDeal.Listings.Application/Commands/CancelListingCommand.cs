@@ -6,21 +6,22 @@ using MediatR;
 
 namespace kiwiDeal.Listings.Application.Commands;
 
-public sealed record DeleteListingCommand(
+public sealed record CancelListingCommand(
     Guid ListingId,
     Guid SellerId) : IRequest<Result>;
 
-public sealed class DeleteListingCommandHandler : IRequestHandler<DeleteListingCommand, Result>
+public sealed class CancelListingCommandHandler : IRequestHandler<CancelListingCommand, Result>
 {
     private readonly IListingRepository _listingRepository;
     private readonly IListingsUnitOfWork _unitOfWork;
-    public DeleteListingCommandHandler(IListingRepository listingRepository, IListingsUnitOfWork unitOfWork)
+
+    public CancelListingCommandHandler(IListingRepository listingRepository, IListingsUnitOfWork unitOfWork)
     {
         _listingRepository = listingRepository;
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> Handle(DeleteListingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CancelListingCommand command, CancellationToken cancellationToken)
     {
         var listingId = kiwiDeal.Listings.Domain.Entities.ListingId.From(command.ListingId);
         var listing = await _listingRepository.GetByIdAsync(listingId, cancellationToken);
@@ -32,7 +33,6 @@ public sealed class DeleteListingCommandHandler : IRequestHandler<DeleteListingC
             return Result.Failure(ListingErrors.Forbidden());
 
         var result = listing.Close();
-
         if (result.IsFailure)
             return result;
 
@@ -43,14 +43,11 @@ public sealed class DeleteListingCommandHandler : IRequestHandler<DeleteListingC
     }
 }
 
-public sealed class DeleteListingCommandValidator : AbstractValidator<DeleteListingCommand>
+public sealed class CancelListingCommandValidator : AbstractValidator<CancelListingCommand>
 {
-    public DeleteListingCommandValidator()
+    public CancelListingCommandValidator()
     {
-        RuleFor(x => x.ListingId)
-            .NotEmpty();
-
-        RuleFor(x => x.SellerId)
-            .NotEmpty();
+        RuleFor(x => x.ListingId).NotEmpty();
+        RuleFor(x => x.SellerId).NotEmpty();
     }
 }

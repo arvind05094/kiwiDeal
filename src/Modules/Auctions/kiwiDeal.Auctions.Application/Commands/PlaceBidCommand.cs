@@ -10,6 +10,7 @@ namespace kiwiDeal.Auctions.Application.Commands;
 public sealed record PlaceBidCommand(
     Guid AuctionId,
     Guid BidderId,
+    string BidderName,
     decimal Amount) : IRequest<Result>;
 
 public interface IAuctionHubContext
@@ -41,14 +42,12 @@ public sealed class PlaceBidCommandHandler : IRequestHandler<PlaceBidCommand, Re
         if (auction is null)
             return Result.Failure(AuctionErrors.NotFound(command.AuctionId));
 
-        var result = auction.PlaceBid(command.BidderId, command.Amount);
-
+        var result = auction.PlaceBid(command.BidderId, command.BidderName, command.Amount);
         if (result.IsFailure)
             return result;
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Send real-time update after transaction commits
         var latestBid = auction.Bids.Last();
         await _hubContext.SendBidPlaced(
             command.AuctionId.ToString(),
@@ -68,6 +67,7 @@ public sealed class PlaceBidCommandValidator : AbstractValidator<PlaceBidCommand
     {
         RuleFor(x => x.AuctionId).NotEmpty();
         RuleFor(x => x.BidderId).NotEmpty();
+        RuleFor(x => x.BidderName).NotEmpty();
         RuleFor(x => x.Amount).GreaterThan(0);
     }
 }

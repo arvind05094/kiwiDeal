@@ -3,6 +3,7 @@ namespace kiwiDeal.Auctions.Application.DTOs;
 public sealed record AuctionDto(
     Guid Id,
     Guid ListingId,
+    string ListingTitle,
     Guid SellerId,
     decimal StartingPrice,
     decimal? CurrentHighestBid,

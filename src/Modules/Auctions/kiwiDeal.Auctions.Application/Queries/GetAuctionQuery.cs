@@ -33,6 +33,7 @@ public sealed class GetAuctionQueryHandler : IRequestHandler<GetAuctionQuery, Re
     private static AuctionDto MapToDto(Auction auction) => new(
         auction.Id.Value,
         auction.ListingId,
+        auction.ListingTitle,
         auction.SellerId,
         auction.StartingPrice,
         auction.CurrentHighestBid,
@@ -43,6 +44,7 @@ public sealed class GetAuctionQueryHandler : IRequestHandler<GetAuctionQuery, Re
         auction.Bids.Select(b => new AuctionBidDto(
             b.Id.Value,
             b.BidderId,
+            b.BidderName,
             b.Amount,
             b.CreatedAt)).ToList());
 }

@@ -1,4 +1,5 @@
 using kiwiDeal.Listings.Application.DTOs;
+using kiwiDeal.Listings.Domain.Entities;
 using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Pagination;
 using kiwiDeal.SharedKernel.Results;
@@ -9,7 +10,8 @@ namespace kiwiDeal.Listings.Application.Queries;
 public sealed record GetMyListingsQuery(
     Guid SellerId,
     int PageNumber,
-    int PageSize) : IRequest<Result<PagedResult<ListingDto>>>;
+    int PageSize,
+    ListingStatus[]? Statuses) : IRequest<Result<PagedResult<ListingDto>>>;
 
 public sealed class GetMyListingsQueryHandler : IRequestHandler<GetMyListingsQuery, Result<PagedResult<ListingDto>>>
 {
@@ -23,7 +25,7 @@ public sealed class GetMyListingsQueryHandler : IRequestHandler<GetMyListingsQue
     public async Task<Result<PagedResult<ListingDto>>> Handle(GetMyListingsQuery query, CancellationToken cancellationToken)
     {
         var pagination = new PaginationParams(query.PageNumber, query.PageSize);
-        var pagedListings = await _listingRepository.GetBySellerIdAsync(query.SellerId, pagination, cancellationToken);
+        var pagedListings = await _listingRepository.GetBySellerIdAsync(query.SellerId, pagination, query.Statuses, cancellationToken);
 
         var dtos = pagedListings.Items.Select(listing => new ListingDto(
             listing.Id.Value,

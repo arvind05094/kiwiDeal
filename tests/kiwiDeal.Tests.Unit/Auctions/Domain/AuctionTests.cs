@@ -14,8 +14,7 @@ public class AuctionTests
         var seller = sellerId ?? Guid.NewGuid();
         var start = DateTimeOffset.UtcNow.AddMinutes(-10);
         var end = endTime ?? DateTimeOffset.UtcNow.AddDays(1);
-
-        var auction = Auction.Create(Guid.NewGuid(), seller, startingPrice, start, end).Value;
+        var auction = Auction.Create(Guid.NewGuid(), "Test Listing", seller, startingPrice, start, end).Value;
         auction.Activate();
         return auction;
     }
@@ -26,9 +25,7 @@ public class AuctionTests
         var sellerId = Guid.NewGuid();
         var start = DateTimeOffset.UtcNow.AddMinutes(5);
         var end = start.AddDays(1);
-
-        var result = Auction.Create(Guid.NewGuid(), sellerId, 100m, start, end);
-
+        var result = Auction.Create(Guid.NewGuid(), "Test Listing", sellerId, 100m, start, end);
         result.IsSuccess.Should().BeTrue();
         result.Value.SellerId.Should().Be(sellerId);
         result.Value.StartingPrice.Should().Be(100m);
@@ -40,9 +37,7 @@ public class AuctionTests
     {
         var start = DateTimeOffset.UtcNow.AddDays(1);
         var end = DateTimeOffset.UtcNow;
-
-        var result = Auction.Create(Guid.NewGuid(), Guid.NewGuid(), 100m, start, end);
-
+        var result = Auction.Create(Guid.NewGuid(), "Test Listing", Guid.NewGuid(), 100m, start, end);
         result.IsFailure.Should().BeTrue();
         result.Error.Message.Should().Contain("End time must be after start time");
     }
@@ -52,9 +47,7 @@ public class AuctionTests
     {
         var auction = CreateActiveAuction(startingPrice: 100m);
         var bidderId = Guid.NewGuid();
-
-        var result = auction.PlaceBid(bidderId, 150m);
-
+        var result = auction.PlaceBid(bidderId, "Jane Doe", 150m);
         result.IsSuccess.Should().BeTrue();
         auction.CurrentHighestBid.Should().Be(150m);
         auction.CurrentHighestBidderId.Should().Be(bidderId);
@@ -64,9 +57,7 @@ public class AuctionTests
     public void PlaceBid_BidTooLow_ReturnsFailure()
     {
         var auction = CreateActiveAuction(startingPrice: 100m);
-
-        var result = auction.PlaceBid(Guid.NewGuid(), 50m);
-
+        var result = auction.PlaceBid(Guid.NewGuid(), "Jane Doe", 50m);
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be(ErrorCode.BidTooLow);
     }
@@ -76,9 +67,7 @@ public class AuctionTests
     {
         var sellerId = Guid.NewGuid();
         var auction = CreateActiveAuction(sellerId: sellerId);
-
-        var result = auction.PlaceBid(sellerId, 150m);
-
+        var result = auction.PlaceBid(sellerId, "Jane Doe", 150m);
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be(ErrorCode.BidderIsSeller);
     }
@@ -88,9 +77,7 @@ public class AuctionTests
     {
         var auction = CreateActiveAuction();
         auction.Close();
-
-        var result = auction.PlaceBid(Guid.NewGuid(), 150m);
-
+        var result = auction.PlaceBid(Guid.NewGuid(), "Jane Doe", 150m);
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be(ErrorCode.AuctionClosed);
     }
@@ -101,9 +88,7 @@ public class AuctionTests
         var endTime = DateTimeOffset.UtcNow.AddMinutes(3);
         var auction = CreateActiveAuction(endTime: endTime);
         var originalEndTime = auction.EndTime;
-
-        auction.PlaceBid(Guid.NewGuid(), 150m);
-
+        auction.PlaceBid(Guid.NewGuid(), "Jane Doe", 150m);
         auction.EndTime.Should().BeAfter(originalEndTime);
         auction.EndTime.Should().BeCloseTo(originalEndTime.AddMinutes(5), TimeSpan.FromSeconds(5));
     }
@@ -112,9 +97,7 @@ public class AuctionTests
     public void PlaceBid_RaisesBidPlacedEvent()
     {
         var auction = CreateActiveAuction();
-
-        auction.PlaceBid(Guid.NewGuid(), 150m);
-
+        auction.PlaceBid(Guid.NewGuid(), "Jane Doe", 150m);
         auction.DomainEvents.Should().HaveCount(1);
         auction.DomainEvents[0].Should().BeOfType<kiwiDeal.Auctions.Domain.Events.BidPlacedEvent>();
     }

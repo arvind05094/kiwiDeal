@@ -8,6 +8,7 @@ namespace kiwiDeal.Auctions.Application.Commands;
 
 public sealed record CreateAuctionCommand(
     Guid ListingId,
+    string ListingTitle,
     Guid SellerId,
     decimal StartingPrice,
     DateTimeOffset StartTime,
@@ -28,6 +29,7 @@ public sealed class CreateAuctionCommandHandler : IRequestHandler<CreateAuctionC
     {
         var result = Auction.Create(
             command.ListingId,
+            command.ListingTitle,
             command.SellerId,
             command.StartingPrice,
             command.StartTime.ToUniversalTime(),
@@ -53,6 +55,7 @@ public sealed class CreateAuctionCommandValidator : AbstractValidator<CreateAuct
     public CreateAuctionCommandValidator()
     {
         RuleFor(x => x.ListingId).NotEmpty();
+        RuleFor(x => x.ListingTitle).NotEmpty().MaximumLength(200);
         RuleFor(x => x.SellerId).NotEmpty();
         RuleFor(x => x.StartingPrice).GreaterThanOrEqualTo(0);
         RuleFor(x => x.StartTime).NotEmpty();

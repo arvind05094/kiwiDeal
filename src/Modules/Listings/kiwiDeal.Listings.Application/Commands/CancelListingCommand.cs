@@ -32,7 +32,7 @@ public sealed class CancelListingCommandHandler : IRequestHandler<CancelListingC
         if (listing.SellerId.Value != command.SellerId)
             return Result.Failure(ListingErrors.Forbidden());
 
-        var result = listing.Close();
+        var result = listing.Cancel();
         if (result.IsFailure)
             return result;
 

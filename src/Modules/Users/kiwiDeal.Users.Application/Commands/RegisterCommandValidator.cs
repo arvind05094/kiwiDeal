@@ -23,5 +23,7 @@ public sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand
         RuleFor(x => x.LastName)
             .NotEmpty().WithMessage("Last name is required.")
             .MaximumLength(100).WithMessage("Last name must not exceed 100 characters.");
+        RuleFor(x => x.Region)
+         .IsInEnum().WithMessage("Region is invalid.");
     }
 }

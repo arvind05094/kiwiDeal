@@ -1,6 +1,7 @@
 using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
+using kiwiDeal.Users.Domain.Enums;
 using kiwiDeal.Users.Domain.Errors;
 
 namespace kiwiDeal.Users.Domain.Entities;
@@ -14,6 +15,8 @@ public sealed class User : AggregateRoot, ISoftDeletable
     public string PasswordHash { get; private set; } = string.Empty;
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
+
+    public Region Region { get; private set; }
     public bool IsDeleted { get; private set; }
     public DateTimeOffset? DeletedAt { get; private set; }
 
@@ -25,7 +28,8 @@ public sealed class User : AggregateRoot, ISoftDeletable
         string email,
         string passwordHash,
         string firstName,
-        string lastName)
+        string lastName,
+        Region region)
     {
         if (string.IsNullOrWhiteSpace(email))
             return Result.Failure<User>(Error.ValidationFailed("Email is required."));
@@ -47,7 +51,8 @@ public sealed class User : AggregateRoot, ISoftDeletable
             FirstName = firstName.Trim(),
             LastName = lastName.Trim(),
             CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
+            UpdatedAt = DateTimeOffset.UtcNow,
+            Region = region,
         };
 
         return Result.Success(user);
@@ -62,6 +67,14 @@ public sealed class User : AggregateRoot, ISoftDeletable
         UpdatedAt = DateTimeOffset.UtcNow;
 
         return refreshToken;
+    }
+
+    public void UpdateProfile(string firstName, string lastName, Region region)
+    {
+        FirstName = firstName.Trim();
+        LastName = lastName.Trim();
+        Region = region;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public Result<RefreshToken> GetActiveRefreshToken(string token)

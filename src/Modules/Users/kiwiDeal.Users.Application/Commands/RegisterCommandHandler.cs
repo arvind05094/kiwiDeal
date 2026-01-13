@@ -35,7 +35,8 @@ public sealed class RegisterCommandHandler(
             request.Email,
             passwordHash,
             request.FirstName,
-            request.LastName);
+            request.LastName,
+            request.Region);
 
         if (result.IsFailure)
             return Result.Failure<AuthResponse>(result.Error);
@@ -58,6 +59,7 @@ public sealed class RegisterCommandHandler(
                 user.Id.Value,
                 user.Email,
                 user.FirstName,
-                user.LastName)));
+                user.LastName,
+                user.Region.ToString())));
     }
 }

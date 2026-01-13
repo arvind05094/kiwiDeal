@@ -34,17 +34,31 @@ namespace kiwiDeal.Payments.Infrastructure.Persistence.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("amount");
 
-                    b.Property<Guid>("AuctionId")
+                    b.Property<Guid?>("AuctionId")
                         .HasColumnType("uuid")
                         .HasColumnName("auction_id");
+
+                    b.Property<Guid>("BuyerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("buyer_id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid>("ListingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("listing_id");
+
                     b.Property<DateTimeOffset?>("PaidAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("paid_at");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("payment_type");
 
                     b.Property<Guid>("SellerId")
                         .HasColumnType("uuid")
@@ -63,10 +77,6 @@ namespace kiwiDeal.Payments.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
-
-                    b.Property<Guid>("WinnerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("winner_id");
 
                     b.HasKey("Id")
                         .HasName("pk_payments");

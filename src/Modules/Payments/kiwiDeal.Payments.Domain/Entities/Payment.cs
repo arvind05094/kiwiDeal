@@ -8,10 +8,12 @@ namespace kiwiDeal.Payments.Domain.Entities;
 public sealed class Payment : AggregateRoot
 {
     public PaymentId Id { get; private set; } = default!;
-    public Guid AuctionId { get; private set; }
-    public Guid WinnerId { get; private set; }
+    public Guid? AuctionId { get; private set; }
+    public Guid ListingId { get; private set; }
+    public Guid BuyerId { get; private set; }
     public Guid SellerId { get; private set; }
     public decimal Amount { get; private set; }
+    public string PaymentType { get; private set; } = default!;
     public PaymentStatus Status { get; private set; }
     public string? StripeSessionId { get; private set; }
     public DateTimeOffset? PaidAt { get; private set; }
@@ -19,19 +21,23 @@ public sealed class Payment : AggregateRoot
     private Payment() { }
 
     public static Result<Payment> Create(
-        Guid auctionId,
-        Guid winnerId,
+        Guid? auctionId,
+        Guid listingId,
+        Guid buyerId,
         Guid sellerId,
-        decimal amount)
+        decimal amount,
+        string paymentType)
     {
         var now = DateTimeOffset.UtcNow;
         var payment = new Payment
         {
             Id = PaymentId.New(),
             AuctionId = auctionId,
-            WinnerId = winnerId,
+            ListingId = listingId,
+            BuyerId = buyerId,
             SellerId = sellerId,
             Amount = amount,
+            PaymentType = paymentType,
             Status = PaymentStatus.Pending,
             CreatedAt = now,
             UpdatedAt = now
@@ -59,7 +65,14 @@ public sealed class Payment : AggregateRoot
         PaidAt = DateTimeOffset.UtcNow;
         UpdatedAt = DateTimeOffset.UtcNow;
 
-        RaiseDomainEvent(new PaymentCompletedEvent(Id.Value, AuctionId, WinnerId, SellerId, Amount));
+        RaiseDomainEvent(new PaymentCompletedEvent(
+            Id.Value,
+            AuctionId,
+            ListingId,
+            BuyerId,
+            SellerId,
+            Amount,
+            PaymentType));
 
         return Result.Success();
     }
@@ -72,7 +85,7 @@ public sealed class Payment : AggregateRoot
         Status = PaymentStatus.Failed;
         UpdatedAt = DateTimeOffset.UtcNow;
 
-        RaiseDomainEvent(new PaymentFailedEvent(Id.Value, AuctionId, WinnerId));
+        RaiseDomainEvent(new PaymentFailedEvent(Id.Value, AuctionId, BuyerId));
 
         return Result.Success();
     }

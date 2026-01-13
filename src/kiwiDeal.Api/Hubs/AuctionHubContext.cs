@@ -17,10 +17,28 @@ public sealed class AuctionHubContext(IHubContext<AuctionHub> hubContext) : IAuc
             "BidPlaced",
             new
             {
+                AuctionId = auctionId,
                 BidId = bidId,
                 BidderId = bidderId,
                 Amount = amount,
                 NewEndTime = newEndTime
+            },
+            cancellationToken);
+    }
+
+    public async Task SendAuctionClosed(
+    string auctionId,
+    Guid? winnerId,
+    decimal? finalAmount,
+    CancellationToken cancellationToken = default)
+    {
+        await hubContext.Clients.Group(auctionId).SendAsync(
+            "AuctionClosed",
+            new
+            {
+                AuctionId = auctionId,
+                WinnerId = winnerId,
+                FinalAmount = finalAmount
             },
             cancellationToken);
     }

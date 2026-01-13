@@ -14,6 +14,7 @@ public sealed class StripeService(
     public async Task<Result<StripeCheckoutSession>> CreateCheckoutSessionAsync(
         Guid paymentId,
         decimal amount,
+        string productName,
         CancellationToken cancellationToken = default)
     {
         try
@@ -33,7 +34,7 @@ public sealed class StripeService(
                             UnitAmount = (long)(amount * 100),
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = "kiwiDeal Auction Payment"
+                               Name = productName
                             }
                         },
                         Quantity = 1

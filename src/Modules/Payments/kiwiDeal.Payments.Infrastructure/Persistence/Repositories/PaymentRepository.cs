@@ -23,7 +23,11 @@ public sealed class PaymentRepository(PaymentsDbContext dbContext) : IPaymentRep
         CancellationToken cancellationToken = default)
         => await dbContext.Payments
             .FirstOrDefaultAsync(p => p.StripeSessionId == stripeSessionId, cancellationToken);
-
+    public async Task<Payment?> GetByListingIdAsync(
+    Guid listingId,
+    CancellationToken cancellationToken = default)
+    => await dbContext.Payments
+        .FirstOrDefaultAsync(p => p.ListingId == listingId, cancellationToken);
     public void Add(Payment payment)
         => dbContext.Payments.Add(payment);
 }

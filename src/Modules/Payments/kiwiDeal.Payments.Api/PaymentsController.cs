@@ -1,9 +1,12 @@
 using Asp.Versioning;
 using kiwiDeal.Payments.Api.Requests;
 using kiwiDeal.Payments.Application;
+using kiwiDeal.Payments.Application.Commands.CreateBuyNowCheckoutSession;
 using kiwiDeal.Payments.Application.Commands.CreateCheckoutSession;
 using kiwiDeal.Payments.Application.Commands.HandleWebhook;
 using kiwiDeal.Payments.Application.Queries.GetPayment;
+using kiwiDeal.Payments.Application.Queries.GetPaymentByListing;
+using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +18,7 @@ namespace kiwiDeal.Payments.Api;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/payments")]
-public sealed class PaymentsController(ISender sender) : ControllerBase
+public sealed class PaymentsController(ISender sender, ICurrentUser currentUser) : ControllerBase
 {
     [HttpPost("checkout")]
     [Authorize]
@@ -70,6 +73,42 @@ public sealed class PaymentsController(ISender sender) : ControllerBase
         CancellationToken cancellationToken)
     {
         var query = new GetPaymentQuery(auctionId);
+        var result = await sender.Send(query, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+        return Ok(result.Value);
+    }
+
+    [HttpPost("buynow")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CreateBuyNowCheckoutSession(
+    [FromBody] CreateBuyNowCheckoutSessionRequest request,
+    CancellationToken cancellationToken)
+    {
+        var command = new CreateBuyNowCheckoutSessionCommand(
+            request.ListingId,
+            currentUser.Id!.Value,
+            request.SellerId,
+            request.Amount);
+        var result = await sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+        return Ok(new { checkoutUrl = result.Value });
+    }
+
+    [HttpGet("listing/{listingId:guid}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPaymentByListing(
+    Guid listingId,
+    CancellationToken cancellationToken)
+    {
+        var query = new GetPaymentByListingQuery(listingId);
         var result = await sender.Send(query, cancellationToken);
         if (result.IsFailure)
             return result.Error.ToProblemDetails();

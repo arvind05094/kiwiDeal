@@ -8,5 +8,6 @@ public interface IStripeService
     Task<Result<StripeCheckoutSession>> CreateCheckoutSessionAsync(
         Guid paymentId,
         decimal amount,
+        string productName,
         CancellationToken cancellationToken = default);
 }

@@ -10,7 +10,10 @@ namespace kiwiDeal.Listings.Application.Queries;
 public sealed record GetListingsQuery(
     int PageNumber,
     int PageSize,
-    string? SearchTerm) : IRequest<Result<PagedResult<ListingDto>>>, IPublicRequest;
+    string? SearchTerm,
+    string? Category,
+    string? Region,
+    string? SortBy) : IRequest<Result<PagedResult<ListingDto>>>, IPublicRequest;
 
 public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, Result<PagedResult<ListingDto>>>
 {
@@ -24,14 +27,17 @@ public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, 
     public async Task<Result<PagedResult<ListingDto>>> Handle(GetListingsQuery query, CancellationToken cancellationToken)
     {
         var pagination = new PaginationParams(query.PageNumber, query.PageSize);
-        var pagedListings = await _listingRepository.GetAllAsync(pagination, query.SearchTerm, cancellationToken);
+        var pagedListings = await _listingRepository.GetAllAsync(pagination, query.SearchTerm, query.Category, query.Region, query.SortBy, cancellationToken);
 
         var dtos = pagedListings.Items.Select(listing => new ListingDto(
             listing.Id.Value,
             listing.SellerId.Value,
             listing.Title,
             listing.Description,
-            listing.StartingPrice,
+            listing.ListingType.ToString(),
+            listing.BuyNowPrice,
+            listing.Category.ToString(),
+            listing.Region.ToString(),
             listing.Status.ToString(),
             listing.CreatedAt,
             listing.UpdatedAt,

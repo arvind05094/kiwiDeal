@@ -30,9 +30,11 @@ public sealed class AuctionClosedEventHandler(
         }
         var result = Payment.Create(
             notification.AuctionId,
+            notification.ListingId,
             notification.WinningBidderId.Value,
             notification.SellerId,
-            notification.WinningAmount.Value);
+            notification.WinningAmount.Value,
+            "Auction");
         if (result.IsFailure)
         {
             logger.LogWarning(

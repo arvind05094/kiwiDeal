@@ -28,6 +28,16 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<decimal?>("BuyNowPrice")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("buy_now_price");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("category");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
@@ -38,13 +48,21 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(5000)")
                         .HasColumnName("description");
 
+                    b.Property<string>("ListingType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("listing_type");
+
+                    b.Property<string>("Region")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("region");
+
                     b.Property<Guid>("SellerId")
                         .HasColumnType("uuid")
                         .HasColumnName("seller_id");
-
-                    b.Property<decimal>("StartingPrice")
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("starting_price");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -65,6 +83,12 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_listings");
 
+                    b.HasIndex("Category")
+                        .HasDatabaseName("ix_listings_category");
+
+                    b.HasIndex("Region")
+                        .HasDatabaseName("ix_listings_region");
+
                     b.HasIndex("SellerId")
                         .HasDatabaseName("ix_listings_seller_id");
 
@@ -72,6 +96,32 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_listings_status");
 
                     b.ToTable("listings", "listings");
+                });
+
+            modelBuilder.Entity("kiwiDeal.Listings.Domain.Entities.ListingWatchlist", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("ListingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("listing_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("UserId", "ListingId")
+                        .HasName("pk_listing_watchlist");
+
+                    b.HasIndex("ListingId")
+                        .HasDatabaseName("ix_listing_watchlist_listing_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_listing_watchlist_user_id");
+
+                    b.ToTable("listing_watchlist", "listings");
                 });
 
             modelBuilder.Entity("kiwiDeal.SharedKernel.Outbox.OutboxMessage", b =>
@@ -148,6 +198,18 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("kiwiDeal.Listings.Domain.Entities.ListingWatchlist", b =>
+                {
+                    b.HasOne("kiwiDeal.Listings.Domain.Entities.Listing", "Listing")
+                        .WithMany()
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_listing_watchlist_listings");
+
+                    b.Navigation("Listing");
                 });
 #pragma warning restore 612, 618
         }

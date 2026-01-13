@@ -1,3 +1,4 @@
+using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Auctions.Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +36,7 @@ public sealed class AuctionClosingWorker(
         using var scope = scopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IAuctionRepository>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IAuctionsUnitOfWork>();
+        var hubContext = scope.ServiceProvider.GetRequiredService<IAuctionHubContext>();
 
         var expiredAuctions = await repository.GetExpiredActiveAuctionsAsync(cancellationToken);
 
@@ -42,6 +44,8 @@ public sealed class AuctionClosingWorker(
             return;
 
         logger.LogInformation("Closing {Count} expired auctions", expiredAuctions.Count);
+
+        var closedAuctions = new List<(string AuctionId, Guid? WinnerId, decimal? FinalAmount)>();
 
         foreach (var auction in expiredAuctions)
         {
@@ -52,9 +56,15 @@ public sealed class AuctionClosingWorker(
                 continue;
             }
 
+            closedAuctions.Add((auction.Id.Value.ToString(), auction.CurrentHighestBidderId, auction.CurrentHighestBid));
             logger.LogInformation("Auction {AuctionId} closed. Winner: {WinnerId}", auction.Id, auction.CurrentHighestBidderId);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        foreach (var (auctionId, winnerId, finalAmount) in closedAuctions)
+        {
+            await hubContext.SendAuctionClosed(auctionId, winnerId, finalAmount, cancellationToken);
+        }
     }
 }

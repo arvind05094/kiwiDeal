@@ -37,9 +37,26 @@ public sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
             .HasMaxLength(5000)
             .IsRequired();
 
-        builder.Property(l => l.StartingPrice)
-            .HasColumnName("starting_price")
-            .HasColumnType("numeric(18,2)")
+        builder.Property(l => l.ListingType)
+            .HasColumnName("listing_type")
+            .HasMaxLength(50)
+            .HasConversion<string>()
+            .IsRequired();
+
+        builder.Property(l => l.BuyNowPrice)
+            .HasColumnName("buy_now_price")
+            .HasColumnType("numeric(18,2)");
+
+        builder.Property(l => l.Category)
+            .HasColumnName("category")
+            .HasMaxLength(50)
+            .HasConversion<string>()
+            .IsRequired();
+
+        builder.Property(l => l.Region)
+            .HasColumnName("region")
+            .HasMaxLength(50)
+            .HasConversion<string>()
             .IsRequired();
 
         builder.Property(l => l.Status)
@@ -86,7 +103,11 @@ public sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
 
         builder.HasIndex(l => l.Status)
             .HasDatabaseName("ix_listings_status");
+        builder.HasIndex(l => l.Category)
+            .HasDatabaseName("ix_listings_category");
 
+        builder.HasIndex(l => l.Region)
+            .HasDatabaseName("ix_listings_region");
         builder.Ignore(l => l.DomainEvents);
     }
 }

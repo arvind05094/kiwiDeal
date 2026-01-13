@@ -8,7 +8,7 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
 {
     public void Configure(EntityTypeBuilder<Payment> builder)
     {
-        builder.ToTable("payments");
+        builder.ToTable("payments", "payments");
 
         builder.HasKey(p => p.Id);
 
@@ -19,11 +19,19 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
                 value => PaymentId.From(value));
 
         builder.Property(p => p.AuctionId)
-            .HasColumnName("auction_id")
+            .HasColumnName("auction_id");
+
+        builder.Property(p => p.ListingId)
+            .HasColumnName("listing_id")
             .IsRequired();
 
-        builder.Property(p => p.WinnerId)
-            .HasColumnName("winner_id")
+        builder.Property(p => p.BuyerId)
+            .HasColumnName("buyer_id")
+            .IsRequired();
+
+        builder.Property(p => p.PaymentType)
+            .HasColumnName("payment_type")
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(p => p.SellerId)

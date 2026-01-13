@@ -27,7 +27,8 @@ public sealed class AuthController(ISender sender) : ControllerBase
             request.Email,
             request.Password,
             request.FirstName,
-            request.LastName);
+            request.LastName,
+            request.Region);
 
         var result = await sender.Send(command, cancellationToken);
 

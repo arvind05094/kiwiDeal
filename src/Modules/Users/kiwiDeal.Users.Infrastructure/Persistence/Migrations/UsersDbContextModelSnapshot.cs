@@ -109,6 +109,10 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(512)")
                         .HasColumnName("password_hash");
 
+                    b.Property<int>("Region")
+                        .HasColumnType("integer")
+                        .HasColumnName("region");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("updated_at");
@@ -121,6 +125,50 @@ namespace kiwiDeal.Users.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("uq_users_email");
 
                     b.ToTable("users", "users");
+                });
+
+            modelBuilder.Entity("kiwiDeal.Users.Domain.Entities.UserRating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("RateeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ratee_id");
+
+                    b.Property<Guid>("RaterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rater_id");
+
+                    b.Property<int>("Stars")
+                        .HasColumnType("integer")
+                        .HasColumnName("stars");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_ratings");
+
+                    b.HasIndex("RateeId")
+                        .HasDatabaseName("ix_user_ratings_ratee_id");
+
+                    b.HasIndex("RaterId", "RateeId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_user_ratings_rater_ratee");
+
+                    b.ToTable("user_ratings", "users");
                 });
 
             modelBuilder.Entity("kiwiDeal.Users.Domain.Entities.RefreshToken", b =>

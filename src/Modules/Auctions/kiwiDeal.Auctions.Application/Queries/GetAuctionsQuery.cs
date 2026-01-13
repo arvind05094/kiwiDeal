@@ -21,9 +21,9 @@ public sealed class GetAuctionsQueryHandler : IRequestHandler<GetAuctionsQuery, 
     public async Task<Result<PagedResult<AuctionDto>>> Handle(GetAuctionsQuery query, CancellationToken cancellationToken)
     {
         var pagination = new PaginationParams(query.PageNumber, query.PageSize);
-        var pagedAuctions = await _auctionRepository.GetPagedAsync(query.PageNumber, query.PageSize, cancellationToken);
+        var paged = await _auctionRepository.GetPagedAsync(query.PageNumber, query.PageSize, cancellationToken);
 
-        var dtos = pagedAuctions.Items.Select(a => new AuctionDto(
+        var dtos = paged.Items.Select(a => new AuctionDto(
             a.Id.Value,
             a.ListingId,
             a.ListingTitle,
@@ -34,13 +34,8 @@ public sealed class GetAuctionsQueryHandler : IRequestHandler<GetAuctionsQuery, 
             a.StartTime,
             a.EndTime,
             a.Status.ToString(),
-            a.Bids.Select(b => new AuctionBidDto(
-                b.Id.Value,
-                b.BidderId,
-                b.BidderName,
-                b.Amount,
-                b.CreatedAt)).ToList())).ToList();
+            [])).ToList();
 
-        return Result.Success(PagedResult<AuctionDto>.Create(dtos, pagedAuctions.TotalCount, pagination));
+        return Result.Success(PagedResult<AuctionDto>.Create(dtos, paged.TotalCount, pagination));
     }
 }

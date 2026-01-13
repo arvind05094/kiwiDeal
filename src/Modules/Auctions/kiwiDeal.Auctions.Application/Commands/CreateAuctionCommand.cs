@@ -40,8 +40,12 @@ public sealed class CreateAuctionCommandHandler : IRequestHandler<CreateAuctionC
 
         var auction = result.Value;
 
-        if (command.StartTime <= DateTimeOffset.UtcNow)
-            auction.Activate();
+        if (command.StartTime.ToUniversalTime() <= DateTimeOffset.UtcNow)
+        {
+            var activateResult = auction.Activate();
+            if (activateResult.IsFailure)
+                return Result.Failure<Guid>(activateResult.Error);
+        }
 
         _auctionRepository.Add(auction);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

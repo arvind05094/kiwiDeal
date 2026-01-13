@@ -9,4 +9,7 @@ public interface IUserRepository
     Task<User?> GetByRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
     Task AddAsync(User user, CancellationToken cancellationToken = default);
     void Update(User user);
+    Task<UserRating?> GetRatingAsync(UserId raterId, UserId rateeId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<UserRating>> GetRatingsByRateeAsync(UserId rateeId, CancellationToken cancellationToken = default);
+    Task AddRatingAsync(UserRating rating, CancellationToken cancellationToken = default);
 }

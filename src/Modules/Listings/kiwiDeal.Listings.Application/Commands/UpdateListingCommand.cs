@@ -10,9 +10,7 @@ public sealed record UpdateListingCommand(
     Guid ListingId,
     Guid SellerId,
     string Title,
-    string Description,
-    decimal StartingPrice) : IRequest<Result>;
-
+    string Description) : IRequest<Result>;
 public sealed class UpdateListingCommandHandler : IRequestHandler<UpdateListingCommand, Result>
 {
     private readonly IListingRepository _listingRepository;
@@ -34,8 +32,7 @@ public sealed class UpdateListingCommandHandler : IRequestHandler<UpdateListingC
         if (listing.SellerId.Value != command.SellerId)
             return Result.Failure(ListingErrors.Forbidden());
 
-        var result = listing.Update(command.Title, command.Description, command.StartingPrice);
-
+        var result = listing.Update(command.Title, command.Description);
         if (result.IsFailure)
             return result;
 
@@ -64,7 +61,5 @@ public sealed class UpdateListingCommandValidator : AbstractValidator<UpdateList
             .NotEmpty()
             .MaximumLength(5000);
 
-        RuleFor(x => x.StartingPrice)
-            .GreaterThanOrEqualTo(0);
     }
 }

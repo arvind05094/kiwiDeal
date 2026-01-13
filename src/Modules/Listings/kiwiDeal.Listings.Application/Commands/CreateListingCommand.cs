@@ -1,5 +1,6 @@
 using FluentValidation;
 using kiwiDeal.Listings.Domain.Entities;
+using kiwiDeal.Listings.Domain.Enums;
 using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
@@ -10,8 +11,10 @@ public sealed record CreateListingCommand(
     Guid SellerId,
     string Title,
     string Description,
-    decimal StartingPrice) : IRequest<Result<Guid>>;
-
+    ListingType ListingType,
+    decimal? BuyNowPrice,
+    ListingCategory Category,
+    ListingRegion Region) : IRequest<Result<Guid>>;
 public sealed class CreateListingCommandHandler : IRequestHandler<CreateListingCommand, Result<Guid>>
 {
     private readonly IListingRepository _listingRepository;
@@ -30,7 +33,10 @@ public sealed class CreateListingCommandHandler : IRequestHandler<CreateListingC
             sellerId,
             command.Title,
             command.Description,
-            command.StartingPrice);
+            command.ListingType,
+            command.BuyNowPrice,
+            command.Category,
+            command.Region);
 
         if (result.IsFailure)
             return Result.Failure<Guid>(result.Error);
@@ -57,7 +63,8 @@ public sealed class CreateListingCommandValidator : AbstractValidator<CreateList
             .NotEmpty()
             .MaximumLength(5000);
 
-        RuleFor(x => x.StartingPrice)
-            .GreaterThanOrEqualTo(0);
+        RuleFor(x => x.BuyNowPrice)
+            .GreaterThan(0)
+            .When(x => x.ListingType == ListingType.FixedPrice);
     }
 }

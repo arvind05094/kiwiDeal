@@ -1,7 +1,10 @@
+using kiwiDeal.Users.Domain.Enums;
+
 namespace kiwiDeal.Users.Api.Requests;
 
 public sealed record RegisterRequest(
     string Email,
     string Password,
     string FirstName,
-    string LastName);
+    string LastName,
+    Region Region);

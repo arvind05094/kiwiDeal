@@ -13,4 +13,6 @@ public sealed record Error(ErrorCode Code, string Message)
     public static Error BidTooLow(string message) => new(ErrorCode.BidTooLow, message);
     public static Error BidderIsSeller(string message) => new(ErrorCode.BidderIsSeller, message);
     public static Error PaymentAlreadyProcessed(string message) => new(ErrorCode.PaymentAlreadyProcessed, message);
+    public static Error ListingAlreadyClosed(string message) => new(ErrorCode.ListingAlreadyClosed, message);
+    public static Error InvalidRefreshToken(string message) => new(ErrorCode.InvalidRefreshToken, message);
 }

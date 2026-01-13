@@ -12,7 +12,7 @@ public sealed class ListingsDbContext(DbContextOptions<ListingsDbContext> option
 {
     public DbSet<Listing> Listings => Set<Listing>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
-
+    public DbSet<ListingWatchlist> ListingWatchlists => Set<ListingWatchlist>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ListingsDbContext).Assembly);

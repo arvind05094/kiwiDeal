@@ -1,4 +1,5 @@
 using kiwiDeal.Listings.Domain.Entities;
+using kiwiDeal.Listings.Domain.Enums;
 using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
             .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
-    public async Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, string? searchTerm, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, string? searchTerm, string? category, string? region, string? sortBy, CancellationToken cancellationToken = default)
     {
         var query = context.Listings
             .Include(l => l.Images)
@@ -29,14 +30,59 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
                     .Matches(EF.Functions.ToTsQuery("english", term)));
         }
 
+        if (!string.IsNullOrWhiteSpace(category) && Enum.TryParse<ListingCategory>(category, true, out var cat))
+            query = query.Where(l => l.Category == cat);
+
+        if (!string.IsNullOrWhiteSpace(region) && Enum.TryParse<ListingRegion>(region, true, out var reg))
+            query = query.Where(l => l.Region == reg);
+
+        query = sortBy?.ToLower() switch
+        {
+            "price_asc" => query.OrderBy(l => l.BuyNowPrice),
+            "price_desc" => query.OrderByDescending(l => l.BuyNowPrice),
+            _ => query.OrderByDescending(l => l.CreatedAt)
+        };
+
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
-            .OrderByDescending(l => l.CreatedAt)
             .Skip((pagination.PageNumber - 1) * pagination.PageSize)
             .Take(pagination.PageSize)
             .ToListAsync(cancellationToken);
 
         return PagedResult<Listing>.Create(items, totalCount, pagination);
+    }
+
+    public async Task<ListingWatchlist?> GetWatchlistEntryAsync(Guid userId, ListingId listingId, CancellationToken cancellationToken = default)
+    {
+        return await context.ListingWatchlists
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.ListingId == listingId, cancellationToken);
+    }
+
+    public async Task<PagedResult<ListingWatchlist>> GetWatchlistByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
+    {
+        var query = context.ListingWatchlists
+            .Include(w => w.Listing)
+            .ThenInclude(l => l.Images)
+            .Where(w => w.UserId == userId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(w => w.CreatedAt)
+            .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+            .Take(pagination.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return PagedResult<ListingWatchlist>.Create(items, totalCount, pagination);
+    }
+
+    public async Task AddWatchlistEntryAsync(ListingWatchlist entry, CancellationToken cancellationToken = default)
+    {
+        await context.ListingWatchlists.AddAsync(entry, cancellationToken);
+    }
+
+    public void RemoveWatchlistEntry(ListingWatchlist entry)
+    {
+        context.ListingWatchlists.Remove(entry);
     }
 
     public async Task<PagedResult<Listing>> GetBySellerIdAsync(Guid sellerId, PaginationParams pagination, ListingStatus[]? statuses, CancellationToken cancellationToken = default)
@@ -67,4 +113,6 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
     {
         context.Listings.Update(listing);
     }
+
+
 }

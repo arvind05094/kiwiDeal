@@ -27,24 +27,25 @@ public sealed class GetAuctionQueryHandler : IRequestHandler<GetAuctionQuery, Re
         if (auction is null)
             return Result.Failure<AuctionDto>(AuctionErrors.NotFound(query.AuctionId));
 
-        return Result.Success(MapToDto(auction));
+        return Result.Success(new AuctionDto(
+            auction.Id.Value,
+            auction.ListingId,
+            auction.ListingTitle,
+            auction.SellerId,
+            auction.StartingPrice,
+            auction.CurrentHighestBid,
+            auction.CurrentHighestBidderId,
+            auction.StartTime,
+            auction.EndTime,
+            auction.Status.ToString(),
+            auction.Bids
+                .OrderBy(b => b.CreatedAt)
+                .Select(b => new AuctionBidDto(
+                    b.Id.Value,
+                    b.BidderId,
+                    b.BidderName,
+                    b.Amount,
+                    b.CreatedAt))
+                .ToList()));
     }
-
-    private static AuctionDto MapToDto(Auction auction) => new(
-        auction.Id.Value,
-        auction.ListingId,
-        auction.ListingTitle,
-        auction.SellerId,
-        auction.StartingPrice,
-        auction.CurrentHighestBid,
-        auction.CurrentHighestBidderId,
-        auction.StartTime,
-        auction.EndTime,
-        auction.Status.ToString(),
-        auction.Bids.Select(b => new AuctionBidDto(
-            b.Id.Value,
-            b.BidderId,
-            b.BidderName,
-            b.Amount,
-            b.CreatedAt)).ToList());
 }

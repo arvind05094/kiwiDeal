@@ -25,7 +25,6 @@ public sealed class AuctionRepository(AuctionsDbContext context) : IAuctionRepos
     {
         var pagination = new PaginationParams(pageNumber, pageSize);
         var query = context.Auctions
-            .Include(a => a.Bids)
             .Where(a => a.Status == AuctionStatus.Active || a.Status == AuctionStatus.Scheduled)
             .AsQueryable();
 
@@ -39,11 +38,18 @@ public sealed class AuctionRepository(AuctionsDbContext context) : IAuctionRepos
         return PagedResult<Auction>.Create(items, totalCount, pagination);
     }
 
+    public async Task<List<Auction>> GetScheduledReadyToActivateAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+        return await context.Auctions
+            .Where(a => a.Status == AuctionStatus.Scheduled && a.StartTime <= now)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Auction>> GetExpiredActiveAuctionsAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTimeOffset.UtcNow;
         return await context.Auctions
-            .Include(a => a.Bids)
             .Where(a => a.Status == AuctionStatus.Active && a.EndTime <= now)
             .ToListAsync(cancellationToken);
     }

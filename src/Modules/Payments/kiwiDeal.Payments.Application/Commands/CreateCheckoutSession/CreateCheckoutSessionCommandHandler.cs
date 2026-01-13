@@ -29,6 +29,7 @@ public sealed class CreateCheckoutSessionCommandHandler(
         var sessionResult = await stripeService.CreateCheckoutSessionAsync(
             payment.Id.Value,
             payment.Amount,
+            "kiwiDeal Auction Payment",
             cancellationToken);
 
         if (sessionResult.IsFailure)

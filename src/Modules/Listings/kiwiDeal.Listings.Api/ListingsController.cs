@@ -3,7 +3,6 @@ using kiwiDeal.Listings.Api.Requests;
 using kiwiDeal.Listings.Application.Commands;
 using kiwiDeal.Listings.Application.Queries;
 using kiwiDeal.Listings.Domain.Entities;
-using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
@@ -16,7 +15,7 @@ namespace kiwiDeal.Listings.Api;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/listings")]
-public sealed class ListingsController(ISender sender, IImageService imageService, ICurrentUser currentUser) : ControllerBase
+public sealed class ListingsController(ISender sender, ICurrentUser currentUser) : ControllerBase
 {
     [HttpPost]
     [Authorize]
@@ -30,7 +29,10 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
             currentUser.Id!.Value,
             request.Title,
             request.Description,
-            request.StartingPrice);
+            request.ListingType,
+            request.BuyNowPrice,
+            request.Category,
+            request.Region);
 
         var result = await sender.Send(command, cancellationToken);
 
@@ -55,8 +57,7 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
             id,
             currentUser.Id!.Value,
             request.Title,
-            request.Description,
-            request.StartingPrice);
+            request.Description);
 
         var result = await sender.Send(command, cancellationToken);
 
@@ -82,6 +83,36 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
             return result.Error.ToProblemDetails();
 
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/images")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UploadImage(
+        Guid id,
+        IFormFile file,
+        CancellationToken cancellationToken)
+    {
+        if (file.Length == 0)
+            return BadRequest("No file provided.");
+
+        using var stream = file.OpenReadStream();
+        var command = new UploadListingImageCommand(
+            id,
+            currentUser.Id!.Value,
+            stream,
+            file.FileName,
+            file.ContentType);
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(new { imageUrl = result.Value });
     }
 
     [HttpGet("mine")]
@@ -126,9 +157,12 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? searchTerm = null,
+        [FromQuery] string? category = null,
+        [FromQuery] string? region = null,
+        [FromQuery] string? sortBy = null,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetListingsQuery(pageNumber, pageSize, searchTerm);
+        var query = new GetListingsQuery(pageNumber, pageSize, searchTerm, category, region, sortBy);
         var result = await sender.Send(query, cancellationToken);
 
         if (result.IsFailure)
@@ -137,27 +171,55 @@ public sealed class ListingsController(ISender sender, IImageService imageServic
         return Ok(result.Value);
     }
 
-    [HttpPost("{id:guid}/images")]
+    [HttpPost("{id:guid}/watchlist")]
     [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UploadImage(
+    public async Task<IActionResult> AddToWatchlist(
         Guid id,
-        IFormFile file,
         CancellationToken cancellationToken)
     {
-        if (file.Length == 0)
-            return BadRequest("No file provided.");
+        var command = new AddToWatchlistCommand(currentUser.Id!.Value, id);
+        var result = await sender.Send(command, cancellationToken);
 
-        using var stream = file.OpenReadStream();
-        var imageUrl = await imageService.UploadImageAsync(
-            id,
-            stream,
-            file.FileName,
-            file.ContentType,
-            cancellationToken);
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
 
-        return Ok(new { imageUrl });
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}/watchlist")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveFromWatchlist(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var command = new RemoveFromWatchlistCommand(currentUser.Id!.Value, id);
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpGet("watchlist")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetWatchlist(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetWatchlistQuery(currentUser.Id!.Value, pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
     }
 }

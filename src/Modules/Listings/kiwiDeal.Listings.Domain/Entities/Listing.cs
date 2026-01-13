@@ -1,32 +1,50 @@
+using kiwiDeal.Listings.Domain.Enums;
 using kiwiDeal.Listings.Domain.Errors;
 using kiwiDeal.Listings.Domain.Events;
 using kiwiDeal.Listings.Domain.ValueObjects;
 using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Results;
+
 namespace kiwiDeal.Listings.Domain.Entities;
+
 public sealed class Listing : AggregateRoot
 {
     public ListingId Id { get; private set; } = default!;
     public SellerId SellerId { get; private set; } = default!;
     public string Title { get; private set; } = default!;
     public string Description { get; private set; } = default!;
-    public decimal StartingPrice { get; private set; }
+    public ListingType ListingType { get; private set; }
+    public decimal? BuyNowPrice { get; private set; }
+    public ListingCategory Category { get; private set; }
+    public ListingRegion Region { get; private set; }
     public ListingStatus Status { get; private set; }
+
     private readonly List<ListingImage> _images = [];
     public IReadOnlyList<ListingImage> Images => _images.AsReadOnly();
+
     private Listing() { }
+
     public static Result<Listing> Create(
         SellerId sellerId,
         string title,
         string description,
-        decimal startingPrice)
+        ListingType listingType,
+        decimal? buyNowPrice,
+        ListingCategory category,
+        ListingRegion region)
     {
         if (string.IsNullOrWhiteSpace(title))
             return Result.Failure<Listing>(Error.ValidationFailed("Title is required."));
+
         if (string.IsNullOrWhiteSpace(description))
             return Result.Failure<Listing>(Error.ValidationFailed("Description is required."));
-        if (startingPrice < 0)
-            return Result.Failure<Listing>(Error.ValidationFailed("Starting price must be zero or greater."));
+
+        if (listingType == ListingType.FixedPrice && (buyNowPrice is null || buyNowPrice <= 0))
+            return Result.Failure<Listing>(Error.ValidationFailed("Buy now price is required for fixed price listings."));
+
+        if (listingType == ListingType.Auction && buyNowPrice is not null)
+            return Result.Failure<Listing>(Error.ValidationFailed("Auction listings do not have a buy now price."));
+
         var now = DateTimeOffset.UtcNow;
         var listing = new Listing
         {
@@ -34,56 +52,75 @@ public sealed class Listing : AggregateRoot
             SellerId = sellerId,
             Title = title,
             Description = description,
-            StartingPrice = startingPrice,
+            ListingType = listingType,
+            BuyNowPrice = buyNowPrice,
+            Category = category,
+            Region = region,
             Status = ListingStatus.Active,
             CreatedAt = now,
             UpdatedAt = now
         };
+
         listing.RaiseDomainEvent(new ListingCreatedEvent(
             listing.Id.Value,
             listing.SellerId.Value,
-            listing.Title,
-            listing.StartingPrice));
+            listing.Title));
+
         return Result.Success(listing);
     }
-    public Result Update(string title, string description, decimal startingPrice)
+
+    public Result Update(string title, string description)
     {
         if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled)
             return Result.Failure(ListingErrors.AlreadyClosed());
+
         if (string.IsNullOrWhiteSpace(title))
             return Result.Failure(Error.ValidationFailed("Title is required."));
+
         if (string.IsNullOrWhiteSpace(description))
             return Result.Failure(Error.ValidationFailed("Description is required."));
-        if (startingPrice < 0)
-            return Result.Failure(Error.ValidationFailed("Starting price must be zero or greater."));
+
         Title = title;
         Description = description;
-        StartingPrice = startingPrice;
         UpdatedAt = DateTimeOffset.UtcNow;
+
         return Result.Success();
     }
-    public Result Close()
+
+    public Result Cancel()
     {
         if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled)
             return Result.Failure(ListingErrors.AlreadyClosed());
+
         Status = ListingStatus.Cancelled;
         UpdatedAt = DateTimeOffset.UtcNow;
-        RaiseDomainEvent(new ListingClosedEvent(
-            Id.Value,
-            SellerId.Value));
+
+        RaiseDomainEvent(new ListingCancelledEvent(Id.Value, SellerId.Value));
+
         return Result.Success();
     }
+
     public Result MarkSold()
     {
         if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled)
             return Result.Failure(ListingErrors.AlreadyClosed());
+
         Status = ListingStatus.Sold;
         UpdatedAt = DateTimeOffset.UtcNow;
+
+        RaiseDomainEvent(new ListingSoldEvent(Id.Value, SellerId.Value));
+
         return Result.Success();
     }
-    public void AddImage(ListingImage image)
+
+    public Result AddImage(ListingImage image)
     {
+        if (_images.Count >= 3)
+            return Result.Failure(ListingErrors.TooManyImages());
+
         _images.Add(image);
         UpdatedAt = DateTimeOffset.UtcNow;
+
+        return Result.Success();
     }
 }

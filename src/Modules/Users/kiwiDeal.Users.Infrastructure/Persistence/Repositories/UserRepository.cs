@@ -36,4 +36,22 @@ public sealed class UserRepository(UsersDbContext context) : IUserRepository
     {
         context.Users.Update(user);
     }
+
+    public async Task<UserRating?> GetRatingAsync(UserId raterId, UserId rateeId, CancellationToken cancellationToken = default)
+    {
+        return await context.UserRatings
+            .FirstOrDefaultAsync(r => r.RaterId == raterId && r.RateeId == rateeId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<UserRating>> GetRatingsByRateeAsync(UserId rateeId, CancellationToken cancellationToken = default)
+    {
+        return await context.UserRatings
+            .Where(r => r.RateeId == rateeId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task AddRatingAsync(UserRating rating, CancellationToken cancellationToken = default)
+    {
+        await context.UserRatings.AddAsync(rating, cancellationToken);
+    }
 }

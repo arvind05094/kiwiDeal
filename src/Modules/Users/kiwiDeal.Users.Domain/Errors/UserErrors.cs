@@ -15,4 +15,9 @@ public static class UserErrors
 
     public static readonly Error InvalidRefreshToken =
         new(SharedKernel.Results.ErrorCode.InvalidRefreshToken, "The refresh token is invalid or has expired.");
+    public static readonly Error AlreadyRated =
+        Error.Conflict("You have already submitted a rating for this user.");
+
+    public static Error RatingNotFound(Guid id) =>
+        Error.NotFound($"Rating with ID '{id}' was not found.");
 }

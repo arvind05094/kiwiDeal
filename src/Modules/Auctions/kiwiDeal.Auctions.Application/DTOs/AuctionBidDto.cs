@@ -5,4 +5,4 @@ public sealed record AuctionBidDto(
     Guid BidderId,
     string BidderName,
     decimal Amount,
-    DateTimeOffset PlacedAt);
+    DateTimeOffset CreatedAt);

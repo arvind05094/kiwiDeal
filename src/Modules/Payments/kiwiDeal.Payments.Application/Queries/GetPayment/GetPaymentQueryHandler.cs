@@ -22,15 +22,17 @@ public sealed class GetPaymentQueryHandler(
             return Result.Failure<PaymentDto>(PaymentErrors.NotFound);
 
         var callerId = currentUser.Id;
-        if (callerId != payment.WinnerId && callerId != payment.SellerId)
+        if (callerId != payment.BuyerId && callerId != payment.SellerId)
             return Result.Failure<PaymentDto>(Error.Forbidden("You do not have permission to view this payment."));
 
         var dto = new PaymentDto(
             payment.Id.Value,
             payment.AuctionId,
-            payment.WinnerId,
+            payment.ListingId,
+            payment.BuyerId,
             payment.SellerId,
             payment.Amount,
+            payment.PaymentType,
             payment.Status.ToString(),
             payment.StripeSessionId,
             payment.CreatedAt,

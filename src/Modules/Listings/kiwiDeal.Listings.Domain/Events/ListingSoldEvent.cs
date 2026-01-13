@@ -2,7 +2,7 @@ using kiwiDeal.SharedKernel.Events;
 
 namespace kiwiDeal.Listings.Domain.Events;
 
-public sealed record ListingClosedEvent(
+public sealed record ListingSoldEvent(
     Guid ListingId,
     Guid SellerId) : IDomainEvent
 {

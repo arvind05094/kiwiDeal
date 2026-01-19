@@ -15,4 +15,5 @@ public sealed record Error(ErrorCode Code, string Message)
     public static Error PaymentAlreadyProcessed(string message) => new(ErrorCode.PaymentAlreadyProcessed, message);
     public static Error ListingAlreadyClosed(string message) => new(ErrorCode.ListingAlreadyClosed, message);
     public static Error InvalidRefreshToken(string message) => new(ErrorCode.InvalidRefreshToken, message);
+    public static Error ConversationAlreadyExists(string message) => new(ErrorCode.ConversationAlreadyExists, message);
 }

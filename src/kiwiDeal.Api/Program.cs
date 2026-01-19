@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
+using kiwiDeal.Messages.Api;
+using kiwiDeal.Messages.Application.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,8 @@ builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Auctions.Application.Commands.CreateAuctionCommand).Assembly);
 builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Payments.Application.Commands.CreateCheckoutSession.CreateCheckoutSessionCommand).Assembly);
+builder.Services.AddValidatorsFromAssembly(
+    typeof(kiwiDeal.Messages.Application.Commands.StartConversationCommand).Assembly);
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -49,11 +53,15 @@ builder.Services.AddMediatR(cfg =>
         typeof(kiwiDeal.Listings.Application.Commands.CreateListingCommand).Assembly);
     cfg.RegisterServicesFromAssembly(
         typeof(kiwiDeal.Auctions.Application.Commands.CreateAuctionCommand).Assembly);
+
     cfg.RegisterServicesFromAssembly(
     typeof(kiwiDeal.Payments.Application.Commands.CreateCheckoutSession.CreateCheckoutSessionCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(
+    typeof(kiwiDeal.Messages.Application.Commands.StartConversationCommand).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+
 });
 
 builder.Services.AddAuthentication(options =>
@@ -94,6 +102,7 @@ builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddListingsModule(builder.Configuration);
 builder.Services.AddAuctionsModule(builder.Configuration);
 builder.Services.AddPaymentsModule(builder.Configuration);
+builder.Services.AddMessagesModule(builder.Configuration);
 builder.Services.AddHostedService<OutboxWorker>();
 builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>
@@ -124,6 +133,7 @@ app.UseCors("Frontend");
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<AuctionHub>("/hubs/auctions");
+app.MapHub<MessageHub>("/hubs/messages");
 app.MapHealthChecks("/health");
 app.Run();
 

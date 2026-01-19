@@ -1,0 +1,28 @@
+using kiwiDeal.Messages.Application.Commands;
+using Microsoft.AspNetCore.SignalR;
+
+namespace kiwiDeal.Messages.Api;
+
+public class MessageHubContext(IHubContext<MessageHub> hubContext) : IMessageHubContext
+{
+    public async Task SendMessageReceived(
+        Guid conversationId,
+        Guid messageId,
+        Guid senderId,
+        string content,
+        DateTimeOffset createdAt,
+        CancellationToken cancellationToken = default)
+    {
+        await hubContext.Clients
+            .Group(conversationId.ToString())
+            .SendAsync("MessageReceived", new
+            {
+                conversationId,
+                messageId,
+                senderId,
+                senderName = string.Empty,
+                content,
+                createdAt
+            }, cancellationToken);
+    }
+}

@@ -14,5 +14,6 @@ public enum ErrorCode
     BidderIsSeller,
     ListingAlreadyClosed,
     PaymentAlreadyProcessed,
-    InvalidRefreshToken
+    InvalidRefreshToken,
+    ConversationAlreadyExists
 }

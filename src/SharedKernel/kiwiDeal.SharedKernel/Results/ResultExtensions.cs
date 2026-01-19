@@ -21,7 +21,8 @@ public static class ResultExtensions
             ErrorCode.ListingAlreadyClosed => StatusCodes.Status409Conflict,
             ErrorCode.PaymentAlreadyProcessed => StatusCodes.Status409Conflict,
             ErrorCode.InvalidRefreshToken => StatusCodes.Status401Unauthorized,
-            _ => StatusCodes.Status500InternalServerError
+            ErrorCode.ConversationAlreadyExists => StatusCodes.Status409Conflict,
+            _ => StatusCodes.Status500InternalServerError,
         };
 
         var problemDetails = new ProblemDetails

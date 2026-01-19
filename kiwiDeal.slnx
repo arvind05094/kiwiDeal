@@ -15,6 +15,12 @@
     <Project Path="src/Modules/Listings/kiwiDeal.Listings.Domain/kiwiDeal.Listings.Domain.csproj" />
     <Project Path="src/Modules/Listings/kiwiDeal.Listings.Infrastructure/kiwiDeal.Listings.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Messages/">
+    <Project Path="src/Modules/Messages/kiwiDeal.Messages.Api/kiwiDeal.Messages.Api.csproj" />
+    <Project Path="src/Modules/Messages/kiwiDeal.Messages.Application/kiwiDeal.Messages.Application.csproj" />
+    <Project Path="src/Modules/Messages/kiwiDeal.Messages.Domain/kiwiDeal.Messages.Domain.csproj" />
+    <Project Path="src/Modules/Messages/kiwiDeal.Messages.Infrastructure/kiwiDeal.Messages.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Notifications/">
     <Project Path="src/Modules/Notifications/kiwiDeal.Notifications.Api/kiwiDeal.Notifications.Api.csproj" />
     <Project Path="src/Modules/Notifications/kiwiDeal.Notifications.Application/kiwiDeal.Notifications.Application.csproj" />

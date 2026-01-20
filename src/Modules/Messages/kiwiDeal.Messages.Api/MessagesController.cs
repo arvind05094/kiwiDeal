@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using kiwiDeal.SharedKernel.Results;
 
-namespace kiwiDeal.Messages.Api.Controllers;
+namespace kiwiDeal.Messages.Api;
 
 [ApiController]
 [ApiVersion("1.0")]

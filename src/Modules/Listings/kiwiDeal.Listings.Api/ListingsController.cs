@@ -91,28 +91,41 @@ public sealed class ListingsController(ISender sender, ICurrentUser currentUser)
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UploadImage(
+    public async Task<IActionResult> UploadImages(
         Guid id,
-        IFormFile file,
+        IFormFileCollection files,
         CancellationToken cancellationToken)
     {
-        if (file.Length == 0)
-            return BadRequest("No file provided.");
+        if (files.Count == 0)
+            return BadRequest("No files provided.");
 
-        using var stream = file.OpenReadStream();
-        var command = new UploadListingImageCommand(
-            id,
-            currentUser.Id!.Value,
-            stream,
-            file.FileName,
-            file.ContentType);
+        if (files.Count > 3)
+            return BadRequest("A maximum of 3 images can be uploaded.");
 
-        var result = await sender.Send(command, cancellationToken);
+        var imageUrls = new List<string>();
 
-        if (result.IsFailure)
-            return result.Error.ToProblemDetails();
+        foreach (var file in files)
+        {
+            if (file.Length == 0)
+                return BadRequest("One or more files are empty.");
 
-        return Ok(new { imageUrl = result.Value });
+            using var stream = file.OpenReadStream();
+            var command = new UploadListingImageCommand(
+                id,
+                currentUser.Id!.Value,
+                stream,
+                file.FileName,
+                file.ContentType);
+
+            var result = await sender.Send(command, cancellationToken);
+
+            if (result.IsFailure)
+                return result.Error.ToProblemDetails();
+
+            imageUrls.Add(result.Value);
+        }
+
+        return Ok(new { imageUrls });
     }
 
     [HttpGet("mine")]

@@ -38,7 +38,7 @@ public sealed class UploadListingImageCommandHandler(
             command.ContentType,
             cancellationToken);
 
-        var image = ListingImage.Create(url, listing.Images.Count + 1);
+        var image = ListingImage.Create(url, listing.Images.Count);
         var result = listing.AddImage(image);
 
         if (result.IsFailure)

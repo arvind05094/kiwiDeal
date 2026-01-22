@@ -114,5 +114,36 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
         context.Listings.Update(listing);
     }
 
+    public async Task<AuctionWatchlist?> GetAuctionWatchlistEntryAsync(Guid userId, Guid auctionId, CancellationToken cancellationToken = default)
+    {
+        return await context.AuctionWatchlists
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.AuctionId == auctionId, cancellationToken);
+    }
+
+    public async Task<PagedResult<AuctionWatchlist>> GetAuctionWatchlistByUserIdAsync(Guid userId, PaginationParams pagination, CancellationToken cancellationToken = default)
+    {
+        var query = context.AuctionWatchlists
+            .Where(w => w.UserId == userId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(w => w.CreatedAt)
+            .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+            .Take(pagination.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return PagedResult<AuctionWatchlist>.Create(items, totalCount, pagination);
+    }
+
+    public async Task AddAuctionWatchlistEntryAsync(AuctionWatchlist entry, CancellationToken cancellationToken = default)
+    {
+        await context.AuctionWatchlists.AddAsync(entry, cancellationToken);
+    }
+
+    public void RemoveAuctionWatchlistEntry(AuctionWatchlist entry)
+    {
+        context.AuctionWatchlists.Remove(entry);
+    }
+
 
 }

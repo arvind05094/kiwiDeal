@@ -16,7 +16,6 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
 using kiwiDeal.Messages.Api;
-using kiwiDeal.Messages.Application.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +57,8 @@ builder.Services.AddMediatR(cfg =>
     typeof(kiwiDeal.Payments.Application.Commands.CreateCheckoutSession.CreateCheckoutSessionCommand).Assembly);
     cfg.RegisterServicesFromAssembly(
     typeof(kiwiDeal.Messages.Application.Commands.StartConversationCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(
+        kiwiDeal.Notifications.Application.NotificationsApplicationAssembly.Reference);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));

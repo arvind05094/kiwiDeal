@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using kiwiDeal.Listings.Application.Commands;
 
 namespace kiwiDeal.Auctions.Api;
 
@@ -97,18 +98,64 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
 
     [HttpGet]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAuctions(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
+        [FromQuery] bool endingSoon = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAuctionsQuery(pageNumber, pageSize);
+        var query = new GetAuctionsQuery(pageNumber, pageSize, endingSoon);
         var result = await sender.Send(query, cancellationToken);
 
         if (result.IsFailure)
             return result.Error.ToProblemDetails();
 
         return Ok(result.Value);
+    }
+
+    [HttpPost("{id:guid}/watchlist")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddToWatchlist(
+    Guid id,
+    CancellationToken cancellationToken)
+    {
+        var auctionQuery = new GetAuctionQuery(id);
+        var auctionResult = await sender.Send(auctionQuery, cancellationToken);
+
+        if (auctionResult.IsFailure)
+            return auctionResult.Error.ToProblemDetails();
+
+        var command = new AddToAuctionWatchlistCommand(
+            currentUser.Id!.Value,
+            id,
+            auctionResult.Value.SellerId,
+            auctionResult.Value.Status);
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}/watchlist")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveFromWatchlist(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var command = new RemoveFromAuctionWatchlistCommand(currentUser.Id!.Value, id);
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return NoContent();
     }
 }

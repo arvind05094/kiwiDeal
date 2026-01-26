@@ -11,6 +11,7 @@
     <ProjectReference Include="..\kiwiDeal.Auctions.Application\kiwiDeal.Auctions.Application.csproj" />
     <ProjectReference Include="..\..\..\SharedKernel\kiwiDeal.SharedKernel\kiwiDeal.SharedKernel.csproj" />
     <ProjectReference Include="..\kiwiDeal.Auctions.Infrastructure\kiwiDeal.Auctions.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Listings\kiwiDeal.Listings.Application\kiwiDeal.Listings.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />

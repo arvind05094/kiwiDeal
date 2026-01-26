@@ -7,7 +7,7 @@ using MediatR;
 
 namespace kiwiDeal.Auctions.Application.Queries;
 
-public sealed record GetAuctionsQuery(int PageNumber, int PageSize) : IRequest<Result<PagedResult<AuctionDto>>>, IPublicRequest;
+public sealed record GetAuctionsQuery(int PageNumber, int PageSize, bool EndingSoon = false) : IRequest<Result<PagedResult<AuctionDto>>>, IPublicRequest;
 
 public sealed class GetAuctionsQueryHandler : IRequestHandler<GetAuctionsQuery, Result<PagedResult<AuctionDto>>>
 {
@@ -18,11 +18,11 @@ public sealed class GetAuctionsQueryHandler : IRequestHandler<GetAuctionsQuery, 
         _auctionRepository = auctionRepository;
     }
 
+
     public async Task<Result<PagedResult<AuctionDto>>> Handle(GetAuctionsQuery query, CancellationToken cancellationToken)
     {
         var pagination = new PaginationParams(query.PageNumber, query.PageSize);
-        var paged = await _auctionRepository.GetPagedAsync(query.PageNumber, query.PageSize, cancellationToken);
-
+        var paged = await _auctionRepository.GetPagedAsync(query.PageNumber, query.PageSize, query.EndingSoon, cancellationToken);
         var dtos = paged.Items.Select(a => new AuctionDto(
             a.Id.Value,
             a.ListingId,

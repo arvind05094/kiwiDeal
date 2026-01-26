@@ -21,16 +21,22 @@ public sealed class AuctionRepository(AuctionsDbContext context) : IAuctionRepos
             .FirstOrDefaultAsync(a => a.ListingId == listingId, cancellationToken);
     }
 
-    public async Task<PagedResult<Auction>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Auction>> GetPagedAsync(int pageNumber, int pageSize, bool endingSoon = false, CancellationToken cancellationToken = default)
     {
         var pagination = new PaginationParams(pageNumber, pageSize);
         var query = context.Auctions
             .Where(a => a.Status == AuctionStatus.Active || a.Status == AuctionStatus.Scheduled)
             .AsQueryable();
 
+        if (endingSoon)
+        {
+            var cutoff = DateTimeOffset.UtcNow.AddHours(24);
+            query = query.Where(a => a.Status == AuctionStatus.Active && a.EndTime <= cutoff);
+        }
+
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
-            .OrderByDescending(a => a.CreatedAt)
+            .OrderBy(a => a.EndTime)
             .Skip(pagination.Skip)
             .Take(pagination.PageSize)
             .ToListAsync(cancellationToken);

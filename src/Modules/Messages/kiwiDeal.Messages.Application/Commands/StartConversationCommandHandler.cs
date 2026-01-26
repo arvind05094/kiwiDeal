@@ -23,8 +23,11 @@ public class StartConversationCommandHandler(
 
         var conversationResult = Conversation.Create(
             request.ListingId,
+            request.ListingTitle,
             request.SenderId,
-            request.RecipientId);
+            request.SenderName,
+            request.RecipientId,
+            request.RecipientName);
 
         if (conversationResult.IsFailure)
             return Result.Failure<ConversationDto>(conversationResult.Error);
@@ -34,6 +37,7 @@ public class StartConversationCommandHandler(
         var messageResult = Message.Create(
             conversation.Id,
             request.SenderId,
+            request.SenderName,
             request.InitialMessage);
 
         if (messageResult.IsFailure)
@@ -50,9 +54,9 @@ public class StartConversationCommandHandler(
         {
             Id = conversation.Id.Value,
             ListingId = conversation.ListingId,
+            ListingTitle = conversation.ListingTitle,
             OtherUserId = request.RecipientId,
-            OtherUserName = string.Empty,
-            ListingTitle = string.Empty,
+            OtherUserName = request.RecipientName,
             LastMessagePreview = request.InitialMessage,
             UpdatedAt = conversation.UpdatedAt
         });

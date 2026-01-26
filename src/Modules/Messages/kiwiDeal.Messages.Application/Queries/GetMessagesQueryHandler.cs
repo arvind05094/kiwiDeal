@@ -32,7 +32,7 @@ public class GetMessagesQueryHandler(
                 Id = m.Id.Value,
                 ConversationId = conversation.Id.Value,
                 SenderId = m.SenderId,
-                SenderName = string.Empty,
+                SenderName = m.SenderName,
                 Content = m.Content,
                 CreatedAt = m.CreatedAt
             }).ToList();

@@ -16,15 +16,21 @@ public class GetConversationsQueryHandler(
         var conversations = await conversationRepository.GetByUserIdAsync(
             request.UserId, cancellationToken);
 
-        var dtos = conversations.Select(c => new ConversationDto
+        var dtos = conversations.Select(c =>
         {
-            Id = c.Id.Value,
-            ListingId = c.ListingId,
-            OtherUserId = c.SenderId == request.UserId ? c.RecipientId : c.SenderId,
-            OtherUserName = string.Empty,
-            ListingTitle = string.Empty,
-            LastMessagePreview = string.Empty,
-            UpdatedAt = c.UpdatedAt
+            var isSender = c.SenderId == request.UserId;
+            var lastMessage = c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+
+            return new ConversationDto
+            {
+                Id = c.Id.Value,
+                ListingId = c.ListingId,
+                ListingTitle = c.ListingTitle,
+                OtherUserId = isSender ? c.RecipientId : c.SenderId,
+                OtherUserName = isSender ? c.RecipientName : c.SenderName,
+                LastMessagePreview = lastMessage?.Content ?? string.Empty,
+                UpdatedAt = c.UpdatedAt
+            };
         }).ToList();
 
         return Result.Success(dtos);

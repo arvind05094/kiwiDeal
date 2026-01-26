@@ -2,6 +2,7 @@ using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.Messages.Domain.Errors;
+
 namespace kiwiDeal.Messages.Domain.Entities;
 
 public class Conversation : AggregateRoot, ISoftDeletable
@@ -10,8 +11,11 @@ public class Conversation : AggregateRoot, ISoftDeletable
 
     public ConversationId Id { get; private set; } = default!;
     public Guid ListingId { get; private set; }
+    public string ListingTitle { get; private set; } = string.Empty;
     public Guid SenderId { get; private set; }
+    public string SenderName { get; private set; } = string.Empty;
     public Guid RecipientId { get; private set; }
+    public string RecipientName { get; private set; } = string.Empty;
     public bool IsDeleted { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
 
@@ -23,8 +27,11 @@ public class Conversation : AggregateRoot, ISoftDeletable
 
     public static Result<Conversation> Create(
         Guid listingId,
+        string listingTitle,
         Guid senderId,
-        Guid recipientId)
+        string senderName,
+        Guid recipientId,
+        string recipientName)
     {
         if (senderId == recipientId)
             return Result.Failure<Conversation>(MessageErrors.CannotMessageSelf);
@@ -33,8 +40,11 @@ public class Conversation : AggregateRoot, ISoftDeletable
         {
             Id = ConversationId.New(),
             ListingId = listingId,
+            ListingTitle = listingTitle,
             SenderId = senderId,
+            SenderName = senderName,
             RecipientId = recipientId,
+            RecipientName = recipientName,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };

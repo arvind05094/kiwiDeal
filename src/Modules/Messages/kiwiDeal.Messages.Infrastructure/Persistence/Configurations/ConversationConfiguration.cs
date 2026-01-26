@@ -24,6 +24,9 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
         builder.Property(x => x.UpdatedAt).IsRequired();
         builder.Property(x => x.IsDeleted).IsRequired();
         builder.Property(x => x.DeletedAt);
+        builder.Property(x => x.ListingTitle).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.SenderName).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.RecipientName).HasMaxLength(200).IsRequired();
 
         builder.HasQueryFilter(x => !x.IsDeleted);
 

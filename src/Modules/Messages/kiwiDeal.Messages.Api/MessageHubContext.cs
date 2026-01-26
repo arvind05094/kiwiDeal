@@ -9,6 +9,7 @@ public class MessageHubContext(IHubContext<MessageHub> hubContext) : IMessageHub
         Guid conversationId,
         Guid messageId,
         Guid senderId,
+        string senderName,
         string content,
         DateTimeOffset createdAt,
         CancellationToken cancellationToken = default)
@@ -20,7 +21,7 @@ public class MessageHubContext(IHubContext<MessageHub> hubContext) : IMessageHub
                 conversationId,
                 messageId,
                 senderId,
-                senderName = string.Empty,
+                senderName,
                 content,
                 createdAt
             }, cancellationToken);

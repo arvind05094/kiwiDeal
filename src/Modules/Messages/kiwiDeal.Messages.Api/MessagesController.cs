@@ -2,10 +2,10 @@ using Asp.Versioning;
 using kiwiDeal.Messages.Application.Commands;
 using kiwiDeal.Messages.Application.Queries;
 using kiwiDeal.SharedKernel.Interfaces;
+using kiwiDeal.SharedKernel.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using kiwiDeal.SharedKernel.Results;
 
 namespace kiwiDeal.Messages.Api;
 
@@ -22,8 +22,11 @@ public sealed class MessagesController(ISender sender, ICurrentUser currentUser)
     {
         var command = new StartConversationCommand(
             request.ListingId,
+            request.ListingTitle,
             currentUser.Id!.Value,
+            currentUser.Name ?? string.Empty,
             request.RecipientId,
+            request.RecipientName,
             request.InitialMessage);
 
         var result = await sender.Send(command, ct);
@@ -40,6 +43,7 @@ public sealed class MessagesController(ISender sender, ICurrentUser currentUser)
         var command = new SendMessageCommand(
             conversationId,
             currentUser.Id!.Value,
+            currentUser.Name ?? string.Empty,
             request.Content);
 
         var result = await sender.Send(command, ct);

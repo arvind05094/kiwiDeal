@@ -6,6 +6,7 @@ public interface IMessageHubContext
         Guid conversationId,
         Guid messageId,
         Guid senderId,
+        string senderName,
         string content,
         DateTimeOffset createdAt,
         CancellationToken cancellationToken = default);

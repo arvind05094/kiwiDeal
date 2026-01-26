@@ -45,13 +45,31 @@ namespace kiwiDeal.Messages.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("listing_id");
 
+                    b.Property<string>("ListingTitle")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("listing_title");
+
                     b.Property<Guid>("RecipientId")
                         .HasColumnType("uuid")
                         .HasColumnName("recipient_id");
 
+                    b.Property<string>("RecipientName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("recipient_name");
+
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uuid")
                         .HasColumnName("sender_id");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("sender_name");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -103,6 +121,12 @@ namespace kiwiDeal.Messages.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uuid")
                         .HasColumnName("sender_id");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("sender_name");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

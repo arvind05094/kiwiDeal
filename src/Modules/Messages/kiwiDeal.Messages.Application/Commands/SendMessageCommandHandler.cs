@@ -28,6 +28,7 @@ public class SendMessageCommandHandler(
         var messageResult = Message.Create(
             conversation.Id,
             request.SenderId,
+            request.SenderName,
             request.Content);
 
         if (messageResult.IsFailure)
@@ -43,6 +44,7 @@ public class SendMessageCommandHandler(
             conversation.Id.Value,
             message.Id.Value,
             message.SenderId,
+            message.SenderName,
             message.Content,
             message.CreatedAt,
             cancellationToken);
@@ -52,7 +54,7 @@ public class SendMessageCommandHandler(
             Id = message.Id.Value,
             ConversationId = conversation.Id.Value,
             SenderId = message.SenderId,
-            SenderName = string.Empty,
+            SenderName = message.SenderName,
             Content = message.Content,
             CreatedAt = message.CreatedAt
         });

@@ -28,6 +28,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.Property(x => x.CreatedAt).IsRequired();
         builder.Property(x => x.IsDeleted).IsRequired();
         builder.Property(x => x.DeletedAt);
+        builder.Property(x => x.SenderName).HasMaxLength(200).IsRequired();
 
         builder.HasQueryFilter(x => !x.IsDeleted);
 

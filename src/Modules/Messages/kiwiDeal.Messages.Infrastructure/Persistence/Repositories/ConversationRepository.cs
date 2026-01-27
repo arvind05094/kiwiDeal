@@ -32,6 +32,15 @@ public class ConversationRepository(MessagesDbContext context) : IConversationRe
             .ToListAsync(ct);
     }
 
+    public async Task MarkMessagesAsReadAsync(ConversationId conversationId, Guid userId, CancellationToken ct = default)
+    {
+        await context.Messages
+            .Where(m => m.ConversationId == conversationId &&
+                        m.SenderId != userId &&
+                        !m.IsRead)
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.IsRead, true), ct);
+    }
+
     public async Task AddAsync(Conversation conversation, CancellationToken ct = default)
     {
         await context.Conversations.AddAsync(conversation, ct);

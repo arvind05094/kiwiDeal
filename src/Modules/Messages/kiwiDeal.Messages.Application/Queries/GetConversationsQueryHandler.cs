@@ -20,6 +20,7 @@ public class GetConversationsQueryHandler(
         {
             var isSender = c.SenderId == request.UserId;
             var lastMessage = c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+            var unreadCount = c.Messages.Count(m => !m.IsRead && m.SenderId != request.UserId);
 
             return new ConversationDto
             {
@@ -29,6 +30,7 @@ public class GetConversationsQueryHandler(
                 OtherUserId = isSender ? c.RecipientId : c.SenderId,
                 OtherUserName = isSender ? c.RecipientName : c.SenderName,
                 LastMessagePreview = lastMessage?.Content ?? string.Empty,
+                UnreadCount = unreadCount,
                 UpdatedAt = c.UpdatedAt
             };
         }).ToList();

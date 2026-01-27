@@ -68,4 +68,13 @@ public sealed class MessagesController(ISender sender, ICurrentUser currentUser)
         if (result.IsFailure) return result.Error.ToProblemDetails();
         return Ok(result.Value);
     }
+
+    [HttpPost("conversations/{conversationId:guid}/read")]
+    public async Task<IActionResult> MarkAsRead(Guid conversationId, CancellationToken ct)
+    {
+        var command = new MarkMessagesAsReadCommand(conversationId, currentUser.Id!.Value);
+        var result = await sender.Send(command, ct);
+        if (result.IsFailure) return result.Error.ToProblemDetails();
+        return NoContent();
+    }
 }

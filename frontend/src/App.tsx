@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "@/shared/components/Navbar";
 import { ProtectedRoute } from "@/shared/components/ProtectedRoute";
+import { LoginPage } from "@/features/auth/LoginPage";
+import { RegisterPage } from "@/features/auth/RegisterPage";
 
 function PlaceholderPage({ name }: { name: string }) {
   return (
@@ -81,11 +83,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<PlaceholderPage name="Login" />} />
-          <Route
-            path="/register"
-            element={<PlaceholderPage name="Register" />}
-          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </main>
     </div>

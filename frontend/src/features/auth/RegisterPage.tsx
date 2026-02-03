@@ -139,8 +139,8 @@ export function RegisterPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {NZ_REGIONS.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      {r}
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

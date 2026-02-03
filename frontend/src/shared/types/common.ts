@@ -135,24 +135,25 @@ export interface PaymentDto {
 }
 
 export const NZ_REGIONS = [
-  "Northland",
-  "Auckland",
-  "Waikato",
-  "Bay of Plenty",
-  "Gisborne",
-  "Hawke's Bay",
-  "Taranaki",
-  "Manawatū-Whanganui",
-  "Wellington",
-  "Tasman",
-  "Nelson",
-  "Marlborough",
-  "West Coast",
-  "Canterbury",
-  "Otago",
-  "Southland",
+  { label: "Northland", value: "Northland" },
+  { label: "Auckland", value: "Auckland" },
+  { label: "Waikato", value: "Waikato" },
+  { label: "Bay of Plenty", value: "BayOfPlenty" },
+  { label: "Gisborne", value: "Gisborne" },
+  { label: "Hawke's Bay", value: "HawkesBay" },
+  { label: "Taranaki", value: "Taranaki" },
+  { label: "Manawatū-Whanganui", value: "ManawatuWhanganui" },
+  { label: "Wellington", value: "Wellington" },
+  { label: "Tasman", value: "Tasman" },
+  { label: "Nelson", value: "Nelson" },
+  { label: "Marlborough", value: "Marlborough" },
+  { label: "West Coast", value: "WestCoast" },
+  { label: "Canterbury", value: "Canterbury" },
+  { label: "Otago", value: "Otago" },
+  { label: "Southland", value: "Southland" },
 ] as const;
 
+export type NzRegionValue = (typeof NZ_REGIONS)[number]["value"];
 export const CATEGORIES = [
   "Electronics",
   "Clothing",

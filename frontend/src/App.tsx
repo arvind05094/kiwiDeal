@@ -3,6 +3,10 @@ import { Navbar } from "@/shared/components/Navbar";
 import { ProtectedRoute } from "@/shared/components/ProtectedRoute";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { RegisterPage } from "@/features/auth/RegisterPage";
+import { ListingsPage } from "@/features/listings/ListingsPage";
+import { ListingDetailPage } from "@/features/listings/ListingDetailPage";
+import { CreateListingPage } from "@/features/listings/CreateListingPage";
+import { EditListingPage } from "@/features/listings/EditListingPage";
 
 function PlaceholderPage({ name }: { name: string }) {
   return (
@@ -23,10 +27,7 @@ export default function App() {
             path="/listings"
             element={<PlaceholderPage name="Listings" />}
           />
-          <Route
-            path="/listings/:id"
-            element={<PlaceholderPage name="Listing Detail" />}
-          />
+
           <Route
             path="/listings/new"
             element={
@@ -34,6 +35,10 @@ export default function App() {
                 <PlaceholderPage name="Create Listing" />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/listings/:id"
+            element={<PlaceholderPage name="Listing Detail" />}
           />
           <Route
             path="/listings/:id/edit"
@@ -85,6 +90,24 @@ export default function App() {
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/listings" element={<ListingsPage />} />
+          <Route
+            path="/listings/new"
+            element={
+              <ProtectedRoute>
+                <CreateListingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/listings/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditListingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/listings/:id" element={<ListingDetailPage />} />
         </Routes>
       </main>
     </div>

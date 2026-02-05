@@ -7,6 +7,7 @@ import { ListingsPage } from "@/features/listings/ListingsPage";
 import { ListingDetailPage } from "@/features/listings/ListingDetailPage";
 import { CreateListingPage } from "@/features/listings/CreateListingPage";
 import { EditListingPage } from "@/features/listings/EditListingPage";
+import { AuctionDetailPage } from "@/features/auctions/AuctionDetailPage";
 
 function PlaceholderPage({ name }: { name: string }) {
   return (
@@ -23,35 +24,25 @@ export default function App() {
       <main className="mx-auto max-w-7xl px-4 py-8">
         <Routes>
           <Route path="/" element={<Navigate to="/listings" replace />} />
-          <Route
-            path="/listings"
-            element={<PlaceholderPage name="Listings" />}
-          />
-
+          <Route path="/listings" element={<ListingsPage />} />
           <Route
             path="/listings/new"
             element={
               <ProtectedRoute>
-                <PlaceholderPage name="Create Listing" />
+                <CreateListingPage />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/listings/:id"
-            element={<PlaceholderPage name="Listing Detail" />}
           />
           <Route
             path="/listings/:id/edit"
             element={
               <ProtectedRoute>
-                <PlaceholderPage name="Edit Listing" />
+                <EditListingPage />
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/auctions/:id"
-            element={<PlaceholderPage name="Auction Detail" />}
-          />
+          <Route path="/listings/:id" element={<ListingDetailPage />} />
+          <Route path="/auctions/:id" element={<AuctionDetailPage />} />
           <Route
             path="/users/:id"
             element={<PlaceholderPage name="Public Profile" />}
@@ -90,24 +81,6 @@ export default function App() {
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/listings" element={<ListingsPage />} />
-          <Route
-            path="/listings/new"
-            element={
-              <ProtectedRoute>
-                <CreateListingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/listings/:id/edit"
-            element={
-              <ProtectedRoute>
-                <EditListingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/listings/:id" element={<ListingDetailPage />} />
         </Routes>
       </main>
     </div>

@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NZ_REGIONS, CATEGORIES } from "@/shared/types/common";
+import { NZ_REGIONS } from "@/shared/types/common";
 import { Search, X } from "lucide-react";
 
 export function ListingsPage() {
@@ -48,6 +48,8 @@ export function ListingsPage() {
         listingType,
       }),
   });
+
+  console.log("Current listings data:", data);
 
   const setParam = (key: string, value: string | undefined) => {
     setSearchParams((prev) => {
@@ -175,24 +177,23 @@ export function ListingsPage() {
           message="Try adjusting your filters or search term."
         />
       ) : (
-        <>
+        <PagedList
+          result={data} // Pass the entire data payload here
+          onPageChange={(p) =>
+            setSearchParams((prev) => {
+              const next = new URLSearchParams(prev);
+              next.set("pageNumber", String(p));
+              return next;
+            })
+          }
+        >
+          {/* Grid elements passed cleanly as {children} */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.items.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
-          <PagedList
-            currentPage={pageNumber}
-            totalPages={data.totalPages}
-            onPageChange={(p) =>
-              setSearchParams((prev) => {
-                const next = new URLSearchParams(prev);
-                next.set("pageNumber", String(p));
-                return next;
-              })
-            }
-          />
-        </>
+        </PagedList>
       )}
     </div>
   );

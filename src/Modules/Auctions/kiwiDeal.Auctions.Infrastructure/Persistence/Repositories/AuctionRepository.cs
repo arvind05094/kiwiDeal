@@ -64,4 +64,61 @@ public sealed class AuctionRepository(AuctionsDbContext context) : IAuctionRepos
     {
         context.Auctions.Add(auction);
     }
+
+    public async Task<PagedResult<Auction>> GetBySellerIdAsync(Guid sellerId, string? status, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var pagination = new PaginationParams(pageNumber, pageSize);
+        var query = context.Auctions
+            .Where(a => a.SellerId == sellerId)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            query = status switch
+            {
+                "Scheduled" => query.Where(a => a.Status == AuctionStatus.Scheduled),
+                "Active" => query.Where(a => a.Status == AuctionStatus.Active),
+                "Sold" => query.Where(a => a.Status == AuctionStatus.Closed && a.CurrentHighestBidderId != null),
+                "Unsold" => query.Where(a => a.Status == AuctionStatus.Closed && a.CurrentHighestBidderId == null),
+                _ => query
+            };
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip(pagination.Skip)
+            .Take(pagination.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return PagedResult<Auction>.Create(items, totalCount, pagination);
+    }
+
+    public async Task<PagedResult<Auction>> GetByBidderIdAsync(Guid bidderId, string? status, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var pagination = new PaginationParams(pageNumber, pageSize);
+        var query = context.Auctions
+            .Where(a => a.Bids.Any(b => b.BidderId == bidderId))
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            query = status switch
+            {
+                "Active" => query.Where(a => a.Status == AuctionStatus.Active),
+                "Won" => query.Where(a => a.Status == AuctionStatus.Closed && a.CurrentHighestBidderId == bidderId),
+                "Lost" => query.Where(a => a.Status == AuctionStatus.Closed && a.CurrentHighestBidderId != bidderId),
+                _ => query
+            };
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip(pagination.Skip)
+            .Take(pagination.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return PagedResult<Auction>.Create(items, totalCount, pagination);
+    }
 }

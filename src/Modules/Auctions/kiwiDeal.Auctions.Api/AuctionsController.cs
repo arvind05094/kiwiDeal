@@ -158,4 +158,40 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
 
         return NoContent();
     }
+
+    [HttpGet("mine")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyAuctions(
+    [FromQuery] string? status,
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetMyAuctionsQuery(currentUser.Id!.Value, status, pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("bidding")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBiddingAuctions(
+        [FromQuery] string? status,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetBiddingAuctionsQuery(currentUser.Id!.Value, status, pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
+    }
 }

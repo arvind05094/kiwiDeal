@@ -11,4 +11,6 @@ public interface IAuctionRepository
     Task<List<Auction>> GetExpiredActiveAuctionsAsync(CancellationToken cancellationToken = default);
     Task<PagedResult<Auction>> GetPagedAsync(int pageNumber, int pageSize, bool endingSoon = false, CancellationToken cancellationToken = default);
     void Add(Auction auction);
+    Task<PagedResult<Auction>> GetBySellerIdAsync(Guid sellerId, string? status, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
+    Task<PagedResult<Auction>> GetByBidderIdAsync(Guid bidderId, string? status, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
 }

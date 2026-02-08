@@ -12,6 +12,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using kiwiDeal.Payments.Application.Queries.GetFixedPriceSales;
+using kiwiDeal.Payments.Application.Queries.GetFixedPricePurchases;
 
 namespace kiwiDeal.Payments.Api;
 
@@ -109,6 +111,36 @@ public sealed class PaymentsController(ISender sender, ICurrentUser currentUser)
     CancellationToken cancellationToken)
     {
         var query = new GetPaymentByListingQuery(listingId);
+        var result = await sender.Send(query, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+        return Ok(result.Value);
+    }
+
+    [HttpGet("sales")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFixedPriceSales(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetFixedPriceSalesQuery(pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+        return Ok(result.Value);
+    }
+
+    [HttpGet("purchases")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFixedPricePurchases(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetFixedPricePurchasesQuery(pageNumber, pageSize);
         var result = await sender.Send(query, cancellationToken);
         if (result.IsFailure)
             return result.Error.ToProblemDetails();

@@ -30,4 +30,34 @@ public sealed class PaymentRepository(PaymentsDbContext dbContext) : IPaymentRep
         .FirstOrDefaultAsync(p => p.ListingId == listingId, cancellationToken);
     public void Add(Payment payment)
         => dbContext.Payments.Add(payment);
+
+    public async Task<(List<Payment> Items, int TotalCount)> GetFixedPriceSalesBySellerAsync(
+    Guid sellerId, int pageNumber, int pageSize,
+    CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.Payments
+            .Where(p => p.SellerId == sellerId && p.PaymentType == "FixedPrice");
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return (items, totalCount);
+    }
+
+    public async Task<(List<Payment> Items, int TotalCount)> GetFixedPricePurchasesByBuyerAsync(
+        Guid buyerId, int pageNumber, int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = dbContext.Payments
+            .Where(p => p.BuyerId == buyerId && p.PaymentType == "FixedPrice");
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return (items, totalCount);
+    }
 }

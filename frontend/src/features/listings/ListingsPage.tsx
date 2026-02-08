@@ -177,23 +177,26 @@ export function ListingsPage() {
           message="Try adjusting your filters or search term."
         />
       ) : (
-        <PagedList
-          result={data} // Pass the entire data payload here
-          onPageChange={(p) =>
-            setSearchParams((prev) => {
-              const next = new URLSearchParams(prev);
-              next.set("pageNumber", String(p));
-              return next;
-            })
-          }
-        >
-          {/* Grid elements passed cleanly as {children} */}
+        <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.items.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
-        </PagedList>
+          <PagedList
+            currentPage={data.pageNumber}
+            totalPages={data.totalPages}
+            hasPreviousPage={data.hasPreviousPage}
+            hasNextPage={data.hasNextPage}
+            onPageChange={(p) =>
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.set("pageNumber", String(p));
+                return next;
+              })
+            }
+          />
+        </>
       )}
     </div>
   );

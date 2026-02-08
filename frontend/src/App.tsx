@@ -8,6 +8,8 @@ import { ListingDetailPage } from "@/features/listings/ListingDetailPage";
 import { CreateListingPage } from "@/features/listings/CreateListingPage";
 import { EditListingPage } from "@/features/listings/EditListingPage";
 import { AuctionDetailPage } from "@/features/auctions/AuctionDetailPage";
+import { PublicProfilePage } from "@/features/profile/PublicProfilePage";
+import { MyAccountPage } from "@/features/profile/MyAccountPage";
 
 function PlaceholderPage({ name }: { name: string }) {
   return (
@@ -43,15 +45,12 @@ export default function App() {
           />
           <Route path="/listings/:id" element={<ListingDetailPage />} />
           <Route path="/auctions/:id" element={<AuctionDetailPage />} />
-          <Route
-            path="/users/:id"
-            element={<PlaceholderPage name="Public Profile" />}
-          />
+          <Route path="/users/:id" element={<PublicProfilePage />} />
           <Route
             path="/account"
             element={
               <ProtectedRoute>
-                <PlaceholderPage name="My Account" />
+                <MyAccountPage />
               </ProtectedRoute>
             }
           />

@@ -1,39 +1,44 @@
-import type { PagedResult } from "@/shared/types/common";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface PagedListProps<T> {
-  result: PagedResult<T>;
+interface PagedListProps {
+  currentPage: number;
+  totalPages: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
   onPageChange: (page: number) => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
-export function PagedList<T>({
-  result,
+export function PagedList({
+  currentPage,
+  totalPages,
+  hasPreviousPage,
+  hasNextPage,
   onPageChange,
   children,
-}: PagedListProps<T>) {
+}: PagedListProps) {
   return (
     <div>
       {children}
-      {result.totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onPageChange(result.pageNumber - 1)}
-            disabled={!result.hasPreviousPage}
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={hasPreviousPage === false || currentPage <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm text-gray-600">
-            Page {result.pageNumber} of {result.totalPages}
+            Page {currentPage} of {totalPages}
           </span>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onPageChange(result.pageNumber + 1)}
-            disabled={!result.hasNextPage}
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={hasNextPage === false || currentPage >= totalPages}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

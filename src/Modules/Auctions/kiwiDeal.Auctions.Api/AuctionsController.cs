@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using kiwiDeal.Listings.Application.Commands;
+using kiwiDeal.Listings.Application.Queries;
 
 namespace kiwiDeal.Auctions.Api;
 
@@ -187,6 +188,23 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
         CancellationToken cancellationToken = default)
     {
         var query = new GetBiddingAuctionsQuery(currentUser.Id!.Value, status, pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("watchlist")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAuctionWatchlist(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetAuctionWatchlistQuery(currentUser.Id!.Value, pageNumber, pageSize);
         var result = await sender.Send(query, cancellationToken);
 
         if (result.IsFailure)

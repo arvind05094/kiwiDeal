@@ -10,6 +10,8 @@ import { EditListingPage } from "@/features/listings/EditListingPage";
 import { AuctionDetailPage } from "@/features/auctions/AuctionDetailPage";
 import { PublicProfilePage } from "@/features/profile/PublicProfilePage";
 import { MyAccountPage } from "@/features/profile/MyAccountPage";
+import { InboxPage } from "@/features/messages/InboxPage";
+import { ConversationPage } from "@/features/messages/ConversationPage";
 
 function PlaceholderPage({ name }: { name: string }) {
   return (
@@ -80,6 +82,22 @@ export default function App() {
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <InboxPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages/:conversationId"
+            element={
+              <ProtectedRoute>
+                <ConversationPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </div>

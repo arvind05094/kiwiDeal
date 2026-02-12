@@ -13,6 +13,7 @@ import { auctionsApi } from "./api";
 import { useAuctionHub } from "./useAuctionHub";
 import type { AuctionDto, AuctionBidDto } from "@/shared/types/common";
 import type { BidPlacedMessage, AuctionClosedMessage } from "./useAuctionHub";
+import { createAuctionCheckout } from "../payments/api";
 
 export function AuctionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -236,10 +237,24 @@ export function AuctionDetailPage() {
               </p>
             )}
 
-            {/* Winner */}
             {isWinner && (
-              <div className="rounded-md bg-green-50 border border-green-200 p-3 text-sm text-green-700 font-medium">
-                You won this auction! 🎉
+              <div className="rounded-md bg-green-50 border border-green-200 p-3 space-y-3">
+                <p className="text-sm text-green-700 font-medium">
+                  You won this auction! 🎉
+                </p>
+                <Button
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                  onClick={async () => {
+                    try {
+                      const { checkoutUrl } = await createAuctionCheckout({
+                        auctionId: auction.id,
+                      });
+                      window.location.href = checkoutUrl;
+                    } catch {}
+                  }}
+                >
+                  Pay Now
+                </Button>
               </div>
             )}
 

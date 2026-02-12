@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { MapPin, Tag, ArrowLeft, Heart } from "lucide-react";
 import { useState } from "react";
+import { createBuyNowCheckout } from "../payments/api";
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -141,8 +142,20 @@ export function ListingDetailPage() {
             {/* Buyer actions */}
             {!isSeller && isActive && (
               <>
-                {isFixedPrice && (
-                  <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                {isFixedPrice && listing.buyNowPrice !== undefined && (
+                  <Button
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={async () => {
+                      try {
+                        const { checkoutUrl } = await createBuyNowCheckout({
+                          listingId: listing.id,
+                          sellerId: listing.sellerId,
+                          amount: listing.buyNowPrice!,
+                        });
+                        window.location.href = checkoutUrl;
+                      } catch {}
+                    }}
+                  >
                     Buy Now
                   </Button>
                 )}

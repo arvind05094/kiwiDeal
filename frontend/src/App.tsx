@@ -12,6 +12,7 @@ import { PublicProfilePage } from "@/features/profile/PublicProfilePage";
 import { MyAccountPage } from "@/features/profile/MyAccountPage";
 import { InboxPage } from "@/features/messages/InboxPage";
 import { ConversationPage } from "@/features/messages/ConversationPage";
+import { PaymentStatusPage } from "@/features/payments/PaymentStatusPage";
 
 function PlaceholderPage({ name }: { name: string }) {
   return (
@@ -95,6 +96,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ConversationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payments/:auctionId"
+            element={
+              <ProtectedRoute>
+                <PaymentStatusPage />
               </ProtectedRoute>
             }
           />

@@ -8,6 +8,8 @@ import { FixedPriceSalesTab } from "./tabs/FixedPriceSalesTab";
 import { FixedPricePurchasesTab } from "./tabs/FixedPricePurchasesTab";
 import { WatchlistTab } from "./tabs/WatchlistTab";
 import { cn } from "@/lib/utils";
+import { InboxPage } from "../messages/InboxPage";
+import { RatingsTab } from "./tabs/RatingsTab";
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -19,8 +21,8 @@ const TABS = [
   { id: "fp-purchases", label: "Fixed Price Purchases" },
   { id: "watchlist", label: "Watchlist" },
   { id: "inbox", label: "Inbox" },
+  { id: "ratings", label: "Ratings" },
 ] as const;
-
 type TabId = (typeof TABS)[number]["id"];
 
 export function MyAccountPage() {
@@ -45,11 +47,9 @@ export function MyAccountPage() {
       case "watchlist":
         return <WatchlistTab />;
       case "inbox":
-        return (
-          <div className="text-gray-400 py-12 text-center">
-            Inbox — coming in step 6
-          </div>
-        );
+        return <InboxPage />;
+      case "ratings":
+        return <RatingsTab />;
     }
   }
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { listingsApi } from "./api";
+import { auctionsApi } from "../auctions/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,9 @@ export function CreateListingPage() {
   const [category, setCategory] = useState("");
   const [region, setRegion] = useState("");
   const [buyNowPrice, setBuyNowPrice] = useState("");
+  const [startingPrice, setStartingPrice] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -45,9 +49,20 @@ export function CreateListingPage() {
       if (images.length > 0) {
         await listingsApi.uploadImages(id, images);
       }
-      return id;
+      if (listingType === "Auction") {
+        const auctionId = await auctionsApi.createAuction({
+          listingId: id,
+          listingTitle: title,
+          startingPrice: Number(startingPrice),
+          startTime: new Date(startTime).toISOString(),
+          endTime: new Date(endTime).toISOString(),
+        });
+        return { id, auctionId };
+      }
+      return { id, auctionId: null };
     },
-    onSuccess: (id) => navigate(`/listings/${id}`),
+    onSuccess: ({ id, auctionId }) =>
+      navigate(auctionId ? `/auctions/${auctionId}` : `/listings/${id}`),
     onError: (err: any) => {
       const data: ProblemDetails = err.response?.data;
       if (data?.errors) setFieldErrors(data.errors);
@@ -160,7 +175,7 @@ export function CreateListingPage() {
           </div>
         </div>
 
-        {/* Fixed price amount */}
+        {/* Fixed price fields */}
         {listingType === "FixedPrice" && (
           <div className="space-y-1.5">
             <Label htmlFor="price">Buy Now Price ($)</Label>
@@ -175,6 +190,43 @@ export function CreateListingPage() {
             {err("BuyNowPrice") && (
               <p className="text-xs text-red-500">{err("BuyNowPrice")}</p>
             )}
+          </div>
+        )}
+
+        {/* Auction fields */}
+        {listingType === "Auction" && (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="startingPrice">Starting Price ($)</Label>
+              <Input
+                id="startingPrice"
+                type="number"
+                min={0}
+                value={startingPrice}
+                onChange={(e) => setStartingPrice(e.target.value)}
+                placeholder="1.00"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="startTime">Start Time</Label>
+                <Input
+                  id="startTime"
+                  type="datetime-local"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="endTime">End Time</Label>
+                <Input
+                  id="endTime"
+                  type="datetime-local"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         )}
 

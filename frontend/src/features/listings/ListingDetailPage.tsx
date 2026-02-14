@@ -127,15 +127,6 @@ export function ListingDetailPage() {
                     ? "Cancelling..."
                     : "Cancel Listing"}
                 </Button>
-                {isAuction && (
-                  <Button
-                    onClick={() =>
-                      navigate(`/auctions/new?listingId=${listing.id}`)
-                    }
-                  >
-                    Start Auction
-                  </Button>
-                )}
               </>
             )}
 

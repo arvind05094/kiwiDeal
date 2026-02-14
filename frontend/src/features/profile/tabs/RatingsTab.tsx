@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getRatingPrompts } from "./api";
-import { RatingPromptCard } from "./RatingPromptCard";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { getRatingPrompts } from "@/features/ratings/api";
+import { RatingPromptCard } from "@/features/ratings/RatingPromptCard";
 
 export function RatingsTab() {
   const { data: prompts = [], isLoading } = useQuery({

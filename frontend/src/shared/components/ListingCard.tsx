@@ -28,9 +28,6 @@ export function ListingCard({ listing }: ListingCardProps) {
             No image
           </div>
         )}
-        <div className="absolute top-2 left-2">
-          <StatusBadge status={listing.status} />
-        </div>
         <div className="absolute top-2 right-2">
           <span className="rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-gray-600 shadow-sm">
             {listing.listingType === "Auction" ? "Auction" : "Buy Now"}
@@ -44,12 +41,16 @@ export function ListingCard({ listing }: ListingCardProps) {
         </h3>
 
         <div className="mt-auto space-y-1">
-          {listing.buyNowPrice !== undefined && (
+          {listing.listingType === "FixedPrice" &&
+          listing.buyNowPrice !== undefined ? (
             <p className="text-lg font-bold text-gray-900">
               ${listing.buyNowPrice.toLocaleString()}
             </p>
+          ) : (
+            <p className="text-sm font-medium text-gray-500">
+              See auction for bid
+            </p>
           )}
-
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -60,12 +61,14 @@ export function ListingCard({ listing }: ListingCardProps) {
               {listing.category}
             </div>
           </div>
-
-          <p className="text-xs text-gray-400">
-            {formatDistanceToNow(new Date(listing.createdAt), {
-              addSuffix: true,
-            })}
-          </p>
+          <div className="flex items-center justify-between">
+            <StatusBadge status={listing.status} />
+            <p className="text-xs text-gray-400">
+              {formatDistanceToNow(new Date(listing.createdAt), {
+                addSuffix: true,
+              })}
+            </p>
+          </div>
         </div>
       </div>
     </Link>

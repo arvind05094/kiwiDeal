@@ -33,10 +33,20 @@ export const profileApi = {
   getMyListings: async (
     params: GetMyListingsParams,
   ): Promise<PagedResult<ListingDto>> => {
-    const res = await client.get("/listings/mine", { params });
+    const res = await client.get("/listings/mine", {
+      params,
+      paramsSerializer: (p) => {
+        const searchParams = new URLSearchParams();
+        if (p.statuses)
+          p.statuses.forEach((s: string) => searchParams.append("statuses", s));
+        if (p.pageNumber)
+          searchParams.append("pageNumber", String(p.pageNumber));
+        if (p.pageSize) searchParams.append("pageSize", String(p.pageSize));
+        return searchParams.toString();
+      },
+    });
     return res.data;
   },
-
   getMySelling: async (
     params: GetMyAuctionsParams,
   ): Promise<PagedResult<AuctionDto>> => {

@@ -6,27 +6,31 @@ import { PagedList } from "@/shared/components/PagedList";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { cn } from "@/lib/utils";
-import type { ListingStatus } from "@/shared/types/common";
 
-const FILTERS: { label: string; value: ListingStatus }[] = [
+type ListingFilter = "Active" | "Scheduled" | "Sold" | "Unsold" | "Cancelled";
+
+const FILTERS: { label: string; value: ListingFilter }[] = [
   { label: "Active", value: "Active" },
   { label: "Sold", value: "Sold" },
   { label: "Cancelled", value: "Cancelled" },
 ];
-
 export function MyListingsTab() {
-  const [status, setStatus] = useState<ListingStatus>("Active");
+  const [status, setStatus] = useState<ListingFilter>("Active");
+
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
     queryKey: ["listings", "mine", { status, page }],
     queryFn: () =>
-      profileApi.getMyListings({ status, pageNumber: page, pageSize: 12 }),
+      profileApi.getMyListings({
+        statuses: [status],
+        pageNumber: page,
+        pageSize: 12,
+      }),
   });
 
   return (
     <div className="space-y-4">
-      {/* Filter tabs */}
       <div className="flex gap-1 border-b">
         {FILTERS.map((f) => (
           <button
@@ -52,7 +56,7 @@ export function MyListingsTab() {
       ) : !data?.items.length ? (
         <EmptyState
           title={`No ${status.toLowerCase()} listings`}
-          description="Nothing to show here."
+          message="Nothing to show here."
         />
       ) : (
         <>

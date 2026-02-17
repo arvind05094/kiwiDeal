@@ -13,14 +13,7 @@ import { MyAccountPage } from "@/features/profile/MyAccountPage";
 import { InboxPage } from "@/features/messages/InboxPage";
 import { ConversationPage } from "@/features/messages/ConversationPage";
 import { PaymentStatusPage } from "@/features/payments/PaymentStatusPage";
-
-function PlaceholderPage({ name }: { name: string }) {
-  return (
-    <div className="flex items-center justify-center py-24 text-gray-400">
-      {name} — coming soon
-    </div>
-  );
-}
+import { WatchlistPage } from "@/features/watchlist/WatchlistPage";
 
 export default function App() {
   return (
@@ -61,32 +54,6 @@ export default function App() {
             path="/messages"
             element={
               <ProtectedRoute>
-                <PlaceholderPage name="Inbox" />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/messages/:conversationId"
-            element={
-              <ProtectedRoute>
-                <PlaceholderPage name="Conversation" />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/watchlist"
-            element={
-              <ProtectedRoute>
-                <PlaceholderPage name="Watchlist" />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/messages"
-            element={
-              <ProtectedRoute>
                 <InboxPage />
               </ProtectedRoute>
             }
@@ -100,6 +67,14 @@ export default function App() {
             }
           />
           <Route
+            path="/watchlist"
+            element={
+              <ProtectedRoute>
+                <WatchlistPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/payments/:auctionId"
             element={
               <ProtectedRoute>
@@ -107,6 +82,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </main>
     </div>

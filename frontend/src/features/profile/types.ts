@@ -1,10 +1,3 @@
-import type {
-  ListingDto,
-  AuctionDto,
-  WatchlistItemDto,
-  PagedResult,
-} from "@/shared/types/common";
-
 export interface UpdateProfileRequest {
   firstName: string;
   lastName: string;
@@ -12,7 +5,7 @@ export interface UpdateProfileRequest {
 }
 
 export interface GetMyListingsParams {
-  status?: "Active" | "Sold" | "Cancelled";
+  statuses?: string[];
   pageNumber?: number;
   pageSize?: number;
 }

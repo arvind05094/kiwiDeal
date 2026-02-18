@@ -13,7 +13,7 @@ public sealed class AzureBlobImageService : IImageService
 {
     private readonly BlobServiceClient _blobServiceClient;
     private const string ContainerName = "kiwideal-images";
-    private const int MaxFileSizeBytes = 1 * 1024 * 1024; // 1MB
+    private const int MaxFileSizeBytes = 1 * 1024 * 1024;
     private const int MaxWidthPx = 1200;
     private const int JpegQuality = 80;
 
@@ -32,30 +32,25 @@ public sealed class AzureBlobImageService : IImageService
         _blobServiceClient = new BlobServiceClient(connectionString);
     }
 
-    public async Task<string> UploadImageAsync(
+    public async Task<Result<string>> UploadImageAsync(
         Guid listingId,
         Stream imageStream,
         string fileName,
         string contentType,
         CancellationToken cancellationToken = default)
     {
-        // Validate file size
         if (imageStream.Length > MaxFileSizeBytes)
-            throw new InvalidOperationException($"File size exceeds the maximum allowed size of 1MB.");
+            return Result.Failure<string>(Error.ValidationFailed("File size exceeds the maximum allowed size of 1MB."));
 
-        // Validate extension
         var extension = Path.GetExtension(fileName);
         if (!AllowedExtensions.Contains(extension))
-            throw new InvalidOperationException($"File type '{extension}' is not allowed. Allowed types: jpg, jpeg, png, webp.");
+            return Result.Failure<string>(Error.ValidationFailed($"File type '{extension}' is not allowed. Allowed types: jpg, jpeg, png, webp."));
 
-        // Validate content type
         if (!AllowedContentTypes.Contains(contentType))
-            throw new InvalidOperationException($"Content type '{contentType}' is not allowed.");
+            return Result.Failure<string>(Error.ValidationFailed($"Content type '{contentType}' is not allowed."));
 
-        // Process image with ImageSharp
         using var image = await Image.LoadAsync(imageStream, cancellationToken);
 
-        // Resize if wider than max — never upscale
         if (image.Width > MaxWidthPx)
         {
             image.Mutate(x => x.Resize(new ResizeOptions
@@ -65,23 +60,21 @@ public sealed class AzureBlobImageService : IImageService
             }));
         }
 
-        // Encode as JPEG with quality 80
         var encoder = new JpegEncoder { Quality = JpegQuality };
         using var outputStream = new MemoryStream();
         await image.SaveAsync(outputStream, encoder, cancellationToken);
         outputStream.Position = 0;
 
-        // Upload to Azure Blob Storage
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var blobName = $"listings/{listingId}/{timestamp}.jpg";
 
         var containerClient = _blobServiceClient.GetBlobContainerClient(ContainerName);
-        await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob, cancellationToken: cancellationToken);
 
         var blobClient = containerClient.GetBlobClient(blobName);
         await blobClient.UploadAsync(outputStream, new BlobHttpHeaders { ContentType = "image/jpeg" }, cancellationToken: cancellationToken);
 
-        return blobClient.Uri.ToString();
+        return Result.Success(blobClient.Uri.ToString());
     }
 
     public async Task DeleteImageAsync(string imageUrl, CancellationToken cancellationToken = default)

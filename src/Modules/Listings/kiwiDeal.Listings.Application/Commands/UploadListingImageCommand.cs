@@ -31,14 +31,17 @@ public sealed class UploadListingImageCommandHandler(
         if (listing.SellerId.Value != command.SellerId)
             return Result.Failure<string>(ListingErrors.NotOwner());
 
-        var url = await imageService.UploadImageAsync(
-            command.ListingId,
-            command.ImageStream,
-            command.FileName,
-            command.ContentType,
-            cancellationToken);
+        var uploadResult = await imageService.UploadImageAsync(
+     command.ListingId,
+     command.ImageStream,
+     command.FileName,
+     command.ContentType,
+     cancellationToken);
 
-        var image = ListingImage.Create(url, listing.Images.Count);
+        if (uploadResult.IsFailure)
+            return Result.Failure<string>(uploadResult.Error);
+
+        var image = ListingImage.Create(uploadResult.Value, listing.Images.Count);
         var result = listing.AddImage(image);
 
         if (result.IsFailure)
@@ -47,7 +50,7 @@ public sealed class UploadListingImageCommandHandler(
         listingRepository.Update(listing);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(url);
+        return Result.Success(uploadResult.Value);
     }
 }
 

@@ -61,14 +61,11 @@ export function ListingCard({ listing }: ListingCardProps) {
               {listing.category}
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <StatusBadge status={listing.status} />
-            <p className="text-xs text-gray-400">
-              {formatDistanceToNow(new Date(listing.createdAt), {
-                addSuffix: true,
-              })}
-            </p>
-          </div>
+          <p className="text-xs text-gray-400">
+            {formatDistanceToNow(new Date(listing.createdAt), {
+              addSuffix: true,
+            })}
+          </p>
         </div>
       </div>
     </Link>

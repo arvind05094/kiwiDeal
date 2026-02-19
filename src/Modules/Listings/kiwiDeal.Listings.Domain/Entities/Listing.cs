@@ -17,12 +17,20 @@ public sealed class Listing : AggregateRoot
     public decimal? BuyNowPrice { get; private set; }
     public ListingCategory Category { get; private set; }
     public ListingRegion Region { get; private set; }
+
+    public Guid? AuctionId { get; private set; }
     public ListingStatus Status { get; private set; }
 
     private readonly List<ListingImage> _images = [];
     public IReadOnlyList<ListingImage> Images => _images.AsReadOnly();
 
     private Listing() { }
+
+    public void SetAuctionId(Guid auctionId)
+    {
+        AuctionId = auctionId;
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
 
     public static Result<Listing> Create(
         SellerId sellerId,

@@ -56,6 +56,8 @@ public sealed class Auction : AggregateRoot
             UpdatedAt = now
         };
 
+        auction.RaiseDomainEvent(new AuctionCreatedEvent(auction.Id.Value, auction.ListingId));
+
         return Result.Success(auction);
     }
 

@@ -10,6 +10,7 @@ public sealed record ListingDto(
     string Category,
     string Region,
     string Status,
+    Guid? AuctionId,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
     IReadOnlyList<ListingImageDto> Images);

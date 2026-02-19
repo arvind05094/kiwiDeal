@@ -36,6 +36,7 @@ public sealed class GetListingQueryHandler : IRequestHandler<GetListingQuery, Re
             listing.Category.ToString(),
             listing.Region.ToString(),
             listing.Status.ToString(),
+            listing.AuctionId,
             listing.CreatedAt,
             listing.UpdatedAt,
             listing.Images.Select(i => new ListingImageDto(i.Url, i.DisplayOrder)).ToList());

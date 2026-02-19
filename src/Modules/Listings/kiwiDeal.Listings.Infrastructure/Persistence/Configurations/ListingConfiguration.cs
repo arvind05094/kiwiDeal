@@ -59,6 +59,9 @@ public sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
             .HasConversion<string>()
             .IsRequired();
 
+        builder.Property(l => l.AuctionId)
+            .HasColumnName("auction_id");
+
         builder.Property(l => l.Status)
             .HasColumnName("status")
             .HasMaxLength(50)

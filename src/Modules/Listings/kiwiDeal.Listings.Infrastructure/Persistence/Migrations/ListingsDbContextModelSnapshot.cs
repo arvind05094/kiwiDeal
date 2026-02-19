@@ -54,6 +54,10 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid?>("AuctionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("auction_id");
+
                     b.Property<decimal?>("BuyNowPrice")
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("buy_now_price");

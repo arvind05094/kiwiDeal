@@ -39,6 +39,7 @@ export interface ListingDto {
   createdAt: string;
   updatedAt: string;
   images: ListingImageDto[];
+  auctionId?: string; // add this
 }
 
 export interface WatchlistItemDto {

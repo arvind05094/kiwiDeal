@@ -2,12 +2,11 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listingsApi } from "./api";
 import { ImageGallery } from "@/shared/components/ImageGallery";
-import { SellerInfo } from "@/shared/components/SellerInfo";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/shared/hooks/useAuth";
-import { MapPin, Tag, ArrowLeft, Heart } from "lucide-react";
+import { MapPin, Tag, ArrowLeft, Heart, User } from "lucide-react";
 import { useState } from "react";
 import { createBuyNowCheckout } from "../payments/api";
 
@@ -50,92 +49,95 @@ export function ListingDetailPage() {
   const isAuction = listing.listingType === "Auction";
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* Back */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
       >
-        <ArrowLeft className="h-4 w-4" /> Back
+        <ArrowLeft className="h-4 w-4" /> Back to listings
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[5fr_4fr] gap-8 items-start">
         {/* Left — images */}
         <ImageGallery images={listing.images} title={listing.title} />
 
-        {/* Right — details */}
+        {/* Right — all details */}
         <div className="space-y-5">
-          <div className="flex items-start justify-between gap-3">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {listing.title}
-            </h1>
-            <StatusBadge status={listing.status} />
+          {/* Title + status */}
+          <div>
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <h1 className="text-xl font-semibold text-gray-900 leading-snug">
+                {listing.title}
+              </h1>
+              <StatusBadge status={listing.status} />
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5" />
+                {listing.region}
+              </span>
+              <span className="flex items-center gap-1">
+                <Tag className="h-3.5 w-3.5" />
+                {listing.category}
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              {listing.region}
-            </span>
-            <span className="flex items-center gap-1">
-              <Tag className="h-4 w-4" />
-              {listing.category}
-            </span>
-          </div>
-
+          {/* Price */}
           {isFixedPrice && listing.buyNowPrice !== undefined && (
-            <p className="text-3xl font-bold text-gray-900">
-              ${listing.buyNowPrice.toLocaleString()}
-            </p>
+            <div className="py-3 border-t border-b border-gray-100">
+              <p className="text-3xl font-bold text-gray-900">
+                ${listing.buyNowPrice.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">Fixed price</p>
+            </div>
           )}
 
           {isAuction && (
-            <p className="text-sm text-gray-500 italic">
-              See auction for current bid
-            </p>
+            <div className="py-3 border-t border-b border-gray-100">
+              <p className="text-sm text-gray-500">Auction listing</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                View auction for current bid
+              </p>
+            </div>
+          )}
+          {isAuction && isActive && (
+            <Button
+              asChild
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+            >
+              <Link to={`/auctions/${listing.auctionId}`}>View Auction</Link>
+            </Button>
           )}
 
-          {/* Seller info — placeholder until users api is wired */}
-          <div className="rounded-lg border border-gray-100 p-4 bg-gray-50">
-            <p className="text-xs text-gray-400 mb-2">Seller</p>
-            <Link
-              to={`/users/${listing.sellerId}`}
-              className="text-sm font-medium text-gray-900 hover:text-orange-500 transition-colors"
-            >
-              View seller profile →
-            </Link>
-          </div>
-
           {/* Actions */}
-          <div className="flex flex-wrap gap-3">
-            {/* Seller actions */}
+          <div className="space-y-2">
             {isSeller && isActive && (
-              <>
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
+                  className="flex-1"
                   onClick={() => navigate(`/listings/${id}/edit`)}
                 >
-                  Edit
+                  Edit Listing
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
                   onClick={() => cancelMutation.mutate()}
                   disabled={cancelMutation.isPending}
                 >
-                  {cancelMutation.isPending
-                    ? "Cancelling..."
-                    : "Cancel Listing"}
+                  {cancelMutation.isPending ? "Cancelling..." : "Cancel"}
                 </Button>
-              </>
+              </div>
             )}
 
-            {/* Buyer actions */}
             {!isSeller && isActive && (
-              <>
+              <div className="space-y-2">
                 {isFixedPrice && listing.buyNowPrice !== undefined && (
                   <Button
-                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                     onClick={async () => {
                       try {
                         const { checkoutUrl } = await createBuyNowCheckout({
@@ -147,55 +149,72 @@ export function ListingDetailPage() {
                       } catch {}
                     }}
                   >
-                    Buy Now
+                    Buy Now — ${listing.buyNowPrice.toLocaleString()}
                   </Button>
                 )}
-                {isAuction && (
-                  <Button asChild>
-                    <Link to={`/auctions/${id}`}>View Auction</Link>
-                  </Button>
-                )}
+
                 {isAuthenticated && (
-                  <Button
-                    variant="outline"
-                    onClick={() => watchMutation.mutate()}
-                    disabled={watchMutation.isPending}
-                    className="flex items-center gap-1"
-                  >
-                    <Heart
-                      className={`h-4 w-4 ${watched ? "fill-orange-500 text-orange-500" : ""}`}
-                    />
-                    {watched ? "Watching" : "Watch"}
-                  </Button>
-                )}
-                {isAuthenticated && (
-                  <Button variant="outline" asChild>
-                    <Link
-                      to={`/messages/new?listingId=${listing.id}&sellerId=${listing.sellerId}`}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => watchMutation.mutate()}
+                      disabled={watchMutation.isPending}
                     >
-                      Message Seller
-                    </Link>
-                  </Button>
+                      <Heart
+                        className={`h-4 w-4 mr-1.5 ${watched ? "fill-orange-500 text-orange-500" : ""}`}
+                      />
+                      {watched ? "Watching" : "Watch"}
+                    </Button>
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link
+                        to={`/messages/new?listingId=${listing.id}&sellerId=${listing.sellerId}`}
+                      >
+                        Message Seller
+                      </Link>
+                    </Button>
+                  </div>
                 )}
-              </>
+              </div>
+            )}
+
+            {!isActive && (
+              <p className="text-sm text-gray-400 italic bg-gray-50 rounded-lg px-4 py-3">
+                This listing is {listing.status.toLowerCase()} and no longer
+                available.
+              </p>
             )}
           </div>
 
-          {!isActive && (
-            <p className="text-sm text-gray-400 italic">
-              This listing is {listing.status.toLowerCase()} and no longer
-              available.
-            </p>
-          )}
-        </div>
-      </div>
+          {/* Seller */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            {/* Added items-center here so avatar and text stay vertically centered */}
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                <User className="h-4 w-4 text-gray-400" />
+              </div>
+              {/* Explicit leading-none or alignment prevents the paragraph tag from introducing default text margins */}
+              <p className="text-sm text-gray-500 leading-none">Listed by</p>
+            </div>
 
-      {/* Description */}
-      <div className="space-y-2">
-        <h2 className="text-base font-semibold text-gray-900">Description</h2>
-        <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
-          {listing.description}
-        </p>
+            <Link
+              to={`/users/${listing.sellerId}`}
+              className="inline-flex items-center gap-1 text-sm font-medium text-gray-900 border border-gray-200 rounded-lg px-3 h-8 hover:bg-gray-50 transition-colors"
+            >
+              View profile <ArrowLeft className="h-3.5 w-3.5 rotate-180" />
+            </Link>
+          </div>
+
+          {/* Description */}
+          <div className="pt-1 border-t border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-700 mb-2">
+              Description
+            </h2>
+            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
+              {listing.description}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

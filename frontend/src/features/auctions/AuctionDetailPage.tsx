@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow, format, isPast } from "date-fns";
@@ -32,29 +32,28 @@ export function AuctionDetailPage() {
     queryKey: ["auction", id],
     queryFn: () => auctionsApi.getAuction(id!),
     enabled: !!id,
-    onSuccess: (data: AuctionDto) => {
-      setLiveBids(data.bids ?? []);
-      setLiveEndTime(data.endTime);
-    },
   });
 
-  const onBidPlaced = useCallback(
-    (msg: BidPlacedMessage) => {
-      setLiveBids((prev) => [
-        {
-          id: crypto.randomUUID(),
-          bidderId: msg.bidderId,
-          bidderName: msg.bidderName,
-          amount: msg.amount,
-          createdAt: new Date().toISOString(),
-        },
-        ...prev,
-      ]);
-      setLiveEndTime(msg.newEndTime);
-      queryClient.invalidateQueries({ queryKey: ["auction", id] });
-    },
-    [id, queryClient],
-  );
+  useEffect(() => {
+    if (auction) {
+      setLiveBids([...(auction.bids ?? [])].reverse());
+      setLiveEndTime(auction.endTime);
+    }
+  }, [auction]);
+
+  const onBidPlaced = useCallback((msg: BidPlacedMessage) => {
+    setLiveBids((prev) => [
+      {
+        id: crypto.randomUUID(),
+        bidderId: msg.bidderId,
+        bidderName: msg.bidderName,
+        amount: msg.amount,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+    setLiveEndTime(msg.newEndTime);
+  }, []);
 
   const onAuctionClosed = useCallback(
     (_msg: AuctionClosedMessage) => {
@@ -104,9 +103,12 @@ export function AuctionDetailPage() {
   const status = liveClosed ? "Closed" : auction.status;
   const endTime = liveEndTime ?? auction.endTime;
   const bids = liveBids.length ? liveBids : (auction.bids ?? []);
-  const currentBid =
-    bids[0]?.amount ?? auction.currentHighestBid ?? auction.startingPrice;
-  const currentBidderId = bids[0]?.bidderId ?? auction.currentHighestBidderId;
+  const currentBid = bids.length
+    ? Math.max(...bids.map((b) => b.amount))
+    : (auction.currentHighestBid ?? auction.startingPrice);
+  const currentBidderId = bids.length
+    ? bids.reduce((a, b) => (a.amount > b.amount ? a : b)).bidderId
+    : auction.currentHighestBidderId;
   const isSeller = user?.id === auction.sellerId;
   const isWinner = status === "Closed" && currentBidderId === user?.id;
   const canBid = isAuthenticated && !isSeller && status === "Active";
@@ -133,7 +135,6 @@ export function AuctionDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Back */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
@@ -142,7 +143,6 @@ export function AuctionDetailPage() {
         Back
       </button>
 
-      {/* Listing context */}
       <div className="flex items-center gap-3">
         <Link
           to={`/listings/${auction.listingId}`}
@@ -154,10 +154,8 @@ export function AuctionDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left — bid info */}
         <Card>
           <CardContent className="p-6 space-y-5">
-            {/* Current bid */}
             <div>
               <p className="text-sm text-gray-500">
                 {bids.length ? "Current bid" : "Starting price"}
@@ -170,7 +168,6 @@ export function AuctionDetailPage() {
               )}
             </div>
 
-            {/* Timer */}
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Clock className="w-4 h-4" />
               {status === "Scheduled" && (
@@ -194,7 +191,6 @@ export function AuctionDetailPage() {
               )}
             </div>
 
-            {/* Start / end times */}
             <div className="text-xs text-gray-400 space-y-0.5">
               <p>
                 Start:{" "}
@@ -203,7 +199,6 @@ export function AuctionDetailPage() {
               <p>End: {format(new Date(endTime), "d MMM yyyy, h:mm a")}</p>
             </div>
 
-            {/* Place bid */}
             {canBid && (
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -227,7 +222,6 @@ export function AuctionDetailPage() {
               </div>
             )}
 
-            {/* Guest prompt */}
             {!isAuthenticated && status === "Active" && (
               <p className="text-sm text-gray-500">
                 <Link to="/login" className="text-orange-500 hover:underline">
@@ -258,7 +252,6 @@ export function AuctionDetailPage() {
               </div>
             )}
 
-            {/* Seller controls */}
             {canClose && (
               <Button
                 variant="outline"
@@ -271,7 +264,6 @@ export function AuctionDetailPage() {
               </Button>
             )}
 
-            {/* Watch */}
             {canWatch && (
               <Button
                 variant="outline"
@@ -295,7 +287,6 @@ export function AuctionDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Right — bid history */}
         <Card>
           <CardContent className="p-6">
             <h3 className="font-semibold mb-4">Bid history</h3>
@@ -308,7 +299,12 @@ export function AuctionDetailPage() {
                     key={bid.id}
                     className="flex items-center justify-between text-sm"
                   >
-                    <span className="font-medium">{bid.bidderName}</span>
+                    <Link
+                      to={`/users/${bid.bidderId}`}
+                      className="font-medium hover:underline hover:text-orange-500 transition-colors"
+                    >
+                      {bid.bidderName}
+                    </Link>
                     <span className="text-gray-500">
                       ${bid.amount.toFixed(2)}
                     </span>

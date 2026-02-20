@@ -84,6 +84,39 @@ export function CreateListingPage() {
 
   const err = (field: string) => fieldErrors[field]?.[0];
 
+  const validate = (): boolean => {
+    const errors: Record<string, string[]> = {};
+
+    if (!title.trim()) errors["Title"] = ["Title is required"];
+    if (!description.trim())
+      errors["Description"] = ["Description is required"];
+    if (!category) errors["Category"] = ["Category is required"];
+    if (!region) errors["Region"] = ["Region is required"];
+
+    if (listingType === "FixedPrice") {
+      if (!buyNowPrice || Number(buyNowPrice) <= 0)
+        errors["BuyNowPrice"] = ["Buy now price must be greater than 0"];
+    }
+
+    if (listingType === "Auction") {
+      if (!startingPrice || Number(startingPrice) <= 0)
+        errors["StartingPrice"] = ["Starting price must be greater than 0"];
+      const now = new Date();
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      if (!startTime || start <= now)
+        errors["StartTime"] = ["Start time must be in the future"];
+      if (!endTime || end <= start)
+        errors["EndTime"] = ["End time must be after start time"];
+    }
+
+    if (images.length === 0)
+      errors["Images"] = ["At least one image is required"];
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <h1 className="text-2xl font-semibold text-gray-900">Post a Listing</h1>
@@ -206,6 +239,9 @@ export function CreateListingPage() {
                 onChange={(e) => setStartingPrice(e.target.value)}
                 placeholder="1.00"
               />
+              {err("StartingPrice") && (
+                <p className="text-xs text-red-500">{err("StartingPrice")}</p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -216,6 +252,9 @@ export function CreateListingPage() {
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                 />
+                {err("StartTime") && (
+                  <p className="text-xs text-red-500">{err("StartTime")}</p>
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="endTime">End Time</Label>
@@ -225,6 +264,9 @@ export function CreateListingPage() {
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                 />
+                {err("EndTime") && (
+                  <p className="text-xs text-red-500">{err("EndTime")}</p>
+                )}
               </div>
             </div>
           </div>
@@ -280,7 +322,10 @@ export function CreateListingPage() {
       <div className="flex gap-3 pt-2">
         <Button
           className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
-          onClick={() => createMutation.mutate()}
+          onClick={() => {
+            if (!validate()) return;
+            createMutation.mutate();
+          }}
           disabled={createMutation.isPending}
         >
           {createMutation.isPending ? "Posting..." : "Post Listing"}

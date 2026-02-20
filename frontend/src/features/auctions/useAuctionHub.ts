@@ -45,8 +45,8 @@ export function useAuctionHub({
   useEffect(() => {
     const token = getAccessToken();
     const url = token
-      ? `${HUB_URL}/hubs/auction?access_token=${token}`
-      : `${HUB_URL}/hubs/auction`;
+      ? `${HUB_URL}/hubs/auctions?access_token=${token}`
+      : `${HUB_URL}/hubs/auctions`;
 
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(url)

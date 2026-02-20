@@ -15,10 +15,9 @@ public sealed record PlaceBidCommand(
 
 public interface IAuctionHubContext
 {
-    Task SendBidPlaced(string auctionId, Guid bidId, Guid bidderId, decimal amount, DateTimeOffset newEndTime, CancellationToken cancellationToken = default);
+    Task SendBidPlaced(string auctionId, Guid bidId, Guid bidderId, string bidderName, decimal amount, DateTimeOffset newEndTime, CancellationToken cancellationToken = default);
     Task SendAuctionClosed(string auctionId, Guid? winnerId, decimal? finalAmount, CancellationToken cancellationToken = default);
 }
-
 public sealed class PlaceBidCommandHandler : IRequestHandler<PlaceBidCommand, Result>
 {
     private readonly IAuctionRepository _auctionRepository;
@@ -54,6 +53,7 @@ public sealed class PlaceBidCommandHandler : IRequestHandler<PlaceBidCommand, Re
             command.AuctionId.ToString(),
             latestBid.Id.Value,
             command.BidderId,
+            command.BidderName,
             command.Amount,
             auction.EndTime,
             cancellationToken);

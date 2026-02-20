@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using kiwiDeal.Listings.Application.Commands;
 using kiwiDeal.Listings.Application.Queries;
-
 namespace kiwiDeal.Auctions.Api;
 
 [ApiController]

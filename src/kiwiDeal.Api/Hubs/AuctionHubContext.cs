@@ -9,6 +9,7 @@ public sealed class AuctionHubContext(IHubContext<AuctionHub> hubContext) : IAuc
         string auctionId,
         Guid bidId,
         Guid bidderId,
+        string bidderName,
         decimal amount,
         DateTimeOffset newEndTime,
         CancellationToken cancellationToken = default)
@@ -20,6 +21,7 @@ public sealed class AuctionHubContext(IHubContext<AuctionHub> hubContext) : IAuc
                 AuctionId = auctionId,
                 BidId = bidId,
                 BidderId = bidderId,
+                BidderName = bidderName,
                 Amount = amount,
                 NewEndTime = newEndTime
             },

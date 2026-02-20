@@ -4,7 +4,6 @@ using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Pagination;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
-using kiwiDeal.SharedKernel.Pagination;
 
 namespace kiwiDeal.Payments.Application.Queries.GetFixedPriceSales;
 

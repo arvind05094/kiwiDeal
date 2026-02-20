@@ -26,8 +26,10 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICur
     {
         get
         {
-            var given = _httpContext?.User?.FindFirst(JwtRegisteredClaimNames.GivenName)?.Value;
-            var family = _httpContext?.User?.FindFirst(JwtRegisteredClaimNames.FamilyName)?.Value;
+            var given = _httpContext?.User?.FindFirst(JwtRegisteredClaimNames.GivenName)?.Value
+                ?? _httpContext?.User?.FindFirst(ClaimTypes.GivenName)?.Value;
+            var family = _httpContext?.User?.FindFirst(JwtRegisteredClaimNames.FamilyName)?.Value
+                ?? _httpContext?.User?.FindFirst(ClaimTypes.Surname)?.Value;
             return (given, family) switch
             {
                 (null, null) => null,

@@ -60,6 +60,24 @@ public sealed class StripeService(
             return Result.Failure<StripeCheckoutSession>(Error.Unexpected(ex.Message));
         }
     }
+
+    public async Task<Result<string>> GetCheckoutSessionUrlAsync(
+    string sessionId,
+    CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            StripeConfiguration.ApiKey = options.Value.SecretKey;
+            var service = new SessionService();
+            var session = await service.GetAsync(sessionId, cancellationToken: cancellationToken);
+            return Result.Success(session.Url);
+        }
+        catch (StripeException ex)
+        {
+            logger.LogWarning(ex, "Stripe error retrieving session {SessionId}", sessionId);
+            return Result.Failure<string>(Error.Unexpected(ex.Message));
+        }
+    }
 }
 
 public sealed class StripeOptions

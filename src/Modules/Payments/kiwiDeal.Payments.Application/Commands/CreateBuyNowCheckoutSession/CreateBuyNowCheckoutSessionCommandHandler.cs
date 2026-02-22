@@ -24,8 +24,16 @@ public sealed class CreateBuyNowCheckoutSessionCommandHandler(
             request.ListingId, cancellationToken);
 
         if (existing is not null && existing.Status == PaymentStatus.Pending)
+        {
+            if (!string.IsNullOrEmpty(existing.StripeSessionId))
+            {
+                var urlResult = await stripeService.GetCheckoutSessionUrlAsync(
+                    existing.StripeSessionId, cancellationToken);
+                if (urlResult.IsSuccess)
+                    return Result.Success(urlResult.Value);
+            }
             return Result.Failure<string>(PaymentErrors.ActiveSessionExists);
-
+        }
         if (existing is not null && existing.Status == PaymentStatus.Completed)
             return Result.Failure<string>(PaymentErrors.AlreadyProcessed);
 

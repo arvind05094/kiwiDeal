@@ -14,6 +14,8 @@ import { InboxPage } from "@/features/messages/InboxPage";
 import { ConversationPage } from "@/features/messages/ConversationPage";
 import { PaymentStatusPage } from "@/features/payments/PaymentStatusPage";
 import { WatchlistPage } from "@/features/watchlist/WatchlistPage";
+import { PaymentSuccessPage } from "./features/payments/PaymentSuccessPage";
+import { PaymentCancelPage } from "./features/payments/PaymentCancelPage";
 
 export default function App() {
   return (
@@ -84,6 +86,22 @@ export default function App() {
           />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/payments/success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccessPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payments/cancel"
+            element={
+              <ProtectedRoute>
+                <PaymentCancelPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </div>

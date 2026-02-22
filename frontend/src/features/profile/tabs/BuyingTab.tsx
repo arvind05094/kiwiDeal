@@ -115,25 +115,25 @@ export function BuyingTab() {
       ) : (
         <>
           <div className="space-y-3">
-            {purchaseData.items.map((l) => (
+            {purchaseData.items.map((p) => (
               <Link
-                key={l.id}
-                to={`/listings/${l.id}`}
+                key={p.id}
+                to={`/listings/${p.listingId}`}
                 className="flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow"
               >
                 <div>
-                  <p className="font-medium text-gray-900">{l.title}</p>
+                  <p className="font-medium text-gray-900">
+                    Listing {p.listingId.slice(0, 8)}...
+                  </p>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {l.category} · {l.region}
+                    {new Date(p.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
-                  {l.buyNowPrice != null && (
-                    <p className="text-sm font-medium text-gray-900">
-                      ${l.buyNowPrice.toFixed(2)}
-                    </p>
-                  )}
-                  <StatusBadge status={l.status} />
+                  <p className="text-sm font-medium text-gray-900">
+                    ${p.amount.toFixed(2)}
+                  </p>
+                  <StatusBadge status={p.status} />
                 </div>
               </Link>
             ))}

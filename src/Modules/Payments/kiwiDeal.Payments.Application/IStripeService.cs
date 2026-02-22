@@ -10,4 +10,8 @@ public interface IStripeService
         decimal amount,
         string productName,
         CancellationToken cancellationToken = default);
+
+    Task<Result<string>> GetCheckoutSessionUrlAsync(
+        string sessionId,
+        CancellationToken cancellationToken = default);
 }

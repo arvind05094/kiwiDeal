@@ -6,6 +6,7 @@ import type {
   ListingDto,
   AuctionDto,
   WatchlistItemDto,
+  PaymentDto,
 } from "@/shared/types/common";
 import type {
   UpdateProfileRequest,
@@ -72,7 +73,7 @@ export const profileApi = {
   getFixedPricePurchases: async (params: {
     pageNumber?: number;
     pageSize?: number;
-  }): Promise<PagedResult<ListingDto>> => {
+  }): Promise<PagedResult<PaymentDto>> => {
     const res = await client.get("/payments/purchases", { params });
     return res.data;
   },

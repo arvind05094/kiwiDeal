@@ -24,8 +24,10 @@ export function ConversationPage() {
     enabled: !!conversationId,
   });
 
-  const { messages } = useMessageHub(conversationId!, initialMessages);
-
+  const { messages, addMessage } = useMessageHub(
+    conversationId!,
+    initialMessages,
+  );
   useEffect(() => {
     if (conversationId) markAsRead(conversationId);
   }, [conversationId]);
@@ -38,6 +40,7 @@ export function ConversationPage() {
     mutationFn: () => sendMessage(conversationId!, { content }),
     onSuccess: () => {
       setContent("");
+      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
   });
@@ -76,11 +79,11 @@ export function ConversationPage() {
             No messages yet
           </p>
         )}
-        {messages.map((msg) => {
+        {messages.map((msg, index) => {
           const isOwn = msg.senderId === user?.id;
           return (
             <div
-              key={msg.id}
+              key={msg.id ?? index}
               className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
             >
               <div

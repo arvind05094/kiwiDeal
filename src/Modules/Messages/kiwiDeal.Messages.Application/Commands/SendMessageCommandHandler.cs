@@ -35,6 +35,9 @@ public class SendMessageCommandHandler(
             return Result.Failure<MessageDto>(messageResult.Error);
 
         var message = messageResult.Value;
+        var addResult = conversation.AddMessage(message);
+        if (addResult.IsFailure)
+            return Result.Failure<MessageDto>(addResult.Error);
         conversation.TouchUpdatedAt();
         conversationRepository.Update(conversation);
 

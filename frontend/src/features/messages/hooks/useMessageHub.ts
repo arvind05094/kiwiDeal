@@ -9,12 +9,12 @@ export function useMessageHub(
   conversationId: string,
   initialMessages: MessageDto[],
 ) {
-  const [messages, setMessages] = useState<MessageDto[]>(initialMessages);
+  const [liveMessages, setLiveMessages] = useState<MessageDto[]>([]);
   const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
-    setMessages(initialMessages);
-  }, [initialMessages]);
+    setLiveMessages([]);
+  }, [conversationId]);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -24,8 +24,19 @@ export function useMessageHub(
       .withAutomaticReconnect()
       .build();
 
-    connection.on("MessageReceived", (msg: MessageDto) => {
-      setMessages((prev) => [...prev, msg]);
+    connection.on("MessageReceived", (msg: any) => {
+      const normalized: MessageDto = {
+        id: msg.messageId ?? msg.id,
+        conversationId: msg.conversationId,
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        content: msg.content,
+        createdAt: msg.createdAt,
+      };
+      setLiveMessages((prev) => {
+        if (prev.some((m) => m.id === normalized.id)) return prev;
+        return [...prev, normalized];
+      });
     });
 
     connection.start().then(() => {
@@ -41,5 +52,18 @@ export function useMessageHub(
     };
   }, [conversationId]);
 
-  return { messages, setMessages };
+  const allIds = new Set(initialMessages.map((m) => m.id));
+  const messages = [
+    ...initialMessages,
+    ...liveMessages.filter((m) => !allIds.has(m.id)),
+  ];
+
+  const addMessage = (msg: MessageDto) => {
+    setLiveMessages((prev) => {
+      if (prev.some((m) => m.id === msg.id)) return prev;
+      return [...prev, msg];
+    });
+  };
+
+  return { messages, addMessage };
 }

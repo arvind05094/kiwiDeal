@@ -9,6 +9,7 @@ import { useAuth } from "@/shared/hooks/useAuth";
 import { MapPin, Tag, ArrowLeft, Heart, User } from "lucide-react";
 import { useState } from "react";
 import { createBuyNowCheckout } from "../payments/api";
+import { startConversation } from "../messages/api";
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -166,12 +167,24 @@ export function ListingDetailPage() {
                       />
                       {watched ? "Watching" : "Watch"}
                     </Button>
-                    <Button variant="outline" className="flex-1" asChild>
-                      <Link
-                        to={`/messages/new?listingId=${listing.id}&sellerId=${listing.sellerId}`}
-                      >
-                        Message Seller
-                      </Link>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={async () => {
+                        try {
+                          const conversationId = await startConversation({
+                            listingId: listing.id,
+                            listingTitle: listing.title,
+                            recipientId: listing.sellerId,
+                            recipientName: "",
+                            initialMessage:
+                              "Hi, I'm interested in this listing.",
+                          });
+                          navigate(`/messages/${conversationId}`);
+                        } catch {}
+                      }}
+                    >
+                      Message Seller
                     </Button>
                   </div>
                 )}

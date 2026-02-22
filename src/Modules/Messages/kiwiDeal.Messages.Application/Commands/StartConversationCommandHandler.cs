@@ -19,7 +19,16 @@ public class StartConversationCommandHandler(
             request.ListingId, request.SenderId, request.RecipientId, cancellationToken);
 
         if (existing is not null)
-            return Result.Failure<ConversationDto>(MessageErrors.ConversationAlreadyExists);
+            return Result.Success(new ConversationDto
+            {
+                Id = existing.Id.Value,
+                ListingId = existing.ListingId,
+                ListingTitle = existing.ListingTitle,
+                OtherUserId = request.RecipientId,
+                OtherUserName = request.RecipientName,
+                LastMessagePreview = existing.Messages.LastOrDefault()?.Content ?? "",
+                UpdatedAt = existing.UpdatedAt
+            });
 
         var conversationResult = Conversation.Create(
             request.ListingId,

@@ -25,8 +25,6 @@ public class GetConversationsQueryHandler(
             return new ConversationDto
             {
                 Id = c.Id.Value,
-                ListingId = c.ListingId,
-                ListingTitle = c.ListingTitle,
                 OtherUserId = isSender ? c.RecipientId : c.SenderId,
                 OtherUserName = isSender ? c.RecipientName : c.SenderName,
                 LastMessagePreview = lastMessage?.Content ?? string.Empty,

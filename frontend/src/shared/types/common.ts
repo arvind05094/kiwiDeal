@@ -100,11 +100,8 @@ export interface MyProfileDto {
   region: string;
   memberSince: string;
 }
-
 export interface ConversationDto {
   id: string;
-  listingId: string;
-  listingTitle: string;
   otherUserId: string;
   otherUserName: string;
   lastMessagePreview: string;

@@ -10,8 +10,6 @@ public class Conversation : AggregateRoot, ISoftDeletable
     private Conversation() { }
 
     public ConversationId Id { get; private set; } = default!;
-    public Guid ListingId { get; private set; }
-    public string ListingTitle { get; private set; } = string.Empty;
     public Guid SenderId { get; private set; }
     public string SenderName { get; private set; } = string.Empty;
     public Guid RecipientId { get; private set; }
@@ -26,8 +24,6 @@ public class Conversation : AggregateRoot, ISoftDeletable
     public IReadOnlyCollection<Message> Messages => _messages.AsReadOnly();
 
     public static Result<Conversation> Create(
-        Guid listingId,
-        string listingTitle,
         Guid senderId,
         string senderName,
         Guid recipientId,
@@ -39,8 +35,6 @@ public class Conversation : AggregateRoot, ISoftDeletable
         var conversation = new Conversation
         {
             Id = ConversationId.New(),
-            ListingId = listingId,
-            ListingTitle = listingTitle,
             SenderId = senderId,
             SenderName = senderName,
             RecipientId = recipientId,

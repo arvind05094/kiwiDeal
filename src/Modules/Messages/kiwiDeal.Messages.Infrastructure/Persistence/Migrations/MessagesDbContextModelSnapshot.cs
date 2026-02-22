@@ -41,16 +41,6 @@ namespace kiwiDeal.Messages.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
-                    b.Property<Guid>("ListingId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("listing_id");
-
-                    b.Property<string>("ListingTitle")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("listing_title");
-
                     b.Property<Guid>("RecipientId")
                         .HasColumnType("uuid")
                         .HasColumnName("recipient_id");
@@ -84,8 +74,8 @@ namespace kiwiDeal.Messages.Infrastructure.Persistence.Migrations
                     b.HasIndex("SenderId")
                         .HasDatabaseName("ix_conversations_sender_id");
 
-                    b.HasIndex("ListingId", "SenderId", "RecipientId")
-                        .HasDatabaseName("ix_conversations_listing_sender_recipient");
+                    b.HasIndex("SenderId", "RecipientId")
+                        .HasDatabaseName("ix_conversations_sender_recipient");
 
                     b.ToTable("conversations", "messages");
                 });

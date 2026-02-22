@@ -21,14 +21,11 @@ public sealed class MessagesController(ISender sender, ICurrentUser currentUser)
         CancellationToken ct)
     {
         var command = new StartConversationCommand(
-            request.ListingId,
-            request.ListingTitle,
             currentUser.Id!.Value,
             currentUser.Name ?? string.Empty,
             request.RecipientId,
             request.RecipientName,
             request.InitialMessage);
-
         var result = await sender.Send(command, ct);
         if (result.IsFailure) return result.Error.ToProblemDetails();
         return Ok(result.Value);
@@ -45,7 +42,6 @@ public sealed class MessagesController(ISender sender, ICurrentUser currentUser)
             currentUser.Id!.Value,
             currentUser.Name ?? string.Empty,
             request.Content);
-
         var result = await sender.Send(command, ct);
         if (result.IsFailure) return result.Error.ToProblemDetails();
         return Ok(result.Value);

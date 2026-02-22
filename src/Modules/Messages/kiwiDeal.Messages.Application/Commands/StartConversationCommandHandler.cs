@@ -1,6 +1,5 @@
 using kiwiDeal.Messages.Application.DTOs;
 using kiwiDeal.Messages.Domain.Entities;
-using kiwiDeal.Messages.Domain.Errors;
 using kiwiDeal.Messages.Domain.Repositories;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
@@ -15,15 +14,13 @@ public class StartConversationCommandHandler(
         StartConversationCommand request,
         CancellationToken cancellationToken)
     {
-        var existing = await conversationRepository.GetByParticipantsAndListingAsync(
-            request.ListingId, request.SenderId, request.RecipientId, cancellationToken);
+        var existing = await conversationRepository.GetByParticipantsAsync(
+            request.SenderId, request.RecipientId, cancellationToken);
 
         if (existing is not null)
             return Result.Success(new ConversationDto
             {
                 Id = existing.Id.Value,
-                ListingId = existing.ListingId,
-                ListingTitle = existing.ListingTitle,
                 OtherUserId = request.RecipientId,
                 OtherUserName = request.RecipientName,
                 LastMessagePreview = existing.Messages.LastOrDefault()?.Content ?? "",
@@ -31,8 +28,6 @@ public class StartConversationCommandHandler(
             });
 
         var conversationResult = Conversation.Create(
-            request.ListingId,
-            request.ListingTitle,
             request.SenderId,
             request.SenderName,
             request.RecipientId,
@@ -62,8 +57,6 @@ public class StartConversationCommandHandler(
         return Result.Success(new ConversationDto
         {
             Id = conversation.Id.Value,
-            ListingId = conversation.ListingId,
-            ListingTitle = conversation.ListingTitle,
             OtherUserId = request.RecipientId,
             OtherUserName = request.RecipientName,
             LastMessagePreview = request.InitialMessage,

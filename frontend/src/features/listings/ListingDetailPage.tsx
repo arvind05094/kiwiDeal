@@ -173,8 +173,6 @@ export function ListingDetailPage() {
                       onClick={async () => {
                         try {
                           const conversationId = await startConversation({
-                            listingId: listing.id,
-                            listingTitle: listing.title,
                             recipientId: listing.sellerId,
                             recipientName: "",
                             initialMessage:

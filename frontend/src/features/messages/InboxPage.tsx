@@ -46,9 +46,7 @@ export function InboxPage() {
                   })}
                 </span>
               </div>
-              <p className="text-sm text-gray-500 truncate mb-0.5">
-                {conv.listingTitle}
-              </p>
+
               <p className="text-sm text-gray-400 truncate">
                 {conv.lastMessagePreview}
               </p>

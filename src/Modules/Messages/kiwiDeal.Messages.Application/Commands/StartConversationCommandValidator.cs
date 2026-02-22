@@ -6,7 +6,6 @@ public class StartConversationCommandValidator : AbstractValidator<StartConversa
 {
     public StartConversationCommandValidator()
     {
-        RuleFor(x => x.ListingId).NotEmpty();
         RuleFor(x => x.RecipientId).NotEmpty();
         RuleFor(x => x.InitialMessage).NotEmpty().MaximumLength(2000);
     }

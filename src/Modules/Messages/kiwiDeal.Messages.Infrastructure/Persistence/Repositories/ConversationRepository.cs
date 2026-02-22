@@ -13,14 +13,13 @@ public class ConversationRepository(MessagesDbContext context) : IConversationRe
             .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
-    public async Task<Conversation?> GetByParticipantsAndListingAsync(
-        Guid listingId, Guid userA, Guid userB, CancellationToken ct = default)
+    public async Task<Conversation?> GetByParticipantsAsync(
+        Guid userA, Guid userB, CancellationToken ct = default)
     {
         return await context.Conversations
             .FirstOrDefaultAsync(c =>
-                c.ListingId == listingId &&
-                ((c.SenderId == userA && c.RecipientId == userB) ||
-                 (c.SenderId == userB && c.RecipientId == userA)), ct);
+                (c.SenderId == userA && c.RecipientId == userB) ||
+                (c.SenderId == userB && c.RecipientId == userA), ct);
     }
 
     public async Task<List<Conversation>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)

@@ -4,6 +4,7 @@ using kiwiDeal.Auctions.Domain.Errors;
 using kiwiDeal.Auctions.Domain.Repositories;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace kiwiDeal.Auctions.Application.Commands;
 
@@ -46,7 +47,14 @@ public sealed class PlaceBidCommandHandler : IRequestHandler<PlaceBidCommand, Re
         if (result.IsFailure)
             return result;
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result.Failure(AuctionErrors.BidConflict());
+        }
 
         var latestBid = auction.Bids.Last();
         await _hubContext.SendBidPlaced(

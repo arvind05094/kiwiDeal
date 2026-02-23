@@ -21,4 +21,6 @@ public static class AuctionErrors
 
     public static Error BidderIsSeller() =>
         Error.BidderIsSeller("You cannot bid on your own listing.");
+    public static Error BidConflict() =>
+        Error.Conflict("Another bid was placed at the same time. Please try again.");
 }

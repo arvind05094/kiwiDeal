@@ -20,7 +20,7 @@ public sealed class Auction : AggregateRoot
     public DateTimeOffset StartTime { get; private set; }
     public DateTimeOffset EndTime { get; private set; }
     public AuctionStatus Status { get; private set; }
-
+    public uint RowVersion { get; private set; }
     private readonly List<AuctionBid> _bids = [];
     public IReadOnlyList<AuctionBid> Bids => _bids.AsReadOnly();
 

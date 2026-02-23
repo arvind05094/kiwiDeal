@@ -125,6 +125,11 @@ public sealed class AuctionConfiguration : IEntityTypeConfiguration<Auction>
         builder.HasIndex(a => a.Status)
             .HasDatabaseName("ix_auctions_status");
 
+        builder.Property(a => a.RowVersion)
+            .HasColumnName("xmin")
+            .HasColumnType("xid")
+            .IsRowVersion()
+            .ValueGeneratedOnAddOrUpdate();
         builder.Ignore(a => a.DomainEvents);
     }
 }

@@ -5,8 +5,10 @@ using kiwiDeal.Api.Infrastructure;
 using kiwiDeal.Auctions.Api;
 using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Listings.Api;
+using kiwiDeal.Messages.Api;
 using kiwiDeal.Payments.Api;
 using kiwiDeal.SharedKernel.Behaviours;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Outbox;
 using kiwiDeal.Users.Api;
@@ -15,7 +17,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
-using kiwiDeal.Messages.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,8 +62,6 @@ builder.Services.AddMediatR(cfg =>
     typeof(kiwiDeal.Payments.Application.Commands.CreateCheckoutSession.CreateCheckoutSessionCommand).Assembly);
     cfg.RegisterServicesFromAssembly(
     typeof(kiwiDeal.Messages.Application.Commands.StartConversationCommand).Assembly);
-    cfg.RegisterServicesFromAssembly(
-        kiwiDeal.Notifications.Application.NotificationsApplicationAssembly.Reference);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
@@ -103,6 +102,20 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+
+var registry = new OutboxTypeRegistry();
+registry.Register<AuctionClosedEvent>();
+registry.Register<AuctionCreatedEvent>();
+registry.Register<BidPlacedEvent>();
+registry.Register<ListingCreatedEvent>();
+registry.Register<ListingCancelledEvent>();
+registry.Register<ListingSoldEvent>();
+registry.Register<PaymentCompletedEvent>();
+registry.Register<PaymentFailedEvent>();
+
+
+builder.Services.AddSingleton<IOutboxTypeRegistry>(registry);
+
 builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddListingsModule(builder.Configuration);
 builder.Services.AddAuctionsModule(builder.Configuration);

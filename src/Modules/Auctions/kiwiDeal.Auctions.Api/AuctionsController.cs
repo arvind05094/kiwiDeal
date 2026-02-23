@@ -8,8 +8,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using kiwiDeal.Listings.Application.Commands;
-using kiwiDeal.Listings.Application.Queries;
 namespace kiwiDeal.Auctions.Api;
 
 [ApiController]
@@ -128,7 +126,7 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
         if (auctionResult.IsFailure)
             return auctionResult.Error.ToProblemDetails();
 
-        var command = new AddToAuctionWatchlistCommand(
+        var command = new AddToWatchlistCommand(
             currentUser.Id!.Value,
             id,
             auctionResult.Value.SellerId,
@@ -150,7 +148,7 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
         Guid id,
         CancellationToken cancellationToken)
     {
-        var command = new RemoveFromAuctionWatchlistCommand(currentUser.Id!.Value, id);
+        var command = new RemoveFromWatchlistCommand(currentUser.Id!.Value, id);
         var result = await sender.Send(command, cancellationToken);
 
         if (result.IsFailure)
@@ -203,7 +201,7 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
     [FromQuery] int pageSize = 10,
     CancellationToken cancellationToken = default)
     {
-        var query = new GetAuctionWatchlistQuery(currentUser.Id!.Value, pageNumber, pageSize);
+        var query = new GetWatchlistQuery(currentUser.Id!.Value, pageNumber, pageSize);
         var result = await sender.Send(query, cancellationToken);
 
         if (result.IsFailure)

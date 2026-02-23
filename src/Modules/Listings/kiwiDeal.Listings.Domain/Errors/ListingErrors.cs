@@ -30,15 +30,4 @@ public static class ListingErrors
     public static Error WatchlistEntryNotFound() =>
         Error.NotFound("Watchlist entry not found.");
 
-    public static Error CannotWatchOwnAuction() =>
-    Error.Conflict("You cannot watch your own auction.");
-
-    public static Error AuctionNotWatchable() =>
-        Error.Conflict("You can only watch Active or Scheduled auctions.");
-
-    public static Error AlreadyWatchingAuction() =>
-        Error.Conflict("You are already watching this auction.");
-
-    public static Error AuctionWatchlistEntryNotFound() =>
-        Error.NotFound("Auction watchlist entry not found.");
 }

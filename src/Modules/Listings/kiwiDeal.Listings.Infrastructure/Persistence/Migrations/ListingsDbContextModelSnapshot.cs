@@ -17,36 +17,11 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("listings")
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("kiwiDeal.Listings.Domain.Entities.AuctionWatchlist", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<Guid>("AuctionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("auction_id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("created_at");
-
-                    b.HasKey("UserId", "AuctionId")
-                        .HasName("pk_auction_watchlist");
-
-                    b.HasIndex("AuctionId")
-                        .HasDatabaseName("ix_auction_watchlist_auction_id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_auction_watchlist_user_id");
-
-                    b.ToTable("auction_watchlist", "listings");
-                });
 
             modelBuilder.Entity("kiwiDeal.Listings.Domain.Entities.Listing", b =>
                 {

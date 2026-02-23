@@ -1,6 +1,6 @@
 using kiwiDeal.Listings.Domain.Enums;
 using kiwiDeal.Listings.Domain.Errors;
-using kiwiDeal.Listings.Domain.Events;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.Listings.Domain.ValueObjects;
 using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Results;
@@ -26,7 +26,7 @@ public sealed class Listing : AggregateRoot
 
     private Listing() { }
 
-    public void SetAuctionId(Guid auctionId)
+    public void AssignAuction(Guid auctionId)
     {
         AuctionId = auctionId;
         UpdatedAt = DateTimeOffset.UtcNow;

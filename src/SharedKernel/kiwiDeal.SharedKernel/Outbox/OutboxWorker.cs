@@ -25,6 +25,7 @@ public sealed class OutboxWorker(
     {
         using var scope = scopeFactory.CreateScope();
         var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
+        var registry = scope.ServiceProvider.GetRequiredService<IOutboxTypeRegistry>();
         var providers = scope.ServiceProvider.GetServices<IOutboxMessageProvider>();
 
         foreach (var provider in providers)
@@ -35,9 +36,7 @@ public sealed class OutboxWorker(
             {
                 try
                 {
-                    var eventType = AppDomain.CurrentDomain.GetAssemblies()
-                        .Select(a => a.GetType(message.EventType))
-                        .FirstOrDefault(t => t is not null);
+                    var eventType = registry.Resolve(message.EventType);
 
                     if (eventType is null)
                     {

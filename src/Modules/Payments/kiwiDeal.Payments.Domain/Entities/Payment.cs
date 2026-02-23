@@ -1,5 +1,5 @@
 using kiwiDeal.Payments.Domain.Errors;
-using kiwiDeal.Payments.Domain.Events;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Results;
 

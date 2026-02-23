@@ -1,10 +1,11 @@
 using kiwiDeal.SharedKernel.Events;
 
-namespace kiwiDeal.Listings.Domain.Events;
+namespace kiwiDeal.SharedKernel.Contracts;
 
-public sealed record ListingCancelledEvent(
-    Guid ListingId,
-    Guid SellerId) : IDomainEvent
+public sealed record PaymentFailedEvent(
+    Guid PaymentId,
+    Guid? AuctionId,
+    Guid BuyerId) : IDomainEvent
 {
     public Guid Id { get; } = Guid.CreateVersion7();
     public DateTimeOffset OccurredOn { get; } = DateTimeOffset.UtcNow;

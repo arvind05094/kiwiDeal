@@ -1,8 +1,8 @@
-using kiwiDeal.Messages.Api;
 using kiwiDeal.Messages.Application.Commands;
 using kiwiDeal.Messages.Domain.Repositories;
 using kiwiDeal.Messages.Infrastructure.Persistence;
 using kiwiDeal.Messages.Infrastructure.Persistence.Repositories;
+using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +23,7 @@ public static class MessagesModule
         services.AddScoped<IMessagesUnitOfWork>(sp => sp.GetRequiredService<MessagesDbContext>());
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IMessageHubContext, MessageHubContext>();
+        services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<MessagesDbContext>());
         return services;
     }
 }

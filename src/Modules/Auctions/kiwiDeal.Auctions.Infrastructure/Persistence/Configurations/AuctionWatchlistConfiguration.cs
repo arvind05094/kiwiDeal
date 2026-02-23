@@ -1,14 +1,14 @@
-using kiwiDeal.Listings.Domain.Entities;
+using kiwiDeal.Auctions.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace kiwiDeal.Listings.Infrastructure.Persistence.Configurations;
+namespace kiwiDeal.Auctions.Infrastructure.Persistence.Configurations;
 
 public sealed class AuctionWatchlistConfiguration : IEntityTypeConfiguration<AuctionWatchlist>
 {
     public void Configure(EntityTypeBuilder<AuctionWatchlist> builder)
     {
-        builder.ToTable("auction_watchlist", "listings");
+        builder.ToTable("auction_watchlist", "auctions");
 
         builder.HasKey(w => new { w.UserId, w.AuctionId });
 

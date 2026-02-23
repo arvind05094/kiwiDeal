@@ -1,4 +1,4 @@
-using kiwiDeal.Auctions.Domain.Events;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.Listings.Domain.Entities;
 using kiwiDeal.Listings.Domain.Repositories;
 using MediatR;

@@ -1,4 +1,4 @@
-namespace kiwiDeal.Listings.Domain.Entities;
+namespace kiwiDeal.Auctions.Domain.Entities;
 
 public sealed class AuctionWatchlist
 {

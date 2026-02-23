@@ -1,4 +1,4 @@
-using kiwiDeal.Auctions.Domain.Events;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.Listings.Domain.Entities;
 using kiwiDeal.Listings.Domain.Repositories;
 using MediatR;
@@ -24,7 +24,7 @@ public sealed class AuctionCreatedEventHandler(
             return;
         }
 
-        listing.SetAuctionId(notification.AuctionId);
+        listing.AssignAuction(notification.AuctionId);
         listingRepository.Update(listing);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

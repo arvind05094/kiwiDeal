@@ -1,6 +1,6 @@
 using kiwiDeal.SharedKernel.Events;
 
-namespace kiwiDeal.Auctions.Domain.Events;
+namespace kiwiDeal.SharedKernel.Contracts;
 
 public sealed record BidPlacedEvent(
     Guid AuctionId,

@@ -1,4 +1,4 @@
-using kiwiDeal.Listings.Domain.Events;
+using kiwiDeal.SharedKernel.Contracts;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

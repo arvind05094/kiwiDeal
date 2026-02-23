@@ -1,7 +1,6 @@
-using kiwiDeal.Auctions.Domain.Events;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.Payments.Domain.Entities;
 using kiwiDeal.Payments.Domain.Repositories;
-using kiwiDeal.SharedKernel.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 namespace kiwiDeal.Payments.Application.Events;

@@ -27,6 +27,3 @@ public sealed record WatchlistItemDto(
     string? ThumbnailUrl,
     DateTimeOffset WatchedSince);
 
-public sealed record AuctionWatchlistItemDto(
-    Guid AuctionId,
-    DateTimeOffset WatchedSince);

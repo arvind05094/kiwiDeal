@@ -22,6 +22,7 @@ public static class AuctionsModule
 
         services.AddScoped<IAuctionsUnitOfWork>(sp => sp.GetRequiredService<AuctionsDbContext>());
         services.AddScoped<IAuctionRepository, AuctionRepository>();
+        services.AddScoped<IAuctionWatchlistRepository, AuctionWatchlistRepository>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<AuctionsDbContext>());
         services.AddHostedService<AuctionActivationWorker>();
         services.AddHostedService<AuctionClosingWorker>();

@@ -1,5 +1,5 @@
 using kiwiDeal.Auctions.Domain.Errors;
-using kiwiDeal.Auctions.Domain.Events;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Results;
 

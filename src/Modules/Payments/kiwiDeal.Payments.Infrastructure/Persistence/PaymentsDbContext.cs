@@ -1,6 +1,7 @@
 using kiwiDeal.Payments.Domain.Entities;
 using kiwiDeal.Payments.Domain.Repositories;
 using kiwiDeal.SharedKernel.Entities;
+using kiwiDeal.SharedKernel.Events;
 using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -29,9 +30,9 @@ public sealed class PaymentsDbContext(DbContextOptions<PaymentsDbContext> option
     public async Task<IReadOnlyList<OutboxMessage>> GetUnprocessedMessagesAsync(
         CancellationToken cancellationToken = default)
         => await OutboxMessages
-            .Where(m => m.ProcessedOn == null)
+            .Where(m => m.ProcessedOn == null && m.RetryCount<OutboxMessage.MaxRetries)
             .OrderBy(m => m.OccurredOn)
-            .Take(50)
+            .Take(20)
             .ToListAsync(cancellationToken);
 
     private void FlushDomainEventsToOutbox()

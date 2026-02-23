@@ -7,4 +7,6 @@ public interface IOutboxMessage
     string Payload { get; }
     DateTimeOffset OccurredOn { get; }
     DateTimeOffset? ProcessedOn { get; }
+    int RetryCount { get; }
+    string? Error { get; }
 }

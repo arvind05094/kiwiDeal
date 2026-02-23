@@ -29,7 +29,7 @@ public sealed class AuctionsDbContext(DbContextOptions<AuctionsDbContext> option
     public async Task<IReadOnlyList<OutboxMessage>> GetUnprocessedMessagesAsync(CancellationToken cancellationToken = default)
     {
         return await OutboxMessages
-            .Where(m => m.ProcessedOn == null)
+            .Where(m => m.ProcessedOn == null && m.RetryCount < OutboxMessage.MaxRetries)
             .OrderBy(m => m.OccurredOn)
             .Take(20)
             .ToListAsync(cancellationToken);

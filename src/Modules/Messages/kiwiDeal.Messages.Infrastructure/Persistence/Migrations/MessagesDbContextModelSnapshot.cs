@@ -141,6 +141,10 @@ namespace kiwiDeal.Messages.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Error")
+                        .HasColumnType("text")
+                        .HasColumnName("error");
+
                     b.Property<string>("EventType")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -159,6 +163,12 @@ namespace kiwiDeal.Messages.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("ProcessedOn")
                         .HasColumnType("timestamptz")
                         .HasColumnName("processed_on");
+
+                    b.Property<int>("RetryCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("retry_count");
 
                     b.HasKey("Id")
                         .HasName("pk_outbox_messages");

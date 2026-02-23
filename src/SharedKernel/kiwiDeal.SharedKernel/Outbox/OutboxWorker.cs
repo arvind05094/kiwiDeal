@@ -41,6 +41,8 @@ public sealed class OutboxWorker(
                     if (eventType is null)
                     {
                         logger.LogWarning("Outbox worker could not resolve type {EventType}", message.EventType);
+                        message.MarkFailed($"Could not resolve event type '{message.EventType}'");
+                        await provider.SaveChangesAsync(cancellationToken);
                         continue;
                     }
 
@@ -49,13 +51,14 @@ public sealed class OutboxWorker(
                     if (domainEvent is null)
                     {
                         logger.LogWarning("Outbox worker could not deserialise message {MessageId}", message.Id);
+                        message.MarkFailed($"Could not deserialise payload for message '{message.Id}'");
+                        await provider.SaveChangesAsync(cancellationToken);
                         continue;
                     }
 
                     await publisher.Publish(domainEvent, cancellationToken);
 
                     message.MarkProcessed(DateTimeOffset.UtcNow);
-
                     await provider.SaveChangesAsync(cancellationToken);
 
                     logger.LogInformation("Outbox message {MessageId} of type {EventType} processed successfully",
@@ -63,8 +66,21 @@ public sealed class OutboxWorker(
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Outbox worker failed to process message {MessageId}. Will retry on next cycle",
-                        message.Id);
+                    message.MarkFailed(ex.Message);
+                    await provider.SaveChangesAsync(cancellationToken);
+
+                    if (message.RetryCount >= OutboxMessage.MaxRetries)
+                    {
+                        logger.LogError(ex,
+                            "Outbox message {MessageId} of type {EventType} has failed {RetryCount} times and will not be retried",
+                            message.Id, message.EventType, message.RetryCount);
+                    }
+                    else
+                    {
+                        logger.LogWarning(ex,
+                            "Outbox worker failed to process message {MessageId} (attempt {RetryCount}/{MaxRetries}). Will retry on next cycle",
+                            message.Id, message.RetryCount, OutboxMessage.MaxRetries);
+                    }
                 }
             }
         }

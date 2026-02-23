@@ -32,6 +32,14 @@ public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outbox
         builder.Property(o => o.ProcessedOn)
             .HasColumnName("processed_on");
 
+        builder.Property(o => o.RetryCount)
+            .HasColumnName("retry_count")
+            .HasDefaultValue(0)
+            .IsRequired();
+
+        builder.Property(o => o.Error)
+            .HasColumnName("error")
+            .HasColumnType("text");
         builder.HasIndex(o => o.ProcessedOn)
             .HasDatabaseName("ix_outbox_messages_processed_on")
             .HasFilter("processed_on IS NULL");

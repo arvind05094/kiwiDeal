@@ -1,4 +1,5 @@
 using kiwiDeal.Auctions.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -52,9 +53,15 @@ public sealed class AuctionActivationWorker(
                 continue;
             }
 
-            logger.LogInformation("Auction {AuctionId} activated", auction.Id);
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+                logger.LogInformation("Auction {AuctionId} activated", auction.Id);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                logger.LogInformation("Auction {AuctionId} was already activated by another instance", auction.Id);
+            }
         }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

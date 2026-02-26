@@ -1,5 +1,6 @@
 using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Auctions.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -45,8 +46,6 @@ public sealed class AuctionClosingWorker(
 
         logger.LogInformation("Closing {Count} expired auctions", expiredAuctions.Count);
 
-        var closedAuctions = new List<(string AuctionId, Guid? WinnerId, decimal? FinalAmount)>();
-
         foreach (var auction in expiredAuctions)
         {
             var result = auction.Close();
@@ -56,15 +55,16 @@ public sealed class AuctionClosingWorker(
                 continue;
             }
 
-            closedAuctions.Add((auction.Id.Value.ToString(), auction.CurrentHighestBidderId, auction.CurrentHighestBid));
-            logger.LogInformation("Auction {AuctionId} closed. Winner: {WinnerId}", auction.Id, auction.CurrentHighestBidderId);
-        }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        foreach (var (auctionId, winnerId, finalAmount) in closedAuctions)
-        {
-            await hubContext.SendAuctionClosed(auctionId, winnerId, finalAmount, cancellationToken);
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+                logger.LogInformation("Auction {AuctionId} closed. Winner: {WinnerId}", auction.Id, auction.CurrentHighestBidderId);
+                await hubContext.SendAuctionClosed(auction.Id.Value.ToString(), auction.CurrentHighestBidderId, auction.CurrentHighestBid, cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                logger.LogInformation("Auction {AuctionId} was already closed by another instance", auction.Id);
+            }
         }
     }
 }

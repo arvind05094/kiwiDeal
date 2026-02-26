@@ -20,7 +20,7 @@ public static class MessagesModule
                 .UseNpgsql(configuration.GetConnectionString("MessagesConnection"))
                 .UseSnakeCaseNamingConvention());
 
-        services.AddScoped<IMessagesUnitOfWork>(sp => sp.GetRequiredService<MessagesDbContext>());
+        services.AddScoped<IMessagesUnitOfWork, MessagesUnitOfWork>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IMessageHubContext, MessageHubContext>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<MessagesDbContext>());

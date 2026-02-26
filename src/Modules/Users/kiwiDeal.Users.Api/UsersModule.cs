@@ -19,7 +19,8 @@ public static class UsersModule
                 .UseNpgsql(configuration.GetConnectionString("UsersConnection"))
                 .UseSnakeCaseNamingConvention());
 
-        services.AddScoped<IUsersUnitOfWork>(sp => sp.GetRequiredService<UsersDbContext>()); services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUsersUnitOfWork, UsersUnitOfWork>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));

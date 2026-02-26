@@ -19,8 +19,7 @@ public static class AuctionsModule
             options
                 .UseNpgsql(configuration.GetConnectionString("AuctionsConnection"))
                 .UseSnakeCaseNamingConvention());
-
-        services.AddScoped<IAuctionsUnitOfWork>(sp => sp.GetRequiredService<AuctionsDbContext>());
+        services.AddScoped<IAuctionsUnitOfWork, AuctionsUnitOfWork>();
         services.AddScoped<IAuctionRepository, AuctionRepository>();
         services.AddScoped<IAuctionWatchlistRepository, AuctionWatchlistRepository>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<AuctionsDbContext>());

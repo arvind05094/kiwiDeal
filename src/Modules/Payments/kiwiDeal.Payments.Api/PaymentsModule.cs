@@ -21,7 +21,7 @@ public static class PaymentsModule
                 .UseNpgsql(configuration.GetConnectionString("PaymentsConnection"))
                 .UseSnakeCaseNamingConvention());
 
-        services.AddScoped<IPaymentsUnitOfWork>(sp => sp.GetRequiredService<PaymentsDbContext>());
+        services.AddScoped<IPaymentsUnitOfWork, PaymentsUnitOfWork>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<PaymentsDbContext>());
         services.AddScoped<IStripeService, StripeService>();

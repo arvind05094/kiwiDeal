@@ -20,8 +20,7 @@ public static class ListingsModule
             options
                 .UseNpgsql(configuration.GetConnectionString("ListingsConnection"))
                 .UseSnakeCaseNamingConvention());
-
-        services.AddScoped<IListingsUnitOfWork>(sp => sp.GetRequiredService<ListingsDbContext>());
+        services.AddScoped<IListingsUnitOfWork, ListingsUnitOfWork>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<ListingsDbContext>());
         services.AddScoped<IListingRepository, ListingRepository>();
         services.AddScoped<IImageService, AzureBlobImageService>();

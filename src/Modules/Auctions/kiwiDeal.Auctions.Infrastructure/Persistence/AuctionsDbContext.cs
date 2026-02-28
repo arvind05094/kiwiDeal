@@ -1,6 +1,7 @@
 using kiwiDeal.Auctions.Domain.Entities;
 using kiwiDeal.Auctions.Domain.Repositories;
 using kiwiDeal.SharedKernel.Entities;
+using kiwiDeal.SharedKernel.Extensions;
 using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -17,9 +18,9 @@ public sealed class AuctionsDbContext(DbContextOptions<AuctionsDbContext> option
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuctionsDbContext).Assembly);
+        modelBuilder.ApplySoftDeleteQueryFilters();
         base.OnModelCreating(modelBuilder);
     }
-
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         FlushDomainEventsToOutbox();

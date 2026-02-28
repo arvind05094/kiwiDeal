@@ -1,6 +1,7 @@
 using kiwiDeal.Listings.Domain.Entities;
 using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Entities;
+using kiwiDeal.SharedKernel.Extensions;
 using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -15,8 +16,8 @@ public sealed class ListingsDbContext(DbContextOptions<ListingsDbContext> option
     public DbSet<ListingWatchlist> ListingWatchlists => Set<ListingWatchlist>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("listings");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ListingsDbContext).Assembly);
+        modelBuilder.ApplySoftDeleteQueryFilters();
         base.OnModelCreating(modelBuilder);
     }
 

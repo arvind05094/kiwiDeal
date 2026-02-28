@@ -1,6 +1,6 @@
-using kiwiDeal.SharedKernel.Interfaces;
-using kiwiDeal.Users.Domain.Repositories;
+using kiwiDeal.SharedKernel.Extensions;
 using kiwiDeal.Users.Domain.Entities;
+using kiwiDeal.Users.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace kiwiDeal.Users.Infrastructure.Persistence;
@@ -16,6 +16,7 @@ public sealed class UsersDbContext(DbContextOptions<UsersDbContext> options)
     {
         modelBuilder.HasDefaultSchema("users");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(UsersDbContext).Assembly);
+        modelBuilder.ApplySoftDeleteQueryFilters();
         base.OnModelCreating(modelBuilder);
     }
 

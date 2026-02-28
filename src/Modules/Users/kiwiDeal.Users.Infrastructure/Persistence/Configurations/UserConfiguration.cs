@@ -61,8 +61,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .IsUnique()
             .HasDatabaseName("uq_users_email");
 
-        builder.HasQueryFilter(u => !u.IsDeleted);
-
+        
         builder.HasMany(u => u.RefreshTokens)
             .WithOne()
             .HasForeignKey(r => r.UserId)

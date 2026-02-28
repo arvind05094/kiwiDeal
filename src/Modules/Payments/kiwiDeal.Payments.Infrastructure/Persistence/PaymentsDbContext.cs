@@ -1,7 +1,7 @@
 using kiwiDeal.Payments.Domain.Entities;
 using kiwiDeal.Payments.Domain.Repositories;
 using kiwiDeal.SharedKernel.Entities;
-using kiwiDeal.SharedKernel.Events;
+using kiwiDeal.SharedKernel.Extensions;
 using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -16,8 +16,8 @@ public sealed class PaymentsDbContext(DbContextOptions<PaymentsDbContext> option
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("payments");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PaymentsDbContext).Assembly);
+        modelBuilder.ApplySoftDeleteQueryFilters();
         base.OnModelCreating(modelBuilder);
     }
 

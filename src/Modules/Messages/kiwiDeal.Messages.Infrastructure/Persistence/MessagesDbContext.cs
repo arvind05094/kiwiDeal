@@ -1,6 +1,7 @@
 using kiwiDeal.Messages.Domain.Entities;
 using kiwiDeal.Messages.Domain.Repositories;
 using kiwiDeal.SharedKernel.Entities;
+using kiwiDeal.SharedKernel.Extensions;
 using kiwiDeal.SharedKernel.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -16,8 +17,8 @@ public sealed class MessagesDbContext(DbContextOptions<MessagesDbContext> option
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("messages");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MessagesDbContext).Assembly);
+        modelBuilder.ApplySoftDeleteQueryFilters();
         base.OnModelCreating(modelBuilder);
     }
 

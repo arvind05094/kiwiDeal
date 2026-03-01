@@ -56,7 +56,7 @@ export function MyListingsTab() {
       ) : !data?.items.length ? (
         <EmptyState
           title={`No ${status.toLowerCase()} listings`}
-          message="Nothing to show here."
+          description="Nothing to show here."
         />
       ) : (
         <>

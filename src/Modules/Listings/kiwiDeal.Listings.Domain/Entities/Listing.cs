@@ -60,6 +60,7 @@ public sealed class Listing : AggregateRoot
         {
             Id = ListingId.New(),
             SellerId = sellerId,
+            SellerName = sellerName,
             Title = title,
             Description = description,
             ListingType = listingType,

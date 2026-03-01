@@ -1,16 +1,61 @@
 import { Link } from "react-router-dom";
-import { MapPin, Tag } from "lucide-react";
-import { StatusBadge } from "./StatusBadge";
+import { MapPin, Tag, Heart } from "lucide-react";
 import type { ListingDto } from "@/shared/types/common";
 import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
+import { listingsApi } from "@/features/listings/api";
+import { useAuth } from "@/features/auth/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ListingCardProps {
   listing: ListingDto;
+  isWatched?: boolean;
 }
 
-export function ListingCard({ listing }: ListingCardProps) {
+export function ListingCard({
+  listing,
+  isWatched: initialWatched = false,
+}: ListingCardProps) {
   const thumbnail = listing.images[0]?.url;
+  const { isAuthenticated, user } = useAuth();
+  const watched = initialWatched;
+  const [loading, setLoading] = useState(false);
 
+  const queryClient = useQueryClient();
+  const handleWatch = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (loading || !isAuthenticated) return;
+    setLoading(true);
+
+    // Optimistic update
+    queryClient.setQueryData<{ items: { listingId: string }[] }>(
+      ["listings-watchlist"],
+      (prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          items: watched
+            ? prev.items.filter((w) => w.listingId !== listing.id)
+            : ([...prev.items, { listingId: listing.id }] as typeof prev.items),
+        };
+      },
+    );
+
+    try {
+      if (watched) {
+        await listingsApi.removeFromWatchlist(listing.id);
+      } else {
+        await listingsApi.addToWatchlist(listing.id);
+      }
+    } catch (err) {
+      // Revert optimistic update on failure
+      queryClient.invalidateQueries({ queryKey: ["listings-watchlist"] });
+      console.error("Failed to update watchlist", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Link
       to={`/listings/${listing.id}`}
@@ -33,6 +78,19 @@ export function ListingCard({ listing }: ListingCardProps) {
             {listing.listingType === "Auction" ? "Auction" : "Buy Now"}
           </span>
         </div>
+        {isAuthenticated && user?.id !== listing.sellerId && (
+          <button
+            onClick={handleWatch}
+            disabled={loading}
+            className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition-colors hover:bg-white"
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${
+                watched ? "fill-orange-500 text-orange-500" : "text-gray-400"
+              }`}
+            />
+          </button>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">

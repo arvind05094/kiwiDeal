@@ -80,7 +80,7 @@ export function WatchlistPage() {
       {combined.length === 0 ? (
         <EmptyState
           title="Nothing on watchlist"
-          message="Watch listings and auctions to track them here."
+          description="Watch listings and auctions to track them here."
         />
       ) : (
         <div className="space-y-3">

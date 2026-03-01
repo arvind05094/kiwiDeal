@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { profileApi } from "./api";
 import { listingsApi } from "@/features/listings/api";
@@ -8,11 +8,18 @@ import { ListingCard } from "@/shared/components/ListingCard";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { NZ_REGIONS } from "@/shared/types/common";
-import { MapPin, Calendar, Star } from "lucide-react";
+import { MapPin, Calendar, Star, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { startConversation } from "../messages/api";
+import { useAuth } from "../auth/AuthContext";
 
 export function PublicProfilePage() {
   const { id } = useParams<{ id: string }>();
+
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const isOwnProfile = user?.id === id;
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", id],
@@ -48,12 +55,15 @@ export function PublicProfilePage() {
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Profile header */}
-      <div className="bg-white border rounded-lg p-6 flex gap-6 items-start">
+      <div className="bg-white border rounded-lg p-6 flex gap-6 items-start justify-between w-full">
+        {/* Left: Avatar */}
         <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-semibold text-gray-600 shrink-0">
           {profile.firstName[0]}
           {profile.lastName[0]}
         </div>
-        <div className="space-y-2">
+
+        {/* Center/Left-aligned content area */}
+        <div className="space-y-2 flex-1">
           <h1 className="text-2xl font-semibold text-gray-900">
             {profile.firstName} {profile.lastName}
           </h1>
@@ -80,11 +90,35 @@ export function PublicProfilePage() {
               </span>
             </div>
           ) : (
-            <span className="text-sm text-gray-400">No ratings yet</span>
+            <span className="text-sm text-gray-400 block">No ratings yet</span>
           )}
         </div>
-      </div>
 
+        {/* Right: Action Button Panel */}
+        {isAuthenticated && !isOwnProfile && (
+          <div className="self-start ml-auto shrink-0 pt-1">
+            {/* Added pt-1 just to perfectly align it with the baseline of the name heading */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1.5"
+              onClick={async () => {
+                try {
+                  const conversation = await startConversation({
+                    recipientId: id!,
+                    recipientName: `${profile.firstName} ${profile.lastName}`,
+                    initialMessage: "Hi, I'd like to get in touch.",
+                  });
+                  navigate(`/messages/${conversation.id}`);
+                } catch {}
+              }}
+            >
+              <MessageCircle className="h-4 w-4" />
+              Message
+            </Button>
+          </div>
+        )}
+      </div>
       {/* Active listings */}
       <section>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">

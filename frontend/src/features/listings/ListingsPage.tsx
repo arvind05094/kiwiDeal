@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listingsApi } from "./api";
@@ -7,8 +6,6 @@ import { CategoryTiles } from "@/shared/components/CategoryTiles";
 import { PagedList } from "@/shared/components/PagedList";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -18,12 +15,10 @@ import {
 } from "@/components/ui/select";
 import { NZ_REGIONS } from "@/shared/types/common";
 import { Search, X } from "lucide-react";
+import { useAuth } from "../auth/AuthContext";
 
 export function ListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchInput, setSearchInput] = useState(
-    searchParams.get("searchTerm") ?? "",
-  );
 
   const pageNumber = Number(searchParams.get("pageNumber") ?? 1);
   const searchTerm = searchParams.get("searchTerm") ?? undefined;
@@ -59,10 +54,6 @@ export function ListingsPage() {
     });
   };
 
-  const handleSearch = () => {
-    setParam("searchTerm", searchInput || undefined);
-  };
-
   const handleCategoryClick = (cat: string) => {
     setParam("category", category === cat ? undefined : cat);
   };
@@ -77,23 +68,18 @@ export function ListingsPage() {
     sortBy && { key: "sortBy", label: sortBy.replace("_", " ") },
   ].filter(Boolean) as { key: string; label: string }[];
 
+  const { isAuthenticated } = useAuth();
+
+  const { data: watchlist } = useQuery({
+    queryKey: ["listings-watchlist"],
+    queryFn: () => listingsApi.getWatchlist({ pageNumber: 1, pageSize: 200 }),
+    enabled: isAuthenticated,
+  });
+
+  const watchedIds = new Set(watchlist?.items.map((w) => w.listingId) ?? []);
+
   return (
     <div className="space-y-6">
-      {/* Search bar */}
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            className="pl-9"
-            placeholder="Search listings..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-          />
-        </div>
-        <Button onClick={handleSearch}>Search</Button>
-      </div>
-
       {/* Category tiles */}
       <CategoryTiles selected={category} onSelect={handleCategoryClick} />
 
@@ -172,18 +158,22 @@ export function ListingsPage() {
       ) : isError ? (
         <EmptyState
           title="Unable to load listings"
-          message="The server could not be reached. Please check your connection and try again."
+          description="The server could not be reached. Please check your connection and try again."
         />
       ) : !data || data.items.length === 0 ? (
         <EmptyState
           title="No listings found"
-          message="Try adjusting your filters or search term."
+          description="Try adjusting your filters or search term."
         />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.items.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                isWatched={watchedIds.has(listing.id)}
+              />
             ))}
           </div>
           <PagedList

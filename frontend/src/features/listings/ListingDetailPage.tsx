@@ -216,7 +216,15 @@ export function ListingDetailPage() {
                 <User className="h-4 w-4 text-gray-400" />
               </div>
               {/* Explicit leading-none or alignment prevents the paragraph tag from introducing default text margins */}
-              <p className="text-sm text-gray-500 leading-none">Listed by</p>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-xs text-gray-400 leading-none">Listed by</p>
+                <p className="text-sm font-medium text-gray-900 leading-none">
+                  {listing.sellerName}
+                  {isSeller && (
+                    <span className="text-gray-400 font-normal"> (You)</span>
+                  )}
+                </p>
+              </div>
             </div>
 
             <Link

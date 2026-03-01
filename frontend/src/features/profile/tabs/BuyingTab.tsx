@@ -70,7 +70,7 @@ export function BuyingTab() {
         !auctionData?.items.length ? (
           <EmptyState
             title={`No ${filter.toLowerCase()} auctions`}
-            message="Nothing to show here."
+            description="Nothing to show here."
           />
         ) : (
           <>
@@ -110,7 +110,7 @@ export function BuyingTab() {
       ) : !purchaseData?.items.length ? (
         <EmptyState
           title="No purchases"
-          message="You have not bought any fixed price listings yet."
+          description="You have not bought any fixed price listings yet."
         />
       ) : (
         <>

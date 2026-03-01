@@ -20,7 +20,7 @@ export function InboxPage() {
     return (
       <EmptyState
         icon={<MessageSquare className="h-8 w-8" />}
-        message="No conversations yet"
+        description="No conversations yet"
       />
     );
   }

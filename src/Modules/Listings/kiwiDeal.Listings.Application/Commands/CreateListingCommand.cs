@@ -9,6 +9,7 @@ namespace kiwiDeal.Listings.Application.Commands;
 
 public sealed record CreateListingCommand(
     Guid SellerId,
+    string SellerName,
     string Title,
     string Description,
     ListingType ListingType,
@@ -31,6 +32,7 @@ public sealed class CreateListingCommandHandler : IRequestHandler<CreateListingC
 
         var result = Listing.Create(
             sellerId,
+            command.SellerName,
             command.Title,
             command.Description,
             command.ListingType,

@@ -24,6 +24,7 @@ public sealed class Listing : AggregateRoot
     private readonly List<ListingImage> _images = [];
     public IReadOnlyList<ListingImage> Images => _images.AsReadOnly();
 
+    public string SellerName { get; private set; } = default!;
     private Listing() { }
 
     public void AssignAuction(Guid auctionId)
@@ -34,6 +35,7 @@ public sealed class Listing : AggregateRoot
 
     public static Result<Listing> Create(
         SellerId sellerId,
+        string sellerName,
         string title,
         string description,
         ListingType listingType,

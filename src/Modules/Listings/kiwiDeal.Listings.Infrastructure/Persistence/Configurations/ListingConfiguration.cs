@@ -70,6 +70,10 @@ public sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
             .HasColumnName("updated_at")
             .HasColumnType("timestamptz")
             .IsRequired();
+        builder.Property(l => l.SellerName)
+            .HasColumnName("seller_name")
+            .HasMaxLength(200)
+            .IsRequired();
 
         builder.OwnsMany(l => l.Images, imageBuilder =>
         {

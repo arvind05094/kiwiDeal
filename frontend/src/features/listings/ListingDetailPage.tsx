@@ -180,7 +180,7 @@ export function ListingDetailPage() {
                         try {
                           const conversation = await startConversation({
                             recipientId: listing.sellerId,
-                            recipientName: "",
+                            recipientName: listing.sellerName,
                             initialMessage:
                               "Hi, I'm interested in this listing.",
                           });

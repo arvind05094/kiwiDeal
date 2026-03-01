@@ -17,7 +17,6 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("listings")
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -68,6 +67,12 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("SellerId")
                         .HasColumnType("uuid")
                         .HasColumnName("seller_id");
+
+                    b.Property<string>("SellerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("seller_name");
 
                     b.Property<string>("Status")
                         .IsRequired()

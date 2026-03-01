@@ -30,6 +30,7 @@ public sealed class GetMyListingsQueryHandler : IRequestHandler<GetMyListingsQue
         var dtos = pagedListings.Items.Select(listing => new ListingDto(
             listing.Id.Value,
             listing.SellerId.Value,
+            listing.SellerName,
             listing.Title,
             listing.Description,
             listing.ListingType.ToString(),

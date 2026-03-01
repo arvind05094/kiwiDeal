@@ -29,6 +29,7 @@ public sealed class GetListingQueryHandler : IRequestHandler<GetListingQuery, Re
         var dto = new ListingDto(
             listing.Id.Value,
             listing.SellerId.Value,
+            listing.SellerName,
             listing.Title,
             listing.Description,
             listing.ListingType.ToString(),

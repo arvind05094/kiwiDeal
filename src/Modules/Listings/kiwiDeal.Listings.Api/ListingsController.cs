@@ -27,6 +27,7 @@ public sealed class ListingsController(ISender sender, ICurrentUser currentUser)
     {
         var command = new CreateListingCommand(
             currentUser.Id!.Value,
+            currentUser.Name ?? string.Empty,
             request.Title,
             request.Description,
             request.ListingType,

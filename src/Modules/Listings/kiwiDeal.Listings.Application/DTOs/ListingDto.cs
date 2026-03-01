@@ -3,6 +3,7 @@ namespace kiwiDeal.Listings.Application.DTOs;
 public sealed record ListingDto(
     Guid Id,
     Guid SellerId,
+    string SellerName,
     string Title,
     string Description,
     string ListingType,

@@ -29,6 +29,7 @@ export interface ListingImageDto {
 export interface ListingDto {
   id: string;
   sellerId: string;
+  sellerName: string;
   title: string;
   description: string;
   listingType: ListingType;

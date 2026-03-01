@@ -14,10 +14,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.Id)
             .HasColumnName("id")
-            .ValueGeneratedNever()
-            .HasConversion(
-                id => id.Value,
-                value => UserId.From(value));
+            .ValueGeneratedNever();
 
         builder.Property(u => u.Email)
             .HasColumnName("email")

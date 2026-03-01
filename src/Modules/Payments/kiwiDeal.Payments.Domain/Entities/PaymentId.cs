@@ -1,6 +1,8 @@
+using kiwiDeal.SharedKernel.Interfaces;
+
 namespace kiwiDeal.Payments.Domain.Entities;
 
-public record PaymentId
+public record PaymentId : IStronglyTypedId
 {
     public Guid Value { get; }
     private PaymentId(Guid value) { Value = value; }

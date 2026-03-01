@@ -1,6 +1,8 @@
+using kiwiDeal.SharedKernel.Interfaces;
+
 namespace kiwiDeal.Auctions.Domain.Entities;
 
-public record AuctionBidId
+public record AuctionBidId : IStronglyTypedId
 {
     public Guid Value { get; }
     private AuctionBidId(Guid value) { Value = value; }

@@ -18,6 +18,7 @@ public sealed class ListingsDbContext(DbContextOptions<ListingsDbContext> option
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ListingsDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
+        modelBuilder.ApplyStronglyTypedIdConverters();
         base.OnModelCreating(modelBuilder);
     }
 

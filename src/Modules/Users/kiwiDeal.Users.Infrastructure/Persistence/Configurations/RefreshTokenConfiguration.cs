@@ -17,10 +17,7 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
             .ValueGeneratedNever();
 
         builder.Property(r => r.UserId)
-            .HasColumnName("user_id")
-            .HasConversion(
-                id => id.Value,
-                value => UserId.From(value));
+            .HasColumnName("user_id");
 
         builder.Property(r => r.Token)
             .HasColumnName("token")

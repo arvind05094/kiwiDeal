@@ -13,10 +13,7 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Id)
-            .HasColumnName("id")
-            .HasConversion(
-                id => id.Value,
-                value => PaymentId.From(value));
+            .HasColumnName("id");
 
         builder.Property(p => p.AuctionId)
             .HasColumnName("auction_id");

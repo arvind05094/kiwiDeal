@@ -1,6 +1,9 @@
+using kiwiDeal.SharedKernel.Interfaces;
+
 namespace kiwiDeal.Messages.Domain.Entities;
 
-public record ConversationId
+
+public record ConversationId : IStronglyTypedId
 {
     public Guid Value { get; }
     private ConversationId(Guid value) { Value = value; }

@@ -18,6 +18,7 @@ public sealed class PaymentsDbContext(DbContextOptions<PaymentsDbContext> option
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PaymentsDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
+        modelBuilder.ApplyStronglyTypedIdConverters();
         base.OnModelCreating(modelBuilder);
     }
 

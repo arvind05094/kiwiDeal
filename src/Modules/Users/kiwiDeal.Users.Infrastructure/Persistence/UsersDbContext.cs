@@ -17,6 +17,7 @@ public sealed class UsersDbContext(DbContextOptions<UsersDbContext> options)
         modelBuilder.HasDefaultSchema("users");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(UsersDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
+        modelBuilder.ApplyStronglyTypedIdConverters();
         base.OnModelCreating(modelBuilder);
     }
 

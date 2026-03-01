@@ -1,6 +1,8 @@
 namespace kiwiDeal.Users.Domain.Entities;
 
-public record UserRatingId
+using kiwiDeal.SharedKernel.Interfaces;
+
+public record UserRatingId : IStronglyTypedId
 {
     public Guid Value { get; }
     private UserRatingId(Guid value) { Value = value; }

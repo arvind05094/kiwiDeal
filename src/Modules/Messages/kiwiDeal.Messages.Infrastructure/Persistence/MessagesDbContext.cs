@@ -19,6 +19,7 @@ public sealed class MessagesDbContext(DbContextOptions<MessagesDbContext> option
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MessagesDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
+        modelBuilder.ApplyStronglyTypedIdConverters();
         base.OnModelCreating(modelBuilder);
     }
 

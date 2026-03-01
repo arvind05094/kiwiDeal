@@ -12,15 +12,9 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id)
-            .HasConversion(
-                id => id.Value,
-                value => MessageId.From(value));
+        builder.Property(x => x.Id);
 
         builder.Property(x => x.ConversationId)
-            .HasConversion(
-                id => id.Value,
-                value => ConversationId.From(value))
             .IsRequired();
 
         builder.Property(x => x.SenderId).IsRequired();
@@ -30,8 +24,6 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.Property(x => x.DeletedAt);
         builder.Property(x => x.SenderName).HasMaxLength(200).IsRequired();
         builder.Property(x => x.IsRead).IsRequired();
-
-        builder.HasQueryFilter(x => !x.IsDeleted);
 
         builder.HasIndex(x => x.ConversationId).HasDatabaseName("ix_messages_conversation_id");
     }

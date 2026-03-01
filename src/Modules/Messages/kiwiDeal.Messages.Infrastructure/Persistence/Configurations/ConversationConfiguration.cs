@@ -10,10 +10,7 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
     {
         builder.ToTable("conversations", "messages");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id)
-            .HasConversion(
-                id => id.Value,
-                value => ConversationId.From(value));
+        builder.Property(x => x.Id);
         builder.Property(x => x.SenderId).IsRequired();
         builder.Property(x => x.RecipientId).IsRequired();
         builder.Property(x => x.SenderName).HasMaxLength(200).IsRequired();
@@ -22,7 +19,6 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
         builder.Property(x => x.UpdatedAt).IsRequired();
         builder.Property(x => x.IsDeleted).IsRequired();
         builder.Property(x => x.DeletedAt);
-        builder.HasQueryFilter(x => !x.IsDeleted);
         builder.HasMany(x => x.Messages)
             .WithOne()
             .HasForeignKey(x => x.ConversationId);

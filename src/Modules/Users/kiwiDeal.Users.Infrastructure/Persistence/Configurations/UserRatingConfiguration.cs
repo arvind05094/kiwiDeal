@@ -14,23 +14,14 @@ public sealed class UserRatingConfiguration : IEntityTypeConfiguration<UserRatin
 
         builder.Property(r => r.Id)
             .HasColumnName("id")
-            .ValueGeneratedNever()
-            .HasConversion(
-                id => id.Value,
-                value => UserRatingId.From(value));
+            .ValueGeneratedNever();
 
         builder.Property(r => r.RaterId)
             .HasColumnName("rater_id")
-            .HasConversion(
-                id => id.Value,
-                value => UserId.From(value))
             .IsRequired();
 
         builder.Property(r => r.RateeId)
             .HasColumnName("ratee_id")
-            .HasConversion(
-                id => id.Value,
-                value => UserId.From(value))
             .IsRequired();
 
         builder.Property(r => r.Stars)

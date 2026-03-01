@@ -14,10 +14,7 @@ public sealed class AuctionConfiguration : IEntityTypeConfiguration<Auction>
 
         builder.Property(a => a.Id)
             .HasColumnName("id")
-            .ValueGeneratedNever()
-            .HasConversion(
-                id => id.Value,
-                value => AuctionId.From(value));
+            .ValueGeneratedNever();
 
         builder.Property(a => a.ListingId)
             .HasColumnName("listing_id")
@@ -81,10 +78,7 @@ public sealed class AuctionConfiguration : IEntityTypeConfiguration<Auction>
 
             bidBuilder.Property(b => b.Id)
                 .HasColumnName("id")
-                .ValueGeneratedNever()
-                .HasConversion(
-                    id => id.Value,
-                    value => AuctionBidId.From(value));
+                .ValueGeneratedNever();
 
             bidBuilder.Ignore(b => b.AuctionId);
 

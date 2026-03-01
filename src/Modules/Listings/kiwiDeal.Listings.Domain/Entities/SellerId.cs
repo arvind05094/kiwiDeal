@@ -1,6 +1,8 @@
+using kiwiDeal.SharedKernel.Interfaces;
+
 namespace kiwiDeal.Listings.Domain.Entities;
 
-public record SellerId
+public record SellerId : IStronglyTypedId
 {
     public Guid Value { get; }
     private SellerId(Guid value) { Value = value; }

@@ -1,5 +1,4 @@
 using kiwiDeal.Listings.Domain.Entities;
-using kiwiDeal.Listings.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,17 +14,11 @@ public sealed class ListingConfiguration : IEntityTypeConfiguration<Listing>
 
         builder.Property(l => l.Id)
             .HasColumnName("id")
-            .ValueGeneratedNever()
-            .HasConversion(
-                id => id.Value,
-                value => ListingId.From(value));
+            .ValueGeneratedNever();
 
         builder.Property(l => l.SellerId)
             .HasColumnName("seller_id")
-            .IsRequired()
-            .HasConversion(
-                id => id.Value,
-                value => SellerId.From(value));
+            .IsRequired();
 
         builder.Property(l => l.Title)
             .HasColumnName("title")

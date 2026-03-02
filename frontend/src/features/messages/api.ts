@@ -3,11 +3,12 @@ import type { ConversationDto, MessageDto } from "@/shared/types/common";
 import type { StartConversationRequest, SendMessageRequest } from "./types";
 export const startConversation = async (
   body: StartConversationRequest,
-): Promise<string> => {
-  const res = await client.post("/messages/conversations", body);
-  return typeof res.data === "string"
-    ? res.data
-    : (res.data.value ?? res.data.id ?? String(res.data));
+): Promise<ConversationDto> => {
+  const res = await client.post<ConversationDto>(
+    "/messages/conversations",
+    body,
+  );
+  return res.data;
 };
 export const getConversations = async (): Promise<ConversationDto[]> => {
   const res = await client.get<ConversationDto[]>("/messages/conversations");

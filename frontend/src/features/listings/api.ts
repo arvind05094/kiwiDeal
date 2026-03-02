@@ -74,4 +74,9 @@ export const listingsApi = {
   removeFromWatchlist: async (id: string): Promise<void> => {
     await client.delete(`/listings/${id}/watchlist`);
   },
+
+  isWatched: async (id: string): Promise<boolean> => {
+    const res = await client.get(`/listings/${id}/watchlist`);
+    return res.data.isWatched;
+  },
 };

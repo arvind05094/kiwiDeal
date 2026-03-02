@@ -7,22 +7,28 @@ import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { MapPin, Tag, ArrowLeft, Heart, User } from "lucide-react";
-import { useState } from "react";
 import { createBuyNowCheckout } from "../payments/api";
 import { startConversation } from "../messages/api";
+import type { ConversationDto } from "@/shared/types/common";
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
-  const [watched, setWatched] = useState(false);
 
   const { data: listing, isLoading } = useQuery({
     queryKey: ["listing", id],
     queryFn: () => listingsApi.getListing(id!),
     enabled: !!id,
   });
+
+  const { data: isWatchedData } = useQuery({
+    queryKey: ["listing-watched", id],
+    queryFn: () => listingsApi.isWatched(id!),
+    enabled: !!id && isAuthenticated,
+  });
+  const watched = isWatchedData ?? false;
 
   const cancelMutation = useMutation({
     mutationFn: () => listingsApi.cancelListing(id!),
@@ -35,9 +41,9 @@ export function ListingDetailPage() {
       watched
         ? listingsApi.removeFromWatchlist(id!)
         : listingsApi.addToWatchlist(id!),
-    onSuccess: () => setWatched((w) => !w),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["listing-watched", id] }),
   });
-
   if (isLoading) return <LoadingSpinner />;
   if (!listing)
     return (
@@ -172,13 +178,18 @@ export function ListingDetailPage() {
                       className="flex-1"
                       onClick={async () => {
                         try {
-                          const conversationId = await startConversation({
+                          const conversation = await startConversation({
                             recipientId: listing.sellerId,
                             recipientName: "",
                             initialMessage:
                               "Hi, I'm interested in this listing.",
                           });
-                          navigate(`/messages/${conversationId}`);
+                          queryClient.setQueryData<ConversationDto[]>(
+                            ["conversations"],
+                            (prev) =>
+                              prev ? [conversation, ...prev] : [conversation],
+                          );
+                          navigate(`/messages/${conversation.id}`);
                         } catch {}
                       }}
                     >

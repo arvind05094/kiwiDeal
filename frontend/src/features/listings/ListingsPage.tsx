@@ -32,7 +32,7 @@ export function ListingsPage() {
   const sortBy = (searchParams.get("sortBy") as any) ?? undefined;
   const listingType = (searchParams.get("listingType") as any) ?? undefined;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: [
       "listings",
       { pageNumber, searchTerm, category, region, sortBy, listingType },
@@ -48,8 +48,6 @@ export function ListingsPage() {
         listingType,
       }),
   });
-
-  console.log("Current listings data:", data);
 
   const setParam = (key: string, value: string | undefined) => {
     setSearchParams((prev) => {
@@ -171,6 +169,11 @@ export function ListingsPage() {
       {/* Results */}
       {isLoading ? (
         <LoadingSpinner />
+      ) : isError ? (
+        <EmptyState
+          title="Unable to load listings"
+          message="The server could not be reached. Please check your connection and try again."
+        />
       ) : !data || data.items.length === 0 ? (
         <EmptyState
           title="No listings found"

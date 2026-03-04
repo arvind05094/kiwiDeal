@@ -17,7 +17,6 @@ namespace kiwiDeal.Payments.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("payments")
                 .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -133,7 +132,7 @@ namespace kiwiDeal.Payments.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_outbox_messages_processed_on")
                         .HasFilter("processed_on IS NULL");
 
-                    b.ToTable("outbox_messages", "payments");
+                    b.ToTable("outbox_messages", (string)null);
                 });
 #pragma warning restore 612, 618
         }

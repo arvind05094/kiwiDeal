@@ -37,7 +37,8 @@ export function WatchlistAuctionCard({
             </p>
           </div>
           <p className="text-xs text-gray-400">
-            {auction.bids.length} bid{auction.bids.length !== 1 ? "s" : ""}
+            {auction.bids?.length ?? 0} bid
+            {(auction.bids?.length ?? 0) !== 1 ? "s" : ""}
           </p>
         </div>
       </Link>

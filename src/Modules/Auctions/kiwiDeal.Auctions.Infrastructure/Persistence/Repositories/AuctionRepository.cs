@@ -14,6 +14,13 @@ public sealed class AuctionRepository(AuctionsDbContext context) : IAuctionRepos
             .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
+    public async Task<List<Auction>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return await context.Auctions
+            .Where(a => ids.Contains(a.Id.Value))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Auction?> GetByListingIdAsync(Guid listingId, CancellationToken cancellationToken = default)
     {
         return await context.Auctions

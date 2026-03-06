@@ -154,16 +154,18 @@ export const NZ_REGIONS = [
 
 export type NzRegionValue = (typeof NZ_REGIONS)[number]["value"];
 export const CATEGORIES = [
-  "Electronics",
-  "Clothing",
-  "Motors",
-  "Cars",
-  "Furniture",
-  "Home and Garden",
-  "Sports",
-  "Books",
-  "Toys",
-  "Music",
-  "Collectibles",
-  "Other",
+  { label: "Electronics", value: "Electronics" },
+  { label: "Clothing", value: "Clothing" },
+  { label: "Motors", value: "Motors" },
+  { label: "Cars", value: "Cars" },
+  { label: "Furniture", value: "Furniture" },
+  { label: "Home and Garden", value: "HomeAndGarden" },
+  { label: "Sports", value: "Sports" },
+  { label: "Books", value: "Books" },
+  { label: "Toys", value: "Toys" },
+  { label: "Music", value: "Music" },
+  { label: "Collectibles", value: "Collectibles" },
+  { label: "Other", value: "Other" },
 ] as const;
+
+export type CategoryValue = (typeof CATEGORIES)[number]["value"];

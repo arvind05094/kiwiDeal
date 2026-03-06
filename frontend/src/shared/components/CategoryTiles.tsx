@@ -39,16 +39,18 @@ export function CategoryTiles({ onSelect, selected }: CategoryTilesProps) {
     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
       {CATEGORIES.map((category) => (
         <button
-          key={category}
-          onClick={() => onSelect(category)}
+          key={category.value}
+          onClick={() => onSelect(category.value)}
           className={`flex flex-col items-center gap-2 rounded-lg border bg-white p-4 text-center transition-all hover:border-orange-400 hover:shadow-sm active:scale-95 ${
-            selected === category
+            selected === category.value
               ? "border-orange-500 text-orange-600"
               : "border-gray-200 text-gray-600"
           }`}
         >
-          {categoryIcons[category]}
-          <span className="text-xs font-medium leading-tight">{category}</span>
+          {categoryIcons[category.label]}
+          <span className="text-xs font-medium leading-tight">
+            {category.label}
+          </span>
         </button>
       ))}
     </div>

@@ -30,7 +30,7 @@ export function AuctionDetailPage() {
   const [liveWinnerId, setLiveWinnerId] = useState<string | null>(null);
   const [liveFinalAmount, setLiveFinalAmount] = useState<number | null>(null);
   const [liveClosedAt, setLiveClosedAt] = useState<string | null>(null);
-  const [watchlisted, setWatchlisted] = useState(false);
+
   const [activeImage, setActiveImage] = useState(0);
 
   const { data: auction, isLoading } = useQuery({
@@ -44,6 +44,14 @@ export function AuctionDetailPage() {
     queryFn: () => listingsApi.getListing(auction!.listingId),
     enabled: !!auction?.listingId,
   });
+
+  const { data: isWatchedData } = useQuery({
+    queryKey: ["auction-watched", id],
+    queryFn: () => auctionsApi.isWatched(id!),
+    enabled: !!id && isAuthenticated,
+  });
+
+  const watchlisted = isWatchedData ?? false;
 
   useEffect(() => {
     if (auction) {
@@ -97,13 +105,15 @@ export function AuctionDetailPage() {
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["auction", id] }),
   });
-
   const watchMutation = useMutation({
     mutationFn: () =>
       watchlisted
         ? auctionsApi.removeFromWatchlist(id!)
         : auctionsApi.addToWatchlist(id!),
-    onSuccess: () => setWatchlisted((w) => !w),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["auction-watched", id] });
+      queryClient.invalidateQueries({ queryKey: ["watchlist", "auctions"] });
+    },
   });
 
   if (isLoading) return <LoadingSpinner />;

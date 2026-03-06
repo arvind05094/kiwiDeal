@@ -209,4 +209,14 @@ public sealed class AuctionsController(ISender sender, ICurrentUser currentUser)
 
         return Ok(result.Value);
     }
+
+    [HttpGet("{id:guid}/watchlist")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> IsWatched(Guid id, CancellationToken cancellationToken)
+    {
+        var query = new GetAuctionWatchStatusQuery(currentUser.Id!.Value, id);
+        var result = await sender.Send(query, cancellationToken);
+        return Ok(new { isWatched = result.Value });
+    }
 }

@@ -39,4 +39,9 @@ export const auctionsApi = {
   removeFromWatchlist: async (id: string): Promise<void> => {
     await client.delete(`/auctions/${id}/watchlist`);
   },
+
+  isWatched: async (id: string): Promise<boolean> => {
+    const res = await client.get(`/auctions/${id}/watchlist`);
+    return res.data.isWatched;
+  },
 };

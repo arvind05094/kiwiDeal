@@ -12,8 +12,8 @@ public interface IListingRepository
     void RemoveWatchlistEntry(ListingWatchlist entry);
     Task<PagedResult<Listing>> GetBySellerIdAsync(Guid sellerId, PaginationParams pagination, ListingStatus[]? statuses, CancellationToken cancellationToken = default);
     Task AddAsync(Listing listing, CancellationToken cancellationToken = default);
-    void Update(Listing listing);
 
-    Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, string? searchTerm, string? category, string? region, string? sortBy, CancellationToken cancellationToken = default);
+    Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, string? searchTerm, string? category, string? region, string? sortBy, string? listingType, CancellationToken cancellationToken = default);
+    void Update(Listing listing);
 
 }

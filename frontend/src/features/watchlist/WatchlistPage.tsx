@@ -1,126 +1,14 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
 import { profileApi } from "@/features/profile/api";
 import { listingsApi } from "@/features/listings/api";
 import { auctionsApi } from "@/features/auctions/api";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { StatusBadge } from "@/shared/components/StatusBadge";
-import { Heart, X, Gavel } from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";
+import { Heart } from "lucide-react";
 import type { WatchlistItemDto, AuctionDto } from "@/shared/types/common";
-
-// --- Local card components ---
-
-function WatchlistListingCard({
-  item,
-  onRemove,
-}: {
-  item: WatchlistItemDto;
-  onRemove: () => void;
-}) {
-  return (
-    <div className="relative group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
-      <Link to={`/listings/${item.listingId}`} className="flex flex-col flex-1">
-        <div className="relative h-48 overflow-hidden bg-gray-100">
-          {item.thumbnailUrl ? (
-            <img
-              src={item.thumbnailUrl}
-              alt={item.title}
-              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-gray-300">
-              No image
-            </div>
-          )}
-          <div className="absolute top-2 right-2">
-            <span className="rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-gray-600 shadow-sm">
-              {item.listingType === "Auction" ? "Auction" : "Buy Now"}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-1 flex-col gap-2 p-4">
-          <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
-            {item.title}
-          </h3>
-          <div className="mt-auto space-y-1">
-            {item.listingType === "FixedPrice" && item.buyNowPrice != null ? (
-              <p className="text-lg font-bold text-gray-900">
-                ${item.buyNowPrice.toLocaleString()}
-              </p>
-            ) : (
-              <p className="text-sm font-medium text-gray-500">
-                See auction for bid
-              </p>
-            )}
-            <div className="flex items-center justify-between">
-              <StatusBadge status={item.status} />
-              <p className="text-xs text-gray-400">
-                {formatDistanceToNow(new Date(item.watchedSince), {
-                  addSuffix: true,
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-      </Link>
-      <button
-        onClick={onRemove}
-        className="absolute top-2 left-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 shadow-sm hover:bg-red-50 hover:text-red-500 text-gray-400 transition-colors"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
-}
-
-function WatchlistAuctionCard({
-  auction,
-  onRemove,
-}: {
-  auction: AuctionDto;
-  onRemove: () => void;
-}) {
-  return (
-    <div className="relative group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
-      <Link to={`/auctions/${auction.id}`} className="flex flex-col flex-1 p-4 gap-3">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-orange-500 transition-colors flex-1">
-            {auction.listingTitle}
-          </h3>
-          <Gavel className="h-4 w-4 text-gray-300 shrink-0 mt-0.5" />
-        </div>
-        <div className="mt-auto space-y-2">
-          <div>
-            <p className="text-xs text-gray-400">Current bid</p>
-            <p className="text-lg font-bold text-gray-900">
-              ${(auction.currentHighestBid ?? auction.startingPrice).toLocaleString()}
-            </p>
-          </div>
-          <div className="flex items-center justify-between">
-            <StatusBadge status={auction.status} />
-            <p className="text-xs text-gray-400">
-              Ends {format(new Date(auction.endTime), "dd MMM HH:mm")}
-            </p>
-          </div>
-          <p className="text-xs text-gray-400">
-            {auction.bids.length} bid{auction.bids.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-      </Link>
-      <button
-        onClick={onRemove}
-        className="absolute top-2 left-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 shadow-sm hover:bg-red-50 hover:text-red-500 text-gray-400 transition-colors"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
-}
-
-// --- Page ---
+import { WatchlistListingCard } from "./WatchlistListingCard";
+import { WatchlistAuctionCard } from "./WatchlistAuctionCard";
 
 export function WatchlistPage() {
   const [listingPage, setListingPage] = useState(1);

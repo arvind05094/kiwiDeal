@@ -15,8 +15,11 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
             .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
-    public async Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, string? searchTerm, string? category, string? region, string? sortBy, CancellationToken cancellationToken = default)
-    {
+
+    public async Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, 
+        string? searchTerm, string? category, string? region, 
+        string? sortBy, string? listingType, CancellationToken cancellationToken = default)
+    { 
         var query = context.Listings
             .Include(l => l.Images)
             .Where(l => l.Status == ListingStatus.Active)
@@ -35,6 +38,9 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
 
         if (!string.IsNullOrWhiteSpace(region) && Enum.TryParse<ListingRegion>(region, true, out var reg))
             query = query.Where(l => l.Region == reg);
+
+        if (!string.IsNullOrWhiteSpace(listingType) && Enum.TryParse<ListingType>(listingType, true, out var lt))
+            query = query.Where(l => l.ListingType == lt);
 
         query = sortBy?.ToLower() switch
         {

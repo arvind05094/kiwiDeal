@@ -89,13 +89,24 @@ export function BuyingTab() {
                       Ends {format(new Date(a.endTime), "dd MMM yyyy HH:mm")}
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <p className="text-sm text-gray-500">
-                      {a.currentHighestBid != null
-                        ? `$${a.currentHighestBid.toFixed(2)}`
-                        : `$${a.startingPrice.toFixed(2)}`}
+                  // With:
+                  <div className="flex flex-col items-end gap-0.5 shrink-0">
+                    <p className="text-sm font-medium text-gray-900">
+                      ${(a.currentHighestBid ?? a.startingPrice).toFixed(2)}
                     </p>
-                    <StatusBadge status={a.status} />
+                    {filter === "Active" && (
+                      <p
+                        className={`text-xs ${a.currentHighestBidderId === a.sellerId ? "text-gray-400" : "text-green-600 font-medium"}`}
+                      >
+                        {a.currentHighestBidderId ? "Outbid" : "No bids yet"}
+                      </p>
+                    )}
+                    {filter === "Won" && (
+                      <p className="text-xs text-green-600 font-medium">Won</p>
+                    )}
+                    {filter === "Lost" && (
+                      <p className="text-xs text-red-500">Lost</p>
+                    )}
                   </div>
                 </Link>
               ))}

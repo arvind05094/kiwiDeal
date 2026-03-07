@@ -19,6 +19,8 @@ public sealed class Auction : AggregateRoot
     public Guid? CurrentHighestBidderId { get; private set; }
     public DateTimeOffset StartTime { get; private set; }
     public DateTimeOffset EndTime { get; private set; }
+
+    public DateTimeOffset? ClosedAt { get; private set; }
     public AuctionStatus Status { get; private set; }
     public uint RowVersion { get; private set; }
     private readonly List<AuctionBid> _bids = [];
@@ -109,6 +111,7 @@ public sealed class Auction : AggregateRoot
             return Result.Failure(AuctionErrors.AlreadyClosed());
 
         Status = AuctionStatus.Closed;
+        ClosedAt = DateTimeOffset.UtcNow;
         UpdatedAt = DateTimeOffset.UtcNow;
 
         RaiseDomainEvent(new AuctionClosedEvent(

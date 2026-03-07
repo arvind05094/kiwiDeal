@@ -1,4 +1,6 @@
+using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Auctions.Domain.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,7 +38,7 @@ public sealed class AuctionActivationWorker(
         using var scope = scopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IAuctionRepository>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IAuctionsUnitOfWork>();
-
+        var hubContext = scope.ServiceProvider.GetRequiredService<IAuctionHubContext>();
         var auctions = await repository.GetScheduledReadyToActivateAsync(cancellationToken);
 
         if (auctions.Count == 0)
@@ -56,6 +58,7 @@ public sealed class AuctionActivationWorker(
             try
             {
                 await unitOfWork.SaveChangesAsync(cancellationToken);
+                await hubContext.SendAuctionStarted(auction.Id.Value.ToString(), cancellationToken);
                 logger.LogInformation("Auction {AuctionId} activated", auction.Id);
             }
             catch (DbUpdateConcurrencyException)

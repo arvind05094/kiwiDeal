@@ -36,6 +36,7 @@ public sealed class GetMyAuctionsQueryHandler : IRequestHandler<GetMyAuctionsQue
             a.CurrentHighestBidderId,
             a.StartTime,
             a.EndTime,
+            a.ClosedAt,
             a.Status.ToString(),
             [])).ToList();
 

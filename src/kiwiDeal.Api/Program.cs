@@ -5,6 +5,7 @@ using kiwiDeal.Api.Infrastructure;
 using kiwiDeal.Auctions.Api;
 using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Listings.Api;
+using kiwiDeal.Listings.Application.Events;
 using kiwiDeal.Messages.Api;
 using kiwiDeal.Payments.Api;
 using kiwiDeal.SharedKernel.Behaviours;
@@ -37,6 +38,7 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IAuctionHubContext, AuctionHubContext>();
+builder.Services.AddScoped<IListingHubContext, ListingHubContext>();
 
 builder.Services.AddValidatorsFromAssembly(
     typeof(kiwiDeal.Users.Application.Commands.RegisterCommand).Assembly);
@@ -151,6 +153,7 @@ app.UseCors("Frontend");
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<AuctionHub>("/hubs/auctions");
+app.MapHub<ListingHub>("/hubs/listings");
 app.MapHub<MessageHub>("/hubs/messages");
 app.MapHealthChecks("/health");
 app.Run();

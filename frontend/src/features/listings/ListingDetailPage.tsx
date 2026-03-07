@@ -10,6 +10,7 @@ import { MapPin, Tag, ArrowLeft, Heart, User } from "lucide-react";
 import { createBuyNowCheckout } from "../payments/api";
 import { startConversation } from "../messages/api";
 import type { ConversationDto } from "@/shared/types/common";
+import { useListingHub } from "./useListingHub";
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +30,9 @@ export function ListingDetailPage() {
     enabled: !!id && isAuthenticated,
   });
   const watched = isWatchedData ?? false;
-
+  useListingHub(id!, () =>
+    queryClient.invalidateQueries({ queryKey: ["listing", id] }),
+  );
   const cancelMutation = useMutation({
     mutationFn: () => listingsApi.cancelListing(id!),
     onSuccess: () =>

@@ -45,4 +45,12 @@ public sealed class AuctionHubContext(IHubContext<AuctionHub> hubContext) : IAuc
             },
             cancellationToken);
     }
+
+    public async Task SendAuctionStarted(string auctionId, CancellationToken cancellationToken = default)
+    {
+        await hubContext.Clients.Group(auctionId).SendAsync(
+            "AuctionStarted",
+            new { AuctionId = auctionId },
+            cancellationToken);
+    }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
 import { getAccessToken } from "@/shared/api/client";
 
@@ -21,20 +21,27 @@ export interface AuctionClosedMessage {
   closedAt?: string;
 }
 
+export interface AuctionStartedMessage {
+  auctionId: string;
+}
+
 interface UseAuctionHubOptions {
   auctionId: string;
   onBidPlaced: (msg: BidPlacedMessage) => void;
   onAuctionClosed: (msg: AuctionClosedMessage) => void;
+  onAuctionStarted: (msg: AuctionStartedMessage) => void;
 }
 
 export function useAuctionHub({
   auctionId,
   onBidPlaced,
   onAuctionClosed,
+  onAuctionStarted,
 }: UseAuctionHubOptions) {
   const connectionRef = useRef<signalR.HubConnection | null>(null);
   const onBidPlacedRef = useRef(onBidPlaced);
   const onAuctionClosedRef = useRef(onAuctionClosed);
+  const onAuctionStartedRef = useRef(onAuctionStarted);
 
   useEffect(() => {
     onBidPlacedRef.current = onBidPlaced;
@@ -42,6 +49,10 @@ export function useAuctionHub({
   useEffect(() => {
     onAuctionClosedRef.current = onAuctionClosed;
   }, [onAuctionClosed]);
+
+  useEffect(() => {
+    onAuctionStartedRef.current = onAuctionStarted;
+  }, [onAuctionStarted]);
 
   useEffect(() => {
     const token = getAccessToken();
@@ -60,6 +71,10 @@ export function useAuctionHub({
 
     connection.on("AuctionClosed", (msg: AuctionClosedMessage) => {
       onAuctionClosedRef.current(msg);
+    });
+
+    connection.on("AuctionStarted", (msg: AuctionStartedMessage) => {
+      onAuctionStartedRef.current(msg);
     });
 
     connection

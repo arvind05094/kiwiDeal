@@ -50,6 +50,9 @@ public sealed class AuctionConfiguration : IEntityTypeConfiguration<Auction>
             .HasColumnName("end_time")
             .HasColumnType("timestamptz")
             .IsRequired();
+        builder.Property(a => a.ClosedAt)
+            .HasColumnName("closed_at")
+            .HasColumnType("timestamptz");
 
         builder.Property(a => a.Status)
             .HasColumnName("status")

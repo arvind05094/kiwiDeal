@@ -81,10 +81,16 @@ export function AuctionDetailPage() {
     },
     [id, queryClient],
   );
+
+  const onAuctionStarted = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["auction", id] });
+  }, [id, queryClient]);
+
   useAuctionHub({
     auctionId: id ?? "",
     onBidPlaced,
     onAuctionClosed,
+    onAuctionStarted,
   });
 
   const placeBidMutation = useMutation({
@@ -124,7 +130,8 @@ export function AuctionDetailPage() {
     );
 
   const status = liveClosed ? "Closed" : auction.status;
-  const endTime = liveClosedAt ?? liveEndTime ?? auction.endTime;
+  const endTime =
+    liveClosedAt ?? auction.closedAt ?? liveEndTime ?? auction.endTime;
   const bids = liveBids.length ? liveBids : (auction.bids ?? []);
   const currentBid = liveFinalAmount
     ? liveFinalAmount
@@ -235,6 +242,24 @@ export function AuctionDetailPage() {
                   </p>
                 )}
               </div>
+
+              {(status === "Closed" || liveClosed) &&
+                currentBidderId &&
+                isSeller && (
+                  <p className="text-sm text-gray-600">
+                    Winner:{" "}
+                    <Link
+                      to={`/users/${currentBidderId}`}
+                      className="font-medium text-orange-500 hover:underline"
+                    >
+                      {liveBids.find((b) => b.bidderId === currentBidderId)
+                        ?.bidderName ??
+                        auction.bids.find((b) => b.bidderId === currentBidderId)
+                          ?.bidderName ??
+                        "View profile"}
+                    </Link>
+                  </p>
+                )}
 
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />

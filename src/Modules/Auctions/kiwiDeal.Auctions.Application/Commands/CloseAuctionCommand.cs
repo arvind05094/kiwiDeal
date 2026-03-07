@@ -13,11 +13,16 @@ public sealed class CloseAuctionCommandHandler : IRequestHandler<CloseAuctionCom
 {
     private readonly IAuctionRepository _auctionRepository;
     private readonly IAuctionsUnitOfWork _unitOfWork;
+    private readonly IAuctionHubContext _hubContext;
 
-    public CloseAuctionCommandHandler(IAuctionRepository auctionRepository, IAuctionsUnitOfWork unitOfWork)
+    public CloseAuctionCommandHandler(
+        IAuctionRepository auctionRepository,
+        IAuctionsUnitOfWork unitOfWork,
+        IAuctionHubContext hubContext)
     {
         _auctionRepository = auctionRepository;
         _unitOfWork = unitOfWork;
+        _hubContext = hubContext;
     }
 
     public async Task<Result> Handle(CloseAuctionCommand command, CancellationToken cancellationToken)
@@ -37,6 +42,12 @@ public sealed class CloseAuctionCommandHandler : IRequestHandler<CloseAuctionCom
             return result;
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _hubContext.SendAuctionClosed(
+            auction.Id.Value.ToString(),
+            auction.CurrentHighestBidderId,
+            auction.CurrentHighestBid,
+            cancellationToken);
 
         return Result.Success();
     }

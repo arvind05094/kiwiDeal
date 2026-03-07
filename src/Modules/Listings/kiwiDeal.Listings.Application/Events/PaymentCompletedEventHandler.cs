@@ -9,6 +9,7 @@ namespace kiwiDeal.Listings.Application.Events;
 public sealed class PaymentCompletedEventHandler(
     IListingRepository listingRepository,
     IListingsUnitOfWork unitOfWork,
+    IListingHubContext listingHubContext,
     ILogger<PaymentCompletedEventHandler> logger) : INotificationHandler<PaymentCompletedEvent>
 {
     public async Task Handle(PaymentCompletedEvent notification, CancellationToken cancellationToken)
@@ -37,8 +38,9 @@ public sealed class PaymentCompletedEventHandler(
         }
 
         listingRepository.Update(listing);
+        
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
+        await listingHubContext.SendListingSold(listing.Id.Value.ToString(), cancellationToken);
         logger.LogInformation(
             "Listing {ListingId} marked as Sold after fixed price payment {PaymentId} completed",
             listing.Id, notification.PaymentId);

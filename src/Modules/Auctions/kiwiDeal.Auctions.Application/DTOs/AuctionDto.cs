@@ -10,5 +10,6 @@ public sealed record AuctionDto(
     Guid? CurrentHighestBidderId,
     DateTimeOffset StartTime,
     DateTimeOffset EndTime,
+    DateTimeOffset? ClosedAt,
     string Status,
     IReadOnlyList<AuctionBidDto> Bids);

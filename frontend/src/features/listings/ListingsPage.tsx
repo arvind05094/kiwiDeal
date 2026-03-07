@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NZ_REGIONS } from "@/shared/types/common";
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 
 export function ListingsPage() {

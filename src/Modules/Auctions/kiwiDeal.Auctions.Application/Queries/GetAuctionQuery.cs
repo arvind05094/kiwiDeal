@@ -37,6 +37,7 @@ public sealed class GetAuctionQueryHandler : IRequestHandler<GetAuctionQuery, Re
             auction.CurrentHighestBidderId,
             auction.StartTime,
             auction.EndTime,
+            auction.ClosedAt,
             auction.Status.ToString(),
             auction.Bids
                 .OrderBy(b => b.CreatedAt)

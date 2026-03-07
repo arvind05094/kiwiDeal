@@ -73,6 +73,7 @@ export interface AuctionDto {
   endTime: string;
   status: AuctionStatus;
   bids: AuctionBidDto[];
+  closedAt?: string;
 }
 
 export interface UserResponse {

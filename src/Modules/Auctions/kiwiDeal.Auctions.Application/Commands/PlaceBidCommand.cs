@@ -18,6 +18,7 @@ public interface IAuctionHubContext
 {
     Task SendBidPlaced(string auctionId, Guid bidId, Guid bidderId, string bidderName, decimal amount, DateTimeOffset newEndTime, CancellationToken cancellationToken = default);
     Task SendAuctionClosed(string auctionId, Guid? winnerId, decimal? finalAmount, CancellationToken cancellationToken = default);
+    Task SendAuctionStarted(string auctionId, CancellationToken cancellationToken = default);
 }
 public sealed class PlaceBidCommandHandler : IRequestHandler<PlaceBidCommand, Result>
 {

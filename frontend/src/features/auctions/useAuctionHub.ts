@@ -18,6 +18,7 @@ export interface AuctionClosedMessage {
   auctionId: string;
   winnerId?: string;
   finalAmount?: number;
+  closedAt?: string;
 }
 
 interface UseAuctionHubOptions {

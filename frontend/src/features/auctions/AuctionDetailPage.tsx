@@ -10,8 +10,9 @@ import { StatusBadge } from "@/shared/components/StatusBadge";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { auctionsApi } from "./api";
+import { listingsApi } from "@/features/listings/api";
 import { useAuctionHub } from "./useAuctionHub";
-import type { AuctionDto, AuctionBidDto } from "@/shared/types/common";
+import type { AuctionBidDto } from "@/shared/types/common";
 import type { BidPlacedMessage, AuctionClosedMessage } from "./useAuctionHub";
 import { createAuctionCheckout } from "../payments/api";
 
@@ -26,12 +27,22 @@ export function AuctionDetailPage() {
   const [liveEndTime, setLiveEndTime] = useState<string | null>(null);
   const [liveBids, setLiveBids] = useState<AuctionBidDto[]>([]);
   const [liveClosed, setLiveClosed] = useState(false);
+  const [liveWinnerId, setLiveWinnerId] = useState<string | null>(null);
+  const [liveFinalAmount, setLiveFinalAmount] = useState<number | null>(null);
+  const [liveClosedAt, setLiveClosedAt] = useState<string | null>(null);
   const [watchlisted, setWatchlisted] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
 
   const { data: auction, isLoading } = useQuery({
     queryKey: ["auction", id],
     queryFn: () => auctionsApi.getAuction(id!),
     enabled: !!id,
+  });
+
+  const { data: listing } = useQuery({
+    queryKey: ["listing", auction?.listingId],
+    queryFn: () => listingsApi.getListing(auction!.listingId),
+    enabled: !!auction?.listingId,
   });
 
   useEffect(() => {
@@ -54,15 +65,16 @@ export function AuctionDetailPage() {
     ]);
     setLiveEndTime(msg.newEndTime);
   }, []);
-
   const onAuctionClosed = useCallback(
-    (_msg: AuctionClosedMessage) => {
+    (msg: AuctionClosedMessage) => {
       setLiveClosed(true);
+      if (msg.winnerId) setLiveWinnerId(msg.winnerId);
+      if (msg.finalAmount) setLiveFinalAmount(msg.finalAmount);
+      if (msg.closedAt) setLiveClosedAt(msg.closedAt);
       queryClient.invalidateQueries({ queryKey: ["auction", id] });
     },
     [id, queryClient],
   );
-
   useAuctionHub({
     auctionId: id ?? "",
     onBidPlaced,
@@ -101,16 +113,23 @@ export function AuctionDetailPage() {
     );
 
   const status = liveClosed ? "Closed" : auction.status;
-  const endTime = liveEndTime ?? auction.endTime;
+  const endTime = liveClosedAt ?? liveEndTime ?? auction.endTime;
   const bids = liveBids.length ? liveBids : (auction.bids ?? []);
-  const currentBid = bids.length
-    ? Math.max(...bids.map((b) => b.amount))
-    : (auction.currentHighestBid ?? auction.startingPrice);
-  const currentBidderId = bids.length
-    ? bids.reduce((a, b) => (a.amount > b.amount ? a : b)).bidderId
-    : auction.currentHighestBidderId;
+  const currentBid = liveFinalAmount
+    ? liveFinalAmount
+    : bids.length
+      ? Math.max(...bids.map((b) => b.amount))
+      : (auction.currentHighestBid ?? auction.startingPrice);
+
+  const currentBidderId =
+    liveWinnerId ??
+    (bids.length
+      ? bids.reduce((a, b) => (a.amount > b.amount ? a : b)).bidderId
+      : auction.currentHighestBidderId);
+
+  const isWinner =
+    (liveClosed || status === "Closed") && currentBidderId === user?.id;
   const isSeller = user?.id === auction.sellerId;
-  const isWinner = status === "Closed" && currentBidderId === user?.id;
   const canBid = isAuthenticated && !isSeller && status === "Active";
   const canClose = isSeller && status === "Active";
   const canWatch =
@@ -134,7 +153,7 @@ export function AuctionDetailPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
@@ -153,172 +172,217 @@ export function AuctionDetailPage() {
         <StatusBadge status={status} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardContent className="p-6 space-y-5">
-            <div>
-              <p className="text-sm text-gray-500">
-                {bids.length ? "Current bid" : "Starting price"}
-              </p>
-              <p className="text-3xl font-bold">${currentBid.toFixed(2)}</p>
-              {bids.length > 0 && (
-                <p className="text-sm text-gray-500 mt-0.5">
-                  {bids.length} bid{bids.length !== 1 ? "s" : ""}
+      <div className="grid grid-cols-1 lg:grid-cols-[5fr_4fr] gap-8 items-start">
+        {/* Left — image gallery */}
+        {listing?.images?.length ? (
+          <div className="space-y-2">
+            <div className="w-full aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
+              <img
+                src={listing.images[activeImage].url}
+                alt={auction.listingTitle}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            {listing.images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {listing.images.map((img, i) => (
+                  <button
+                    key={img.displayOrder}
+                    onClick={() => setActiveImage(i)}
+                    className={`shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-colors ${
+                      i === activeImage
+                        ? "border-orange-500"
+                        : "border-transparent"
+                    }`}
+                  >
+                    <img
+                      src={img.url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="aspect-[4/3] rounded-lg bg-gray-100" />
+        )}
+
+        {/* Right — bid panel + bid history */}
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <div>
+                <p className="text-sm text-gray-500">
+                  {bids.length ? "Current bid" : "Starting price"}
+                </p>
+                <p className="text-3xl font-bold">${currentBid.toFixed(2)}</p>
+                {bids.length > 0 && (
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    {bids.length} bid{bids.length !== 1 ? "s" : ""}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                {status === "Scheduled" && (
+                  <span>
+                    Starts{" "}
+                    {formatDistanceToNow(new Date(auction.startTime), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                )}
+                {status === "Active" && !isEnded && (
+                  <span>
+                    Ends{" "}
+                    {formatDistanceToNow(new Date(endTime), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                )}
+                {(status === "Closed" || isEnded) && (
+                  <span>
+                    Ended {format(new Date(endTime), "d MMM yyyy, h:mm a")}
+                  </span>
+                )}
+              </div>
+
+              <div className="text-xs text-gray-400 space-y-0.5">
+                <p>
+                  Start:{" "}
+                  {format(new Date(auction.startTime), "d MMM yyyy, h:mm a")}
+                </p>
+                <p>End: {format(new Date(endTime), "d MMM yyyy, h:mm a")}</p>
+              </div>
+
+              {canBid && (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder={`More than $${currentBid.toFixed(2)}`}
+                      value={bidAmount}
+                      onChange={(e) => setBidAmount(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handlePlaceBid}
+                      disabled={placeBidMutation.isPending}
+                      className="bg-[#1a1a1a] hover:bg-gray-800 text-white"
+                    >
+                      <Gavel className="w-4 h-4 mr-1.5" />
+                      Bid
+                    </Button>
+                  </div>
+                  {bidError && (
+                    <p className="text-sm text-red-500">{bidError}</p>
+                  )}
+                </div>
+              )}
+
+              {!isAuthenticated && status === "Active" && (
+                <p className="text-sm text-gray-500">
+                  <Link to="/login" className="text-orange-500 hover:underline">
+                    Sign in
+                  </Link>{" "}
+                  to place a bid.
                 </p>
               )}
-            </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Clock className="w-4 h-4" />
-              {status === "Scheduled" && (
-                <span>
-                  Starts{" "}
-                  {formatDistanceToNow(new Date(auction.startTime), {
-                    addSuffix: true,
-                  })}
-                </span>
-              )}
-              {status === "Active" && !isEnded && (
-                <span>
-                  Ends{" "}
-                  {formatDistanceToNow(new Date(endTime), { addSuffix: true })}
-                </span>
-              )}
-              {(status === "Closed" || isEnded) && (
-                <span>
-                  Ended {format(new Date(endTime), "d MMM yyyy, h:mm a")}
-                </span>
-              )}
-            </div>
-
-            <div className="text-xs text-gray-400 space-y-0.5">
-              <p>
-                Start:{" "}
-                {format(new Date(auction.startTime), "d MMM yyyy, h:mm a")}
-              </p>
-              <p>End: {format(new Date(endTime), "d MMM yyyy, h:mm a")}</p>
-            </div>
-
-            {canBid && (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    type="number"
-                    placeholder={`More than $${currentBid.toFixed(2)}`}
-                    value={bidAmount}
-                    onChange={(e) => setBidAmount(e.target.value)}
-                    className="flex-1"
-                  />
+              {isWinner && (
+                <div className="rounded-md bg-green-50 border border-green-200 p-3 space-y-3">
+                  <p className="text-sm text-green-700 font-medium">
+                    You won this auction! 🎉
+                  </p>
                   <Button
-                    onClick={handlePlaceBid}
-                    disabled={placeBidMutation.isPending}
-                    className="bg-[#1a1a1a] hover:bg-gray-800 text-white"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={async () => {
+                      try {
+                        const { checkoutUrl } = await createAuctionCheckout({
+                          auctionId: auction.id,
+                        });
+                        window.location.href = checkoutUrl;
+                      } catch {}
+                    }}
                   >
-                    <Gavel className="w-4 h-4 mr-1.5" />
-                    Bid
+                    Pay Now
                   </Button>
                 </div>
-                {bidError && <p className="text-sm text-red-500">{bidError}</p>}
-              </div>
-            )}
+              )}
 
-            {!isAuthenticated && status === "Active" && (
-              <p className="text-sm text-gray-500">
-                <Link to="/login" className="text-orange-500 hover:underline">
-                  Sign in
-                </Link>{" "}
-                to place a bid.
-              </p>
-            )}
-
-            {isWinner && (
-              <div className="rounded-md bg-green-50 border border-green-200 p-3 space-y-3">
-                <p className="text-sm text-green-700 font-medium">
-                  You won this auction! 🎉
-                </p>
+              {canClose && (
                 <Button
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                  onClick={async () => {
-                    try {
-                      const { checkoutUrl } = await createAuctionCheckout({
-                        auctionId: auction.id,
-                      });
-                      window.location.href = checkoutUrl;
-                    } catch {}
-                  }}
+                  variant="outline"
+                  className="w-full border-red-300 text-red-600 hover:bg-red-50"
+                  onClick={() => closeMutation.mutate()}
+                  disabled={closeMutation.isPending}
                 >
-                  Pay Now
+                  <X className="w-4 h-4 mr-1.5" />
+                  Close Auction
                 </Button>
-              </div>
-            )}
+              )}
 
-            {canClose && (
-              <Button
-                variant="outline"
-                className="w-full border-red-300 text-red-600 hover:bg-red-50"
-                onClick={() => closeMutation.mutate()}
-                disabled={closeMutation.isPending}
-              >
-                <X className="w-4 h-4 mr-1.5" />
-                Close Auction
-              </Button>
-            )}
+              {canWatch && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => watchMutation.mutate()}
+                  disabled={watchMutation.isPending}
+                >
+                  {watchlisted ? (
+                    <>
+                      <EyeOff className="w-4 h-4 mr-1.5" />
+                      Unwatch
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-4 h-4 mr-1.5" />
+                      Watch
+                    </>
+                  )}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
 
-            {canWatch && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => watchMutation.mutate()}
-                disabled={watchMutation.isPending}
-              >
-                {watchlisted ? (
-                  <>
-                    <EyeOff className="w-4 h-4 mr-1.5" />
-                    Unwatch
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-4 h-4 mr-1.5" />
-                    Watch
-                  </>
-                )}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Bid history</h3>
-            {bids.length === 0 ? (
-              <p className="text-sm text-gray-400">No bids yet.</p>
-            ) : (
-              <ul className="space-y-3">
-                {bids.map((bid) => (
-                  <li
-                    key={bid.id}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <Link
-                      to={`/users/${bid.bidderId}`}
-                      className="font-medium hover:underline hover:text-orange-500 transition-colors"
-                    >
-                      {bid.bidderName}
-                    </Link>
-                    <span className="text-gray-500">
-                      ${bid.amount.toFixed(2)}
-                    </span>
-                    <span className="text-gray-400 text-xs">
-                      {formatDistanceToNow(new Date(bid.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4">Bid history</h3>
+              {bids.length === 0 ? (
+                <p className="text-sm text-gray-400">No bids yet.</p>
+              ) : (
+                <div className="max-h-64 overflow-y-auto">
+                  <ul className="space-y-3">
+                    {bids.map((bid) => (
+                      <li
+                        key={bid.id}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <Link
+                          to={`/users/${bid.bidderId}`}
+                          className="font-medium hover:underline hover:text-orange-500 transition-colors"
+                        >
+                          {bid.bidderName}
+                        </Link>
+                        <span className="text-gray-500">
+                          ${bid.amount.toFixed(2)}
+                        </span>
+                        <span className="text-gray-400 text-xs">
+                          {formatDistanceToNow(new Date(bid.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

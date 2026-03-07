@@ -64,8 +64,11 @@ export function PublicProfilePage() {
 
         {/* Center/Left-aligned content area */}
         <div className="space-y-2 flex-1">
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
             {profile.firstName} {profile.lastName}
+            {isOwnProfile && (
+              <span className="text-sm font-normal text-gray-600">(you)</span>
+            )}
           </h1>
           <div className="flex flex-wrap gap-4 text-sm text-gray-500">
             <span className="flex items-center gap-1">

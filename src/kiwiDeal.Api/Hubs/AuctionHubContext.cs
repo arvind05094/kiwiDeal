@@ -40,7 +40,8 @@ public sealed class AuctionHubContext(IHubContext<AuctionHub> hubContext) : IAuc
             {
                 AuctionId = auctionId,
                 WinnerId = winnerId,
-                FinalAmount = finalAmount
+                FinalAmount = finalAmount,
+                ClosedAt = DateTimeOffset.UtcNow
             },
             cancellationToken);
     }

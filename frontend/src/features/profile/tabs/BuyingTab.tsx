@@ -7,12 +7,12 @@ import { EmptyState } from "@/shared/components/EmptyState";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PagedList } from "@/shared/components/PagedList";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
 type BuyingFilter = "Active" | "Won" | "Lost" | "Purchased";
 
 const FILTERS: { label: string; value: BuyingFilter }[] = [
-  { label: "Active", value: "Active" },
+  { label: "Bidding", value: "Active" },
   { label: "Won", value: "Won" },
   { label: "Lost", value: "Lost" },
   { label: "Purchased", value: "Purchased" },
@@ -86,26 +86,26 @@ export function BuyingTab() {
                       {a.listingTitle}
                     </p>
                     <p className="text-sm text-gray-500 mt-0.5">
-                      Ends {format(new Date(a.endTime), "dd MMM yyyy HH:mm")}
+                      {filter === "Active"
+                        ? `Ends ${formatDistanceToNow(new Date(a.endTime), { addSuffix: true })}`
+                        : filter === "Lost"
+                          ? `Auction ended on ${format(new Date(a.closedAt ?? a.endTime), "dd MMM yyyy")}`
+                          : `You won this auction on ${format(new Date(a.closedAt ?? a.endTime), "dd MMM yyyy")}`}
                     </p>
                   </div>
-                  // With:
                   <div className="flex flex-col items-end gap-0.5 shrink-0">
                     <p className="text-sm font-medium text-gray-900">
                       ${(a.currentHighestBid ?? a.startingPrice).toFixed(2)}
                     </p>
-                    {filter === "Active" && (
-                      <p
-                        className={`text-xs ${a.currentHighestBidderId === a.sellerId ? "text-gray-400" : "text-green-600 font-medium"}`}
-                      >
-                        {a.currentHighestBidderId ? "Outbid" : "No bids yet"}
+                    {filter === "Active" && a.currentHighestBidderId && (
+                      <p className="text-xs text-orange-500 font-medium">
+                        Outbid
                       </p>
                     )}
                     {filter === "Won" && (
-                      <p className="text-xs text-green-600 font-medium">Won</p>
-                    )}
-                    {filter === "Lost" && (
-                      <p className="text-xs text-red-500">Lost</p>
+                      <p className="text-xs text-orange-500 font-medium">
+                        Awaiting payment
+                      </p>
                     )}
                   </div>
                 </Link>
@@ -137,7 +137,8 @@ export function BuyingTab() {
                     Listing {p.listingId.slice(0, 8)}...
                   </p>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {new Date(p.createdAt).toLocaleDateString()}
+                    You purchased this on{" "}
+                    {format(new Date(p.paidAt ?? p.createdAt), "dd MMM yyyy")}
                   </p>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">

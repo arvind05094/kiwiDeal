@@ -7,10 +7,11 @@ import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { MapPin, Tag, ArrowLeft, Heart, User } from "lucide-react";
-import { createBuyNowCheckout } from "../payments/api";
+import { createBuyNowCheckout, getPaymentByListing } from "../payments/api";
 import { startConversation } from "../messages/api";
 import type { ConversationDto } from "@/shared/types/common";
 import { useListingHub } from "./useListingHub";
+import { format } from "date-fns";
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,13 +49,21 @@ export function ListingDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["listings-watchlist"] });
     },
   });
+
+  const isSeller = user?.id === listing?.sellerId;
+
+  const { data: buyerPayment } = useQuery({
+    queryKey: ["payment-listing", id],
+    queryFn: () => getPaymentByListing(id!),
+    enabled: !!id && isAuthenticated && !isSeller && listing?.status === "Sold",
+  });
+
   if (isLoading) return <LoadingSpinner />;
   if (!listing)
     return (
       <div className="text-center py-24 text-gray-400">Listing not found.</div>
     );
 
-  const isSeller = user?.id === listing.sellerId;
   const isActive = listing.status === "Active";
   const isFixedPrice = listing.listingType === "FixedPrice";
   const isAuction = listing.listingType === "Auction";
@@ -83,6 +92,12 @@ export function ListingDetailPage() {
               </h1>
               <StatusBadge status={listing.status} />
             </div>
+            {buyerPayment?.status === "Completed" && buyerPayment.paidAt && (
+              <p className="text-sm text-blue-600 font-medium mt-1">
+                You purchased this on{" "}
+                {format(new Date(buyerPayment.paidAt), "dd MMM yyyy")}
+              </p>
+            )}
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <MapPin className="h-3.5 w-3.5" />

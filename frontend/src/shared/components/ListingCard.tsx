@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { MapPin, Tag, Heart } from "lucide-react";
 import type { ListingDto } from "@/shared/types/common";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { listingsApi } from "@/features/listings/api";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -73,11 +73,6 @@ export function ListingCard({
             No image
           </div>
         )}
-        <div className="absolute top-2 right-2">
-          <span className="rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-gray-600 shadow-sm">
-            {listing.listingType === "Auction" ? "Auction" : "Buy Now"}
-          </span>
-        </div>
         {isAuthenticated && user?.id !== listing.sellerId && (
           <button
             onClick={handleWatch}
@@ -94,6 +89,18 @@ export function ListingCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              listing.listingType === "Auction"
+                ? "bg-orange-100 text-orange-600"
+                : "bg-blue-100 text-blue-600"
+            }`}
+          >
+            {listing.listingType === "Auction" ? "Auction" : "Fixed Price"}
+          </span>
+        </div>
+
         <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
           {listing.title}
         </h3>
@@ -109,6 +116,26 @@ export function ListingCard({
               See auction for bid
             </p>
           )}
+
+          {/* Status labels */}
+          {listing.status === "PendingPayment" && (
+            <p className="text-xs text-orange-500 font-medium">
+              Awaiting payment from buyer
+            </p>
+          )}
+          {listing.status === "Sold" && listing.soldAmount != null && (
+            <p className="text-xs text-blue-600 font-medium">
+              {listing.listingType === "Auction"
+                ? `Sold via auction on ${format(new Date(listing.updatedAt), "dd MMM yyyy")} for $${listing.soldAmount.toLocaleString()}`
+                : `Sold on ${format(new Date(listing.updatedAt), "dd MMM yyyy")} for $${listing.soldAmount.toLocaleString()}`}
+            </p>
+          )}
+          {listing.status === "Cancelled" && (
+            <p className="text-xs text-gray-400">
+              Cancelled on {format(new Date(listing.updatedAt), "dd MMM yyyy")}
+            </p>
+          )}
+
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />

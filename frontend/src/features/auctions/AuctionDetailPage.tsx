@@ -331,24 +331,29 @@ export function AuctionDetailPage() {
                 </p>
               )}
 
-              {isWinner && winnerPayment?.status !== "Completed" && (
+              {isWinner && (
                 <div className="rounded-md bg-green-50 border border-green-200 p-3 space-y-3">
                   <p className="text-sm text-green-700 font-medium">
-                    You won this auction! 🎉
+                    You won this auction on{" "}
+                    {format(new Date(endTime), "dd MMM yyyy")}
+                    {winnerPayment?.status !== "Completed" &&
+                      " · Awaiting payment"}
                   </p>
-                  <Button
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                    onClick={async () => {
-                      try {
-                        const { checkoutUrl } = await createAuctionCheckout({
-                          auctionId: auction.id,
-                        });
-                        window.location.href = checkoutUrl;
-                      } catch {}
-                    }}
-                  >
-                    Pay Now
-                  </Button>
+                  {winnerPayment?.status !== "Completed" && (
+                    <Button
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                      onClick={async () => {
+                        try {
+                          const { checkoutUrl } = await createAuctionCheckout({
+                            auctionId: auction.id,
+                          });
+                          window.location.href = checkoutUrl;
+                        } catch {}
+                      }}
+                    >
+                      Pay Now
+                    </Button>
+                  )}
                 </div>
               )}
               {isSeller &&

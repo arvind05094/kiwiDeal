@@ -15,7 +15,8 @@ public sealed class StripeService(
         Guid paymentId,
         decimal amount,
         string productName,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Guid? listingId = null)
     {
         try
         {
@@ -41,7 +42,9 @@ public sealed class StripeService(
                     }
                 ],
                 Mode = "payment",
-                SuccessUrl = $"{options.Value.SuccessUrl}?paymentId={paymentId}",
+                SuccessUrl = listingId.HasValue
+                    ? $"{options.Value.SuccessUrl}?paymentId={paymentId}&listingId={listingId.Value}"
+                    : $"{options.Value.SuccessUrl}?paymentId={paymentId}",
                 CancelUrl = options.Value.CancelUrl,
                 Metadata = new Dictionary<string, string>
                 {

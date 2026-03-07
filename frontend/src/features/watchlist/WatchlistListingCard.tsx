@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import type { WatchlistItemDto } from "@/shared/types/common";
-import { formatDistanceToNow, intlFormatDistance } from "date-fns";
+import { intlFormatDistance } from "date-fns";
 import { X } from "lucide-react";
 import { Link } from "react-router-dom";
 

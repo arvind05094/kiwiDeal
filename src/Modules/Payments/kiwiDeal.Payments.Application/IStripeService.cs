@@ -9,7 +9,8 @@ public interface IStripeService
         Guid paymentId,
         decimal amount,
         string productName,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        Guid? listingId = null);
 
     Task<Result<string>> GetCheckoutSessionUrlAsync(
         string sessionId,

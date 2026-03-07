@@ -54,7 +54,8 @@ public sealed class CreateBuyNowCheckoutSessionCommandHandler(
             paymentResult.Value.Id.Value,
             paymentResult.Value.Amount,
             "kiwiDeal Buy Now",
-            cancellationToken);
+            cancellationToken,
+            listingId: request.ListingId);
 
         if (sessionResult.IsFailure)
             return Result.Failure<string>(sessionResult.Error);

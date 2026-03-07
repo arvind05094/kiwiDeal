@@ -44,13 +44,11 @@ export function AuctionDetailPage() {
     queryFn: () => listingsApi.getListing(auction!.listingId),
     enabled: !!auction?.listingId,
   });
-
   const { data: isWatchedData } = useQuery({
-    queryKey: ["auction-watched", id],
-    queryFn: () => auctionsApi.isWatched(id!),
-    enabled: !!id && isAuthenticated,
+    queryKey: ["listing-watched", auction?.listingId],
+    queryFn: () => listingsApi.isWatched(auction!.listingId),
+    enabled: !!auction?.listingId && isAuthenticated,
   });
-
   const watchlisted = isWatchedData ?? false;
 
   useEffect(() => {
@@ -108,11 +106,14 @@ export function AuctionDetailPage() {
   const watchMutation = useMutation({
     mutationFn: () =>
       watchlisted
-        ? auctionsApi.removeFromWatchlist(id!)
-        : auctionsApi.addToWatchlist(id!),
+        ? listingsApi.removeFromWatchlist(auction!.listingId)
+        : listingsApi.addToWatchlist(auction!.listingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auction-watched", id] });
-      queryClient.invalidateQueries({ queryKey: ["watchlist", "auctions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["listing-watched", auction!.listingId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["watchlist", "listings"] });
+      queryClient.invalidateQueries({ queryKey: ["listings-watchlist"] });
     },
   });
 

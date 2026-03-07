@@ -21,7 +21,6 @@ public static class AuctionsModule
                 .UseSnakeCaseNamingConvention());
         services.AddScoped<IAuctionsUnitOfWork, AuctionsUnitOfWork>();
         services.AddScoped<IAuctionRepository, AuctionRepository>();
-        services.AddScoped<IAuctionWatchlistRepository, AuctionWatchlistRepository>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<AuctionsDbContext>());
         services.AddHostedService<AuctionActivationWorker>();
         services.AddHostedService<AuctionClosingWorker>();

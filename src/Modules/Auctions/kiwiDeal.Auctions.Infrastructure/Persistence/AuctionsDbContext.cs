@@ -13,7 +13,6 @@ public sealed class AuctionsDbContext(DbContextOptions<AuctionsDbContext> option
     : DbContext(options), IAuctionsUnitOfWork, IOutboxMessageProvider
 {
     public DbSet<Auction> Auctions => Set<Auction>();
-    public DbSet<AuctionWatchlist> AuctionWatchlists => Set<AuctionWatchlist>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

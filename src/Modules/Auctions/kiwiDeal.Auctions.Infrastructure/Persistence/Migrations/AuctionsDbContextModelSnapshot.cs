@@ -97,32 +97,6 @@ namespace kiwiDeal.Auctions.Infrastructure.Persistence.Migrations
                     b.ToTable("auctions", "auctions");
                 });
 
-            modelBuilder.Entity("kiwiDeal.Auctions.Domain.Entities.AuctionWatchlist", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<Guid>("AuctionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("auction_id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("created_at");
-
-                    b.HasKey("UserId", "AuctionId")
-                        .HasName("pk_auction_watchlist");
-
-                    b.HasIndex("AuctionId")
-                        .HasDatabaseName("ix_auction_watchlist_auction_id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_auction_watchlist_user_id");
-
-                    b.ToTable("auction_watchlist", "auctions");
-                });
-
             modelBuilder.Entity("kiwiDeal.SharedKernel.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")

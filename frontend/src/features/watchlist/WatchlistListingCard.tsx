@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import type { WatchlistItemDto } from "@/shared/types/common";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, intlFormatDistance } from "date-fns";
 import { X } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -50,6 +50,9 @@ export function WatchlistListingCard({
               </p>
             )}
           </div>
+          <p className="text-xs text-gray-400">
+            Added {intlFormatDistance(new Date(item.watchedSince), new Date())}
+          </p>
         </div>
       </Link>
       <button

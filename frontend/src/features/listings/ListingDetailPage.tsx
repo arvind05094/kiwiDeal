@@ -35,14 +35,15 @@ export function ListingDetailPage() {
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["listing", id] }),
   });
-
   const watchMutation = useMutation({
     mutationFn: () =>
       watched
         ? listingsApi.removeFromWatchlist(id!)
         : listingsApi.addToWatchlist(id!),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["listing-watched", id] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listing-watched", id] });
+      queryClient.invalidateQueries({ queryKey: ["listings-watchlist"] });
+    },
   });
   if (isLoading) return <LoadingSpinner />;
   if (!listing)

@@ -78,7 +78,7 @@ export function BuyingTab() {
               {auctionData.items.map((a) => (
                 <Link
                   key={a.id}
-                  to={`/auctions/${a.id}`}
+                  to={`/listings/${a.listingId}`}
                   className="flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow"
                 >
                   <div>

@@ -113,7 +113,7 @@ export function ListingDetailPage() {
               </p>
             </div>
           )}
-          {isAuction && isActive && (
+          {isAuction && listing.auctionId && (
             <Button
               asChild
               className="w-full bg-gray-900 hover:bg-gray-800 text-white"

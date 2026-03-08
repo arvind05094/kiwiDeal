@@ -16,7 +16,7 @@ export interface ProblemDetails {
 }
 
 export type ListingType = "Auction" | "FixedPrice";
-export type ListingStatus = "Active" | "Sold" | "Cancelled";
+export type ListingStatus = "Active" | "Sold" | "Cancelled" | "PendingPayment";
 export type AuctionStatus = "Scheduled" | "Active" | "Closed";
 export type PaymentType = "Auction" | "FixedPrice";
 export type PaymentStatus = "Pending" | "Completed" | "Failed";

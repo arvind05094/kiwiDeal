@@ -44,7 +44,7 @@ public sealed class AuctionClosedEventHandler(
         }
         else
         {
-            result = listing.MarkSold();
+            result = listing.MarkPendingPayment();
             if (result.IsFailure)
             {
                 logger.LogWarning(

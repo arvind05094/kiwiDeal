@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow, format, isPast } from "date-fns";
@@ -14,7 +14,7 @@ import { listingsApi } from "@/features/listings/api";
 import { useAuctionHub } from "./useAuctionHub";
 import type { AuctionBidDto } from "@/shared/types/common";
 import type { BidPlacedMessage, AuctionClosedMessage } from "./useAuctionHub";
-import { createAuctionCheckout } from "../payments/api";
+import { createAuctionCheckout, getPaymentByListing } from "../payments/api";
 
 export function AuctionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,13 +24,12 @@ export function AuctionDetailPage() {
 
   const [bidAmount, setBidAmount] = useState("");
   const [bidError, setBidError] = useState("");
-  const [liveEndTime, setLiveEndTime] = useState<string | null>(null);
   const [liveBids, setLiveBids] = useState<AuctionBidDto[]>([]);
   const [liveClosed, setLiveClosed] = useState(false);
   const [liveWinnerId, setLiveWinnerId] = useState<string | null>(null);
   const [liveFinalAmount, setLiveFinalAmount] = useState<number | null>(null);
   const [liveClosedAt, setLiveClosedAt] = useState<string | null>(null);
-
+  const [liveEndTime, setLiveEndTime] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
 
   const { data: auction, isLoading } = useQuery({
@@ -51,12 +50,12 @@ export function AuctionDetailPage() {
   });
   const watchlisted = isWatchedData ?? false;
 
-  useEffect(() => {
-    if (auction) {
-      setLiveBids([...(auction.bids ?? [])].reverse());
-      setLiveEndTime(auction.endTime);
-    }
-  }, [auction]);
+  const { data: winnerPayment } = useQuery({
+    queryKey: ["payment-listing", auction?.listingId],
+    queryFn: () => getPaymentByListing(auction!.listingId),
+    enabled:
+      !!auction?.listingId && (auction?.status === "Closed" || liveClosed),
+  });
 
   const onBidPlaced = useCallback((msg: BidPlacedMessage) => {
     setLiveBids((prev) => [
@@ -130,9 +129,11 @@ export function AuctionDetailPage() {
     );
 
   const status = liveClosed ? "Closed" : auction.status;
+
   const endTime =
     liveClosedAt ?? auction.closedAt ?? liveEndTime ?? auction.endTime;
-  const bids = liveBids.length ? liveBids : (auction.bids ?? []);
+  const auctionBidsReversed = [...(auction.bids ?? [])].reverse();
+  const bids = liveBids.length ? liveBids : auctionBidsReversed;
   const currentBid = liveFinalAmount
     ? liveFinalAmount
     : bids.length
@@ -147,7 +148,9 @@ export function AuctionDetailPage() {
 
   const isWinner =
     (liveClosed || status === "Closed") && currentBidderId === user?.id;
+
   const isSeller = user?.id === auction.sellerId;
+
   const canBid = isAuthenticated && !isSeller && status === "Active";
   const canClose = isSeller && status === "Active";
   const canWatch =
@@ -328,7 +331,7 @@ export function AuctionDetailPage() {
                 </p>
               )}
 
-              {isWinner && (
+              {isWinner && winnerPayment?.status !== "Completed" && (
                 <div className="rounded-md bg-green-50 border border-green-200 p-3 space-y-3">
                   <p className="text-sm text-green-700 font-medium">
                     You won this auction! 🎉
@@ -348,7 +351,21 @@ export function AuctionDetailPage() {
                   </Button>
                 </div>
               )}
-
+              {isSeller &&
+                (status === "Closed" || liveClosed) &&
+                winnerPayment && (
+                  <div
+                    className={`rounded-md p-3 text-sm font-medium ${
+                      winnerPayment.status === "Completed"
+                        ? "bg-green-50 border border-green-200 text-green-700"
+                        : "bg-orange-50 border border-orange-200 text-orange-700"
+                    }`}
+                  >
+                    {winnerPayment.status === "Completed"
+                      ? "Payment received"
+                      : "Awaiting payment from winner"}
+                  </div>
+                )}
               {canClose && (
                 <Button
                   variant="outline"

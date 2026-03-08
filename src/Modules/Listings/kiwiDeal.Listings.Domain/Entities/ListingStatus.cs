@@ -4,5 +4,6 @@ public enum ListingStatus
 {
     Active,
     Sold,
-    Cancelled
+    Cancelled,
+    PendingPayment
 }

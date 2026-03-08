@@ -82,7 +82,7 @@ public sealed class Listing : AggregateRoot
 
     public Result Update(string title, string description)
     {
-        if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled)
+        if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled || Status == ListingStatus.PendingPayment)
             return Result.Failure(ListingErrors.AlreadyClosed());
 
         if (string.IsNullOrWhiteSpace(title))
@@ -100,9 +100,9 @@ public sealed class Listing : AggregateRoot
 
     public Result Cancel()
     {
-        if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled)
+        if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled || Status == ListingStatus.PendingPayment)
             return Result.Failure(ListingErrors.AlreadyClosed());
-
+        
         Status = ListingStatus.Cancelled;
         UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -120,6 +120,17 @@ public sealed class Listing : AggregateRoot
         UpdatedAt = DateTimeOffset.UtcNow;
 
         RaiseDomainEvent(new ListingSoldEvent(Id.Value, SellerId.Value));
+
+        return Result.Success();
+    }
+
+    public Result MarkPendingPayment()
+    {
+        if (Status != ListingStatus.Active)
+            return Result.Failure(ListingErrors.AlreadyClosed());
+
+        Status = ListingStatus.PendingPayment;
+        UpdatedAt = DateTimeOffset.UtcNow;
 
         return Result.Success();
     }

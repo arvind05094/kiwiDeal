@@ -7,12 +7,13 @@ import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { cn } from "@/lib/utils";
 
-type ListingFilter = "Active" | "Scheduled" | "Sold" | "Unsold" | "Cancelled";
+type ListingFilter = "Active" | "Sold" | "Cancelled" | "PendingPayment";
 
 const FILTERS: { label: string; value: ListingFilter }[] = [
   { label: "Active", value: "Active" },
   { label: "Sold", value: "Sold" },
   { label: "Cancelled", value: "Cancelled" },
+  { label: "Pending Payment", value: "PendingPayment" },
 ];
 export function MyListingsTab() {
   const [status, setStatus] = useState<ListingFilter>("Active");

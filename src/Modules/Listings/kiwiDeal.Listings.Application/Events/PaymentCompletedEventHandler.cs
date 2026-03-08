@@ -14,7 +14,7 @@ public sealed class PaymentCompletedEventHandler(
 {
     public async Task Handle(PaymentCompletedEvent notification, CancellationToken cancellationToken)
     {
-        if (notification.PaymentType != "FixedPrice")
+        if (notification.PaymentType != "FixedPrice" && notification.PaymentType != "Auction")
             return;
 
         var listing = await listingRepository.GetByIdAsync(

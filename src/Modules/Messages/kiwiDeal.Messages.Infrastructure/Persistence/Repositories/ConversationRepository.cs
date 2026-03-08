@@ -25,7 +25,7 @@ public class ConversationRepository(MessagesDbContext context) : IConversationRe
     public async Task<List<Conversation>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
     {
         return await context.Conversations
-            .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+            .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt))
             .Where(c => c.SenderId == userId || c.RecipientId == userId)
             .OrderByDescending(c => c.UpdatedAt)
             .ToListAsync(ct);

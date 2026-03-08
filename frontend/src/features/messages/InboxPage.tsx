@@ -5,9 +5,11 @@ import { MessageSquare } from "lucide-react";
 import { getConversations } from "./api";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { useInboxHub } from "./useInboxHub";
 
 export function InboxPage() {
   const navigate = useNavigate();
+  useInboxHub();
 
   const { data: conversations, isLoading } = useQuery({
     queryKey: ["conversations"],

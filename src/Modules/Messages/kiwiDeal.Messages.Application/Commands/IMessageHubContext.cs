@@ -10,4 +10,11 @@ public interface IMessageHubContext
         string content,
         DateTimeOffset createdAt,
         CancellationToken cancellationToken = default);
+
+    Task SendConversationUpdated(
+        Guid recipientUserId,
+        Guid conversationId,
+        string lastMessagePreview,
+        DateTimeOffset updatedAt,
+        CancellationToken cancellationToken = default);
 }

@@ -26,4 +26,21 @@ public class MessageHubContext(IHubContext<MessageHub> hubContext) : IMessageHub
                 createdAt
             }, cancellationToken);
     }
+
+    public async Task SendConversationUpdated(
+        Guid recipientUserId,
+        Guid conversationId,
+        string lastMessagePreview,
+        DateTimeOffset updatedAt,
+        CancellationToken cancellationToken = default)
+    {
+        await hubContext.Clients
+            .User(recipientUserId.ToString())
+            .SendAsync("ConversationUpdated", new
+            {
+                conversationId,
+                lastMessagePreview,
+                updatedAt
+            }, cancellationToken);
+    }
 }

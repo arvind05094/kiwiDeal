@@ -52,6 +52,17 @@ public class SendMessageCommandHandler(
             message.CreatedAt,
             cancellationToken);
 
+        var recipientId = conversation.SenderId == request.SenderId
+            ? conversation.RecipientId
+            : conversation.SenderId;
+
+        await hubContext.SendConversationUpdated(
+            recipientId,
+            conversation.Id.Value,
+            message.Content,
+            message.CreatedAt,
+            cancellationToken);
+
         return Result.Success(new MessageDto
         {
             Id = message.Id.Value,

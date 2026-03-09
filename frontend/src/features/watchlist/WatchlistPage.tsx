@@ -23,6 +23,7 @@ export function WatchlistPage() {
       queryClient.invalidateQueries({
         queryKey: ["listing-watched", listingId],
       });
+      queryClient.invalidateQueries({ queryKey: ["listings-watchlist"] });
     },
   });
 

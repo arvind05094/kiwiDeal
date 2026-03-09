@@ -47,6 +47,7 @@ export function ListingDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["listing-watched", id] });
       queryClient.invalidateQueries({ queryKey: ["listings-watchlist"] });
+      queryClient.invalidateQueries({ queryKey: ["watchlist", "listings"] });
     },
   });
 

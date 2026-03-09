@@ -48,8 +48,11 @@ export function ListingCard({
       } else {
         await listingsApi.addToWatchlist(listing.id);
       }
+      queryClient.invalidateQueries({ queryKey: ["watchlist", "listings"] });
+      queryClient.invalidateQueries({
+        queryKey: ["listing-watched", listing.id],
+      });
     } catch (err) {
-      // Revert optimistic update on failure
       queryClient.invalidateQueries({ queryKey: ["listings-watchlist"] });
       console.error("Failed to update watchlist", err);
     } finally {

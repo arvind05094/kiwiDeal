@@ -36,7 +36,9 @@ public sealed class GetPaymentByListingQueryHandler(
             payment.Status.ToString(),
             payment.StripeSessionId,
             payment.CreatedAt,
-            payment.PaidAt);
+            payment.PaidAt,
+            null,
+            null);
 
         return Result.Success(dto);
     }

@@ -14,6 +14,7 @@ public interface IListingRepository
     Task AddAsync(Listing listing, CancellationToken cancellationToken = default);
 
     Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, string? searchTerm, string? category, string? region, string? sortBy, string? listingType, CancellationToken cancellationToken = default);
+    Task<List<Listing>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken = default);
     void Update(Listing listing);
 
 }

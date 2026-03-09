@@ -1,5 +1,6 @@
 using kiwiDeal.Auctions.Application.DTOs;
 using kiwiDeal.Auctions.Domain.Repositories;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.SharedKernel.Pagination;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
@@ -12,19 +13,22 @@ public sealed record GetBiddingAuctionsQuery(
     int PageNumber,
     int PageSize) : IRequest<Result<PagedResult<AuctionDto>>>;
 
-public sealed class GetBiddingAuctionsQueryHandler : IRequestHandler<GetBiddingAuctionsQuery, Result<PagedResult<AuctionDto>>>
+public sealed class GetBiddingAuctionsQueryHandler(
+    IAuctionRepository auctionRepository,
+    IMediator mediator)
+    : IRequestHandler<GetBiddingAuctionsQuery, Result<PagedResult<AuctionDto>>>
 {
-    private readonly IAuctionRepository _auctionRepository;
-
-    public GetBiddingAuctionsQueryHandler(IAuctionRepository auctionRepository)
+    public async Task<Result<PagedResult<AuctionDto>>> Handle(
+        GetBiddingAuctionsQuery query, CancellationToken cancellationToken)
     {
-        _auctionRepository = auctionRepository;
-    }
-
-    public async Task<Result<PagedResult<AuctionDto>>> Handle(GetBiddingAuctionsQuery query, CancellationToken cancellationToken)
-    {
-        var paged = await _auctionRepository.GetByBidderIdAsync(
+        var paged = await auctionRepository.GetByBidderIdAsync(
             query.BidderId, query.Status, query.PageNumber, query.PageSize, cancellationToken);
+
+        var listingIds = paged.Items.Select(a => a.ListingId).Distinct().ToList();
+        var summariesResult = await mediator.Send(new GetListingSummariesQuery(listingIds), cancellationToken);
+        var summaries = summariesResult.IsSuccess
+            ? summariesResult.Value.ToDictionary(s => s.Id)
+            : new Dictionary<Guid, ListingSummaryDto>();
 
         var dtos = paged.Items.Select(a => new AuctionDto(
             a.Id.Value,
@@ -38,8 +42,10 @@ public sealed class GetBiddingAuctionsQueryHandler : IRequestHandler<GetBiddingA
             a.EndTime,
             a.ClosedAt,
             a.Status.ToString(),
-            [])).ToList();
+            [],
+            summaries.GetValueOrDefault(a.ListingId)?.ThumbnailUrl)).ToList();
 
-        return Result.Success(PagedResult<AuctionDto>.Create(dtos, paged.TotalCount, new PaginationParams(query.PageNumber, query.PageSize)));
+        return Result.Success(PagedResult<AuctionDto>.Create(
+            dtos, paged.TotalCount, new PaginationParams(query.PageNumber, query.PageSize)));
     }
 }

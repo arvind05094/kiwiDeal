@@ -35,7 +35,7 @@ public sealed class GetAuctionsQueryHandler : IRequestHandler<GetAuctionsQuery, 
             a.EndTime,
             a.ClosedAt,
             a.Status.ToString(),
-            [])).ToList();
+            [], null)).ToList();
 
         return Result.Success(PagedResult<AuctionDto>.Create(dtos, paged.TotalCount, pagination));
     }

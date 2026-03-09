@@ -75,6 +75,7 @@ export interface AuctionDto {
   status: AuctionStatus;
   bids: AuctionBidDto[];
   closedAt?: string;
+  thumbnailUrl?: string;
 }
 
 export interface UserResponse {
@@ -133,6 +134,8 @@ export interface PaymentDto {
   stripeSessionId?: string;
   createdAt: string;
   paidAt?: string;
+  listingTitle?: string;
+  thumbnailUrl?: string;
 }
 
 export const NZ_REGIONS = [

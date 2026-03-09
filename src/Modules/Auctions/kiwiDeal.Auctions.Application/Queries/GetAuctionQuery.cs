@@ -47,6 +47,6 @@ public sealed class GetAuctionQueryHandler : IRequestHandler<GetAuctionQuery, Re
                     b.BidderName,
                     b.Amount,
                     b.CreatedAt))
-                .ToList()));
+                .ToList(),null));
     }
 }

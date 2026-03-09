@@ -120,4 +120,13 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
         context.Listings.Update(listing);
     }
 
+    public async Task<List<Listing>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var listingIds = ids.Select(ListingId.From).ToList();
+        return await context.Listings
+            .Include(l => l.Images)
+            .Where(l => listingIds.Contains(l.Id))
+            .ToListAsync(cancellationToken);
+    }
+
 }

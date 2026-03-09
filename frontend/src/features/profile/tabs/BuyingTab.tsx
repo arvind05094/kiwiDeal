@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { profileApi } from "../api";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PagedList } from "@/shared/components/PagedList";
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
@@ -26,7 +25,7 @@ export function BuyingTab() {
     queryKey: ["auctions", "bidding", { filter, page }],
     queryFn: () =>
       profileApi.getMyBuying({
-        status: filter,
+        status: filter as "Active" | "Won" | "Lost",
         pageNumber: page,
         pageSize: 10,
       }),
@@ -74,39 +73,55 @@ export function BuyingTab() {
           />
         ) : (
           <>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {auctionData.items.map((a) => (
                 <Link
                   key={a.id}
                   to={`/listings/${a.listingId}`}
-                  className="flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow"
+                  className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
                 >
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {a.listingTitle}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      {filter === "Active"
-                        ? `Ends ${formatDistanceToNow(new Date(a.endTime), { addSuffix: true })}`
-                        : filter === "Lost"
-                          ? `Auction ended on ${format(new Date(a.closedAt ?? a.endTime), "dd MMM yyyy")}`
-                          : `You won this auction on ${format(new Date(a.closedAt ?? a.endTime), "dd MMM yyyy")}`}
-                    </p>
+                  <div className="h-48 overflow-hidden bg-gray-100">
+                    {a.thumbnailUrl ? (
+                      <img
+                        src={a.thumbnailUrl}
+                        alt={a.listingTitle}
+                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-gray-300 text-sm">
+                        No image
+                      </div>
+                    )}
                   </div>
-                  <div className="flex flex-col items-end gap-0.5 shrink-0">
-                    <p className="text-sm font-medium text-gray-900">
-                      ${(a.currentHighestBid ?? a.startingPrice).toFixed(2)}
-                    </p>
-                    {filter === "Active" && a.currentHighestBidderId && (
-                      <p className="text-xs text-orange-500 font-medium">
-                        Outbid
+                  <div className="flex flex-1 flex-col gap-2 p-4">
+                    <span className="self-start rounded-full px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-600">
+                      Auction
+                    </span>
+                    <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
+                      {a.listingTitle}
+                    </h3>
+                    <div className="mt-auto space-y-1">
+                      <p className="text-lg font-bold text-gray-900">
+                        ${(a.currentHighestBid ?? a.startingPrice).toFixed(2)}
                       </p>
-                    )}
-                    {filter === "Won" && (
-                      <p className="text-xs text-orange-500 font-medium">
-                        Awaiting payment
+                      <p className="text-xs text-gray-500">
+                        {filter === "Active"
+                          ? `Ends ${formatDistanceToNow(new Date(a.endTime), { addSuffix: true })}`
+                          : filter === "Lost"
+                            ? `Auction ended on ${format(new Date(a.closedAt ?? a.endTime), "dd MMM yyyy")}`
+                            : `You won this auction on ${format(new Date(a.closedAt ?? a.endTime), "dd MMM yyyy")}`}
                       </p>
-                    )}
+                      {filter === "Active" && a.currentHighestBidderId && (
+                        <p className="text-xs text-orange-500 font-medium">
+                          Outbid
+                        </p>
+                      )}
+                      {filter === "Won" && (
+                        <p className="text-xs text-orange-500 font-medium">
+                          Awaiting payment
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -125,27 +140,42 @@ export function BuyingTab() {
         />
       ) : (
         <>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {purchaseData.items.map((p) => (
               <Link
                 key={p.id}
                 to={`/listings/${p.listingId}`}
-                className="flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow"
+                className="group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
               >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Listing {p.listingId.slice(0, 8)}...
-                  </p>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    You purchased this on{" "}
-                    {format(new Date(p.paidAt ?? p.createdAt), "dd MMM yyyy")}
-                  </p>
+                <div className="h-48 overflow-hidden bg-gray-100">
+                  {p.thumbnailUrl ? (
+                    <img
+                      src={p.thumbnailUrl}
+                      alt={p.listingTitle ?? "Purchase"}
+                      className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-gray-300 text-sm">
+                      No image
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                  <p className="text-sm font-medium text-gray-900">
-                    ${p.amount.toFixed(2)}
-                  </p>
-                  <StatusBadge status={p.status} />
+                <div className="flex flex-1 flex-col gap-2 p-4">
+                  <span className="self-start rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-600">
+                    Fixed Price
+                  </span>
+                  <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
+                    {p.listingTitle ?? `Listing ${p.listingId.slice(0, 8)}...`}
+                  </h3>
+                  <div className="mt-auto space-y-1">
+                    <p className="text-lg font-bold text-gray-900">
+                      ${p.amount.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      You purchased this on{" "}
+                      {format(new Date(p.paidAt ?? p.createdAt), "dd MMM yyyy")}
+                    </p>
+                  </div>
                 </div>
               </Link>
             ))}

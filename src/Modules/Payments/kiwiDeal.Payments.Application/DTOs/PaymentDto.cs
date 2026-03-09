@@ -11,4 +11,6 @@ public sealed record PaymentDto(
     string Status,
     string? StripeSessionId,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? PaidAt);
+    DateTimeOffset? PaidAt,
+    string? ListingTitle,
+    string? ThumbnailUrl);

@@ -21,8 +21,7 @@ public sealed class GetFixedPriceSalesQueryHandler(
         var dtos = items.Select(p => new PaymentDto(
             p.Id.Value, p.AuctionId, p.ListingId, p.BuyerId, p.SellerId,
             p.Amount, p.PaymentType, p.Status.ToString(),
-            p.StripeSessionId, p.CreatedAt, p.PaidAt)).ToList();
-
+            p.StripeSessionId, p.CreatedAt, p.PaidAt, null, null)).ToList();
         return Result.Success(PagedResult<PaymentDto>.Create(dtos, totalCount, new PaginationParams(request.PageNumber, request.PageSize)));
     }
 }

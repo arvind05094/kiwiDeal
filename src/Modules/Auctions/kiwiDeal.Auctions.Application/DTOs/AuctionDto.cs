@@ -12,4 +12,5 @@ public sealed record AuctionDto(
     DateTimeOffset EndTime,
     DateTimeOffset? ClosedAt,
     string Status,
-    IReadOnlyList<AuctionBidDto> Bids);
+    IReadOnlyList<AuctionBidDto> Bids,
+    string? ThumbnailUrl);

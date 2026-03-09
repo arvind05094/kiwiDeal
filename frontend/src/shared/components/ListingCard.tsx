@@ -87,11 +87,14 @@ export function ListingCard({
           </button>
         )}
       </div>
-
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="flex items-center gap-2">
+        {/* Title + badge inline */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
+            {listing.title}
+          </h3>
           <span
-            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
               listing.listingType === "Auction"
                 ? "bg-orange-100 text-orange-600"
                 : "bg-blue-100 text-blue-600"
@@ -100,24 +103,36 @@ export function ListingCard({
             {listing.listingType === "Auction" ? "Auction" : "Fixed Price"}
           </span>
         </div>
-
-        <h3 className="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
-          {listing.title}
-        </h3>
-
         <div className="mt-auto space-y-1">
-          {listing.listingType === "FixedPrice" &&
-          listing.buyNowPrice !== undefined ? (
-            <p className="text-lg font-bold text-gray-900">
-              ${listing.buyNowPrice.toLocaleString()}
-            </p>
-          ) : (
-            <p className="text-sm font-medium text-gray-500">
-              See auction for bid
-            </p>
-          )}
+          <div className="flex items-center justify-between gap-2">
+            {listing.listingType === "FixedPrice" &&
+            listing.buyNowPrice !== undefined ? (
+              <p className="text-lg font-bold text-gray-900">
+                ${listing.buyNowPrice.toLocaleString()}
+              </p>
+            ) : (
+              <p className="text-sm font-medium text-gray-500">
+                See auction for bid
+              </p>
+            )}
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <Tag className="h-3 w-3" />
+              {listing.category}
+            </div>
+          </div>
 
-          {/* Status labels */}
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {listing.region}
+            </div>
+            <span>
+              {formatDistanceToNow(new Date(listing.createdAt), {
+                addSuffix: true,
+              })}
+            </span>
+          </div>
+
           {listing.status === "PendingPayment" && (
             <p className="text-xs text-orange-500 font-medium">
               Awaiting payment from buyer
@@ -135,22 +150,6 @@ export function ListingCard({
               Cancelled on {format(new Date(listing.updatedAt), "dd MMM yyyy")}
             </p>
           )}
-
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              {listing.region}
-            </div>
-            <div className="flex items-center gap-1">
-              <Tag className="h-3 w-3" />
-              {listing.category}
-            </div>
-          </div>
-          <p className="text-xs text-gray-400">
-            {formatDistanceToNow(new Date(listing.createdAt), {
-              addSuffix: true,
-            })}
-          </p>
         </div>
       </div>
     </Link>

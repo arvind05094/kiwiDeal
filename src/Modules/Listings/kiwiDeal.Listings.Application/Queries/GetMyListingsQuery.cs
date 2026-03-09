@@ -41,6 +41,7 @@ public sealed class GetMyListingsQueryHandler : IRequestHandler<GetMyListingsQue
             listing.AuctionId,
             listing.CreatedAt,
             listing.UpdatedAt,
+            listing.SoldAmount,
             listing.Images.Select(i => new ListingImageDto(i.Url, i.DisplayOrder)).ToList())).ToList();
 
         var result = PagedResult<ListingDto>.Create(dtos, pagedListings.TotalCount, pagination);

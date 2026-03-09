@@ -14,6 +14,7 @@ public sealed record ListingDto(
     Guid? AuctionId,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
+    decimal? SoldAmount,
     IReadOnlyList<ListingImageDto> Images);
 public sealed record ListingImageDto(
     string Url,

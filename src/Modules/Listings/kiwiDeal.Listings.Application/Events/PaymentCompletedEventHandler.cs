@@ -28,7 +28,7 @@ public sealed class PaymentCompletedEventHandler(
             return;
         }
 
-        var result = listing.MarkSold();
+        var result = listing.MarkSold(notification.Amount);
         if (result.IsFailure)
         {
             logger.LogWarning(

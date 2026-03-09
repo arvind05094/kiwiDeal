@@ -40,6 +40,7 @@ public sealed class GetListingQueryHandler : IRequestHandler<GetListingQuery, Re
             listing.AuctionId,
             listing.CreatedAt,
             listing.UpdatedAt,
+            listing.SoldAmount,
             listing.Images.Select(i => new ListingImageDto(i.Url, i.DisplayOrder)).ToList());
 
         return Result.Success(dto);

@@ -74,6 +74,10 @@ namespace kiwiDeal.Listings.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("seller_name");
 
+                    b.Property<decimal?>("SoldAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("sold_amount");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)

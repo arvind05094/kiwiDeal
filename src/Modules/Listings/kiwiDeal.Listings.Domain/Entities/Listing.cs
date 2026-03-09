@@ -17,7 +17,7 @@ public sealed class Listing : AggregateRoot
     public decimal? BuyNowPrice { get; private set; }
     public ListingCategory Category { get; private set; }
     public ListingRegion Region { get; private set; }
-
+    public decimal? SoldAmount { get; private set; }
     public Guid? AuctionId { get; private set; }
     public ListingStatus Status { get; private set; }
 
@@ -111,12 +111,13 @@ public sealed class Listing : AggregateRoot
         return Result.Success();
     }
 
-    public Result MarkSold()
+    public Result MarkSold(decimal amount)
     {
         if (Status == ListingStatus.Sold || Status == ListingStatus.Cancelled)
             return Result.Failure(ListingErrors.AlreadyClosed());
 
         Status = ListingStatus.Sold;
+        SoldAmount = amount;
         UpdatedAt = DateTimeOffset.UtcNow;
 
         RaiseDomainEvent(new ListingSoldEvent(Id.Value, SellerId.Value));

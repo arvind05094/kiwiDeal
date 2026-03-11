@@ -18,6 +18,7 @@ export function RatingsList({ userId }: { userId: string }) {
   const lastResult = results[results.length - 1];
   const isFetching = results.some((r) => r.isFetching);
   const hasNextPage = lastResult?.data?.hasNextPage ?? false;
+  const isExpanded = pageCount > 1;
 
   if (allItems.length === 0) return null;
 
@@ -38,15 +39,25 @@ export function RatingsList({ userId }: { userId: string }) {
           )}
         </div>
       ))}
-      {hasNextPage && (
-        <button
-          onClick={() => setPageCount((p) => p + 1)}
-          disabled={isFetching}
-          className="text-sm text-orange-500 hover:text-orange-600 font-medium disabled:opacity-50"
-        >
-          {isFetching ? "Loading..." : "Show more"}
-        </button>
-      )}
+      <div className="flex gap-4">
+        {hasNextPage && (
+          <button
+            onClick={() => setPageCount((p) => p + 1)}
+            disabled={isFetching}
+            className="text-sm text-orange-500 hover:text-orange-600 font-medium disabled:opacity-50"
+          >
+            {isFetching ? "Loading..." : "Show more"}
+          </button>
+        )}
+        {isExpanded && (
+          <button
+            onClick={() => setPageCount(1)}
+            className="text-sm text-gray-400 hover:text-gray-600 font-medium"
+          >
+            Show less
+          </button>
+        )}
+      </div>
     </div>
   );
 }

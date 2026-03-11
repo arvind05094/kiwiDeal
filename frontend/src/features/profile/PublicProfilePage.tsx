@@ -1,8 +1,7 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { profileApi } from "./api";
 import { listingsApi } from "@/features/listings/api";
-import { auctionsApi } from "@/features/auctions/api";
 import { RatingStars } from "@/shared/components/RatingStars";
 import { ListingCard } from "@/shared/components/ListingCard";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
@@ -33,12 +32,6 @@ export function PublicProfilePage() {
     queryKey: ["listings", { sellerId: id, status: "Active" }],
     queryFn: () =>
       listingsApi.getListings({ pageNumber: 1, pageSize: 8, sellerId: id }),
-    enabled: !!id,
-  });
-
-  const { data: auctions } = useQuery({
-    queryKey: ["auctions", { sellerId: id }],
-    queryFn: () => auctionsApi.getAuctions({ pageNumber: 1, pageSize: 4 }),
     enabled: !!id,
   });
 
@@ -206,11 +199,10 @@ export function PublicProfilePage() {
           </div>
         )}
       </div>
-      {/* Active listings */}
+
+      {/* Listings */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Active Listings
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Listings</h2>
         {listings?.items.length ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {listings.items.map((l) => (
@@ -219,44 +211,8 @@ export function PublicProfilePage() {
           </div>
         ) : (
           <EmptyState
-            title="No active listings"
+            title="No listings"
             description="This seller has no active listings."
-          />
-        )}
-      </section>
-
-      {/* Active auctions */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Active Auctions
-        </h2>
-        {auctions?.items.length ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {auctions.items.map((a) => (
-              <Link
-                key={a.id}
-                to={`/auctions/${a.id}`}
-                className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <p className="font-medium text-gray-900 truncate">
-                  {a.listingTitle}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Current bid:{" "}
-                  {a.currentHighestBid != null
-                    ? `$${a.currentHighestBid.toFixed(2)}`
-                    : `$${a.startingPrice.toFixed(2)}`}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Ends {format(new Date(a.endTime), "dd MMM yyyy HH:mm")}
-                </p>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No active auctions"
-            description="This seller has no active auctions."
           />
         )}
       </section>

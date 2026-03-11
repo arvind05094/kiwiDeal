@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace kiwiDeal.Users.Application.DTOs;
 
-namespace kiwiDeal.Users.Application.DTOs
-{
-    internal class UserRatingDto
-    {
-    }
-}
+public sealed record UserRatingDto(
+    int Stars,
+    string? Comment,
+    string RaterName,
+    DateTimeOffset CreatedAt);

@@ -13,38 +13,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) {
+      Promise.resolve().then(() => setIsLoading(false));
+      return;
+    }
     axios
-      .post(`${BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+      .post(`${BASE_URL}/auth/refresh`, { refreshToken })
       .then((res) => {
         setToken(res.data.accessToken);
         setAccessToken(res.data.accessToken);
         setUser(res.data.user);
+        localStorage.setItem("refreshToken", res.data.refreshToken);
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await axios.post<{ accessToken: string; user: UserResponse }>(
-      `${BASE_URL}/auth/login`,
-      { email, password } satisfies LoginRequest,
-      { withCredentials: true },
-    );
+    const res = await axios.post<{
+      accessToken: string;
+      refreshToken: string;
+      user: UserResponse;
+    }>(`${BASE_URL}/auth/login`, { email, password } satisfies LoginRequest);
     setToken(res.data.accessToken);
     setAccessToken(res.data.accessToken);
     setUser(res.data.user);
+    localStorage.setItem("refreshToken", res.data.refreshToken);
   };
 
   const logout = async () => {
-    try {
-      await axios.post(
-        `${BASE_URL}/auth/logout`,
-        {},
-        { withCredentials: true },
-      );
-    } catch {
-      // intentional
-    }
+    localStorage.removeItem("refreshToken");
     setToken(null);
     setAccessToken(null);
     setUser(null);

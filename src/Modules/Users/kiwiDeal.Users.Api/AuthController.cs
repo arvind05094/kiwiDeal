@@ -35,9 +35,8 @@ public sealed class AuthController(ISender sender) : ControllerBase
         if (result.IsFailure)
             return result.Error.ToProblemDetails();
 
-        AppendRefreshTokenCookie(result.Value.RefreshToken);
+        return CreatedAtAction(nameof(Register), new { result.Value.AccessToken, result.Value.RefreshToken, result.Value.User });
 
-        return CreatedAtAction(nameof(Register), new { result.Value.AccessToken, result.Value.User });
     }
 
     [HttpPost("login")]
@@ -55,44 +54,24 @@ public sealed class AuthController(ISender sender) : ControllerBase
 
         if (result.IsFailure)
             return result.Error.ToProblemDetails();
-
-        AppendRefreshTokenCookie(result.Value.RefreshToken);
-
-        return Ok(new { result.Value.AccessToken, result.Value.User });
+        return Ok(new { result.Value.AccessToken, result.Value.RefreshToken, result.Value.User });
     }
 
     [HttpPost("refresh")]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh(
+        [FromBody] RefreshTokenRequest request,
         CancellationToken cancellationToken)
     {
-        var refreshToken = Request.Cookies["refreshToken"];
-
-        if (string.IsNullOrWhiteSpace(refreshToken))
+        if (string.IsNullOrWhiteSpace(request?.RefreshToken))
             return Unauthorized();
 
-        var command = new RefreshTokenCommand(refreshToken);
-
+        var command = new RefreshTokenCommand(request.RefreshToken);
         var result = await sender.Send(command, cancellationToken);
 
         if (result.IsFailure)
             return result.Error.ToProblemDetails();
 
-        AppendRefreshTokenCookie(result.Value.RefreshToken);
-
-        return Ok(new { result.Value.AccessToken, result.Value.User });
-    }
-
-    private void AppendRefreshTokenCookie(string refreshToken)
-    {
-        Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTimeOffset.UtcNow.AddDays(7)
-        });
+        return Ok(new { result.Value.AccessToken, result.Value.RefreshToken, result.Value.User });
     }
 }

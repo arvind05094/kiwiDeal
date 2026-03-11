@@ -13,7 +13,10 @@ public interface IListingRepository
     Task<PagedResult<Listing>> GetBySellerIdAsync(Guid sellerId, PaginationParams pagination, ListingStatus[]? statuses, CancellationToken cancellationToken = default);
     Task AddAsync(Listing listing, CancellationToken cancellationToken = default);
 
-    Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, string? searchTerm, string? category, string? region, string? sortBy, string? listingType, CancellationToken cancellationToken = default);
+    Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, 
+            string? searchTerm, string? category, 
+            string? region, string? sortBy, string? listingType, 
+            Guid? sellerId, CancellationToken cancellationToken = default);
     Task<List<Listing>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken = default);
     void Update(Listing listing);
 

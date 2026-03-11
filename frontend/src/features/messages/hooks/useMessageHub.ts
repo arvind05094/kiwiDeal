@@ -13,10 +13,6 @@ export function useMessageHub(
   const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
-    setLiveMessages([]);
-  }, [conversationId]);
-
-  useEffect(() => {
     if (!conversationId) return;
 
     const connection = new signalR.HubConnectionBuilder()
@@ -24,9 +20,9 @@ export function useMessageHub(
       .withAutomaticReconnect()
       .build();
 
-    connection.on("MessageReceived", (msg: any) => {
+    connection.on("MessageReceived", (msg: MessageDto) => {
       const normalized: MessageDto = {
-        id: msg.messageId ?? msg.id,
+        id: msg.id,
         conversationId: msg.conversationId,
         senderId: msg.senderId,
         senderName: msg.senderName,
@@ -55,7 +51,9 @@ export function useMessageHub(
   const allIds = new Set(initialMessages.map((m) => m.id));
   const messages = [
     ...initialMessages,
-    ...liveMessages.filter((m) => !allIds.has(m.id)),
+    ...liveMessages.filter(
+      (m) => m.conversationId === conversationId && !allIds.has(m.id),
+    ),
   ];
 
   const addMessage = (msg: MessageDto) => {

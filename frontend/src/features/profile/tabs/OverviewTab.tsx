@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { profileApi } from "../api";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
-import { LayoutList, Gavel, DollarSign, ShoppingBag } from "lucide-react";
+import { LayoutList, Gavel, ShoppingBag } from "lucide-react";
 
 export function OverviewTab() {
   const { data: listings, isLoading: loadingListings } = useQuery({
     queryKey: ["listings", "mine", { status: "Active" }],
     queryFn: () =>
       profileApi.getMyListings({
-        status: "Active",
+        statuses: ["Active"],
         pageNumber: 1,
         pageSize: 1,
       }),

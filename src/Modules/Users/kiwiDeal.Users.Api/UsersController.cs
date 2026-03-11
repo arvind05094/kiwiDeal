@@ -6,6 +6,7 @@ using kiwiDeal.Users.Application.Commands.SubmitRating;
 using kiwiDeal.Users.Application.Commands.UpdateProfile;
 using kiwiDeal.Users.Application.Queries.GetMyProfile;
 using kiwiDeal.Users.Application.Queries.GetUserProfile;
+using kiwiDeal.Users.Application.Queries.GetUserRatings;
 using kiwiDeal.Users.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -93,5 +94,24 @@ public sealed class UsersController(ISender sender, ICurrentUser currentUser) : 
             return result.Error.ToProblemDetails();
 
         return NoContent();
+    }
+
+    [HttpGet("{id:guid}/ratings")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUserRatings(
+    Guid id,
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 5,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetUserRatingsQuery(id, pageNumber, pageSize);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+            return result.Error.ToProblemDetails();
+
+        return Ok(result.Value);
     }
 }

@@ -63,8 +63,9 @@ export function CreateListingPage() {
     },
     onSuccess: ({ id, auctionId }) =>
       navigate(auctionId ? `/auctions/${auctionId}` : `/listings/${id}`),
-    onError: (err: any) => {
-      const data: ProblemDetails = err.response?.data;
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: ProblemDetails } }).response
+        ?.data;
       if (data?.errors) setFieldErrors(data.errors);
     },
   });

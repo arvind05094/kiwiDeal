@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { profileApi } from "./api";
 import { listingsApi } from "@/features/listings/api";
 import { auctionsApi } from "@/features/auctions/api";
@@ -12,7 +12,9 @@ import { MapPin, Calendar, Star, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { startConversation } from "../messages/api";
-import { useAuth } from "../auth/AuthContext";
+import { useState } from "react";
+import { RatingsList } from "./RatingsList";
+import { useAuth } from "../auth/useAuth";
 
 export function PublicProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -38,6 +40,22 @@ export function PublicProfilePage() {
     queryKey: ["auctions", { sellerId: id }],
     queryFn: () => auctionsApi.getAuctions({ pageNumber: 1, pageSize: 4 }),
     enabled: !!id,
+  });
+
+  const queryClient = useQueryClient();
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [selectedStars, setSelectedStars] = useState(0);
+  const [comment, setComment] = useState("");
+
+  const ratingMutation = useMutation({
+    mutationFn: () =>
+      profileApi.submitRating(id!, selectedStars, comment || undefined),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile", id] });
+      setShowRatingForm(false);
+      setSelectedStars(0);
+      setComment("");
+    },
   });
 
   if (isLoading) return <LoadingSpinner />;
@@ -79,18 +97,82 @@ export function PublicProfilePage() {
               <Calendar className="h-4 w-4" />
               Member since {format(new Date(profile.memberSince), "MMMM yyyy")}
             </span>
+
+            {isAuthenticated && !isOwnProfile && (
+              <div className="pt-1">
+                {!showRatingForm ? (
+                  <button
+                    onClick={() => setShowRatingForm(true)}
+                    className="flex items-center gap-1.5 text-sm text-orange-500 hover:text-orange-600 font-medium"
+                  >
+                    <Star className="h-4 w-4" />
+                    Rate this seller
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <RatingStars
+                      value={selectedStars}
+                      interactive
+                      onChange={setSelectedStars}
+                      size="md"
+                    />
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="Leave a comment (optional)"
+                      maxLength={500}
+                      rows={2}
+                      className="w-full text-sm border border-gray-200 rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-1 focus:ring-orange-400"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        disabled={
+                          selectedStars === 0 || ratingMutation.isPending
+                        }
+                        onClick={() => ratingMutation.mutate()}
+                      >
+                        Submit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setShowRatingForm(false);
+                          setSelectedStars(0);
+                          setComment("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                    {ratingMutation.isError && (
+                      <p className="text-xs text-red-500">
+                        {(
+                          ratingMutation.error as {
+                            response?: { status?: number };
+                          }
+                        )?.response?.status === 409
+                          ? "You have already rated this seller."
+                          : "Failed to submit rating."}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           {profile.totalRatings > 0 ? (
-            <div className="flex items-center gap-2">
-              <RatingStars
-                value={profile.averageRating ?? 0}
-                readonly
-                size="sm"
-              />
-              <span className="text-sm text-gray-500">
-                {profile.averageRating?.toFixed(1)} ({profile.totalRatings}{" "}
-                rating{profile.totalRatings !== 1 ? "s" : ""})
-              </span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <RatingStars value={profile.averageRating ?? 0} size="sm" />
+                <span className="text-sm text-gray-500">
+                  {profile.averageRating?.toFixed(1)} ({profile.totalRatings}{" "}
+                  rating{profile.totalRatings !== 1 ? "s" : ""})
+                </span>
+              </div>
+              <RatingsList userId={id!} />
             </div>
           ) : (
             <span className="text-sm text-gray-400 block">No ratings yet</span>
@@ -113,7 +195,9 @@ export function PublicProfilePage() {
                     initialMessage: "Hi, I'd like to get in touch.",
                   });
                   navigate(`/messages/${conversation.id}`);
-                } catch {}
+                } catch {
+                  //intentional
+                }
               }}
             >
               <MessageCircle className="h-4 w-4" />

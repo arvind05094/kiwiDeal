@@ -13,7 +13,7 @@ import type {
   GetMyListingsParams,
   GetMyAuctionsParams,
   GetBuyingParams,
-  AccountOverviewDto,
+  UserRatingDto,
 } from "./types";
 
 export const profileApi = {
@@ -91,6 +91,24 @@ export const profileApi = {
     pageSize?: number;
   }): Promise<PagedResult<AuctionDto>> => {
     const res = await client.get("/auctions/watchlist", { params });
+    return res.data;
+  },
+  submitRating: async (
+    userId: string,
+    stars: number,
+    comment?: string,
+  ): Promise<void> => {
+    await client.post(`/users/${userId}/rate`, { stars, comment });
+  },
+
+  getUserRatings: async (
+    id: string,
+    pageNumber = 1,
+    pageSize = 5,
+  ): Promise<PagedResult<UserRatingDto>> => {
+    const res = await client.get(`/users/${id}/ratings`, {
+      params: { pageNumber, pageSize },
+    });
     return res.data;
   },
 };

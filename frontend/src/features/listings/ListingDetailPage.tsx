@@ -5,13 +5,13 @@ import { ImageGallery } from "@/shared/components/ImageGallery";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/shared/hooks/useAuth";
 import { MapPin, Tag, ArrowLeft, Heart, User } from "lucide-react";
 import { createBuyNowCheckout, getPaymentByListing } from "../payments/api";
 import { startConversation } from "../messages/api";
 import type { ConversationDto } from "@/shared/types/common";
 import { useListingHub } from "./useListingHub";
 import { format } from "date-fns";
+import { useAuth } from "../auth/useAuth";
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -173,7 +173,9 @@ export function ListingDetailPage() {
                           amount: listing.buyNowPrice!,
                         });
                         window.location.href = checkoutUrl;
-                      } catch {}
+                      } catch {
+                        //intentional
+                      }
                     }}
                   >
                     Buy Now — ${listing.buyNowPrice.toLocaleString()}
@@ -210,7 +212,9 @@ export function ListingDetailPage() {
                               prev ? [conversation, ...prev] : [conversation],
                           );
                           navigate(`/messages/${conversation.id}`);
-                        } catch {}
+                        } catch {
+                          //intentional
+                        }
                       }}
                     >
                       Message Seller

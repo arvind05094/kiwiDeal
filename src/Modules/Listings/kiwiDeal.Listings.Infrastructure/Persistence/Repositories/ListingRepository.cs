@@ -16,14 +16,17 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
     }
 
 
-    public async Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination, 
-        string? searchTerm, string? category, string? region, 
-        string? sortBy, string? listingType, CancellationToken cancellationToken = default)
-    { 
+    public async Task<PagedResult<Listing>> GetAllAsync(PaginationParams pagination,
+    string? searchTerm, string? category, string? region,
+    string? sortBy, string? listingType, Guid? sellerId, CancellationToken cancellationToken = default)
+    {
         var query = context.Listings
             .Include(l => l.Images)
             .Where(l => l.Status == ListingStatus.Active)
             .AsQueryable();
+
+        if (sellerId.HasValue)
+            query = query.Where(l => l.SellerId == SellerId.From(sellerId.Value));
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -129,4 +132,5 @@ public sealed class ListingRepository(ListingsDbContext context) : IListingRepos
             .ToListAsync(cancellationToken);
     }
 
+    
 }

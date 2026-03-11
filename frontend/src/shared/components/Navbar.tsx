@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Heart, Inbox, ChevronDown, LogOut, User } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "@/features/auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,13 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/features/auth/useAuth";
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (search.trim()) {
       navigate(`/listings?searchTerm=${encodeURIComponent(search.trim())}`);

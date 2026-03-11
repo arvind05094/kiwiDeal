@@ -14,7 +14,8 @@ public sealed record GetListingsQuery(
     string? Category,
     string? Region,
     string? SortBy,
-    string? ListingType) : IRequest<Result<PagedResult<ListingDto>>>, IPublicRequest;
+    string? ListingType,
+    Guid? SellerId) : IRequest<Result<PagedResult<ListingDto>>>, IPublicRequest;
 public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, Result<PagedResult<ListingDto>>>
 {
     private readonly IListingRepository _listingRepository;
@@ -27,7 +28,10 @@ public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, 
     public async Task<Result<PagedResult<ListingDto>>> Handle(GetListingsQuery query, CancellationToken cancellationToken)
     {
         var pagination = new PaginationParams(query.PageNumber, query.PageSize);
-        var pagedListings = await _listingRepository.GetAllAsync(pagination, query.SearchTerm, query.Category, query.Region, query.SortBy, query.ListingType, cancellationToken);
+        var pagedListings = await _listingRepository.GetAllAsync(pagination, query.SearchTerm, 
+                query.Category, query.Region, query.SortBy, 
+                query.ListingType, query.SellerId, cancellationToken);
+
         var dtos = pagedListings.Items.Select(listing => new ListingDto(
             listing.Id.Value,
             listing.SellerId.Value,
@@ -46,6 +50,7 @@ public sealed class GetListingsQueryHandler : IRequestHandler<GetListingsQuery, 
             listing.Images.Select(i => new ListingImageDto(i.Url, i.DisplayOrder)).ToList())).ToList();
 
         var result = PagedResult<ListingDto>.Create(dtos, pagedListings.TotalCount, pagination);
+        
         return Result.Success(result);
     }
 }

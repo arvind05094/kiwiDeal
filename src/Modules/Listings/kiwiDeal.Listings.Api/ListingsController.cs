@@ -168,16 +168,17 @@ public sealed class ListingsController(ISender sender, ICurrentUser currentUser)
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetListings(
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? searchTerm = null,
-    [FromQuery] string? category = null,
-    [FromQuery] string? region = null,
-    [FromQuery] string? sortBy = null,
-    [FromQuery] string? listingType = null,
-    CancellationToken cancellationToken = default)
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? category = null,
+        [FromQuery] string? region = null,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? listingType = null,
+        [FromQuery] Guid? sellerId = null,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetListingsQuery(pageNumber, pageSize, searchTerm, category, region, sortBy, listingType);
+        var query = new GetListingsQuery(pageNumber, pageSize, searchTerm, category, region, sortBy, listingType, sellerId);
         var result = await sender.Send(query, cancellationToken);
 
         if (result.IsFailure)

@@ -6,6 +6,7 @@ export interface GetListingsParams {
   region?: string;
   sortBy?: "newest" | "price_asc" | "price_desc" | "ending_soon";
   listingType?: "Auction" | "FixedPrice";
+  sellerId?: string;
 }
 
 export interface GetMyListingsParams {

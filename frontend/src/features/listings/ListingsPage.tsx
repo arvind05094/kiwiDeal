@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/select";
 import { NZ_REGIONS } from "@/shared/types/common";
 import { X } from "lucide-react";
-import { useAuth } from "../auth/AuthContext";
-
+import { useAuth } from "../auth/useAuth";
+import type { GetListingsParams } from "./types";
 export function ListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -24,8 +24,12 @@ export function ListingsPage() {
   const searchTerm = searchParams.get("searchTerm") ?? undefined;
   const category = searchParams.get("category") ?? undefined;
   const region = searchParams.get("region") ?? undefined;
-  const sortBy = (searchParams.get("sortBy") as any) ?? undefined;
-  const listingType = (searchParams.get("listingType") as any) ?? undefined;
+
+  const sortBy = (searchParams.get("sortBy") ??
+    undefined) as GetListingsParams["sortBy"];
+
+  const listingType = (searchParams.get("listingType") ??
+    undefined) as GetListingsParams["listingType"];
 
   const { data, isLoading, isError } = useQuery({
     queryKey: [

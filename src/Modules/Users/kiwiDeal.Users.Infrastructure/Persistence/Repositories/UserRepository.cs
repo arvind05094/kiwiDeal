@@ -54,4 +54,17 @@ public sealed class UserRepository(UsersDbContext context) : IUserRepository
     {
         await context.UserRatings.AddAsync(rating, cancellationToken);
     }
+
+    public async Task<(IReadOnlyList<UserRating> Items, int TotalCount)> GetPagedRatingsByRateeAsync(
+    UserId rateeId, int skip, int take, CancellationToken cancellationToken = default)
+    {
+        var query = context.UserRatings
+            .Where(r => r.RateeId == rateeId)
+            .OrderByDescending(r => r.CreatedAt);
+
+        var total = await query.CountAsync(cancellationToken);
+        var items = await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
+
+        return (items, total);
+    }
 }

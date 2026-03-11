@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { profileApi } from "../api";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
@@ -13,27 +13,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NZ_REGIONS } from "@/shared/types/common";
+import type { MyProfileDto } from "@/shared/types/common";
 
 export function ProfileTab() {
-  const queryClient = useQueryClient();
-
   const { data: profile, isLoading } = useQuery({
     queryKey: ["me"],
     queryFn: profileApi.getMyProfile,
   });
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [region, setRegion] = useState("");
-  const [saved, setSaved] = useState(false);
+  if (isLoading) return <LoadingSpinner />;
+  if (!profile) return null;
 
-  useEffect(() => {
-    if (profile) {
-      setFirstName(profile.firstName);
-      setLastName(profile.lastName);
-      setRegion(profile.region);
-    }
-  }, [profile]);
+  return <ProfileForm profile={profile} />;
+}
+
+function ProfileForm({ profile }: { profile: MyProfileDto }) {
+  const queryClient = useQueryClient();
+  const [firstName, setFirstName] = useState(profile.firstName);
+  const [lastName, setLastName] = useState(profile.lastName);
+  const [region, setRegion] = useState(profile.region);
+  const [saved, setSaved] = useState(false);
 
   const mutation = useMutation({
     mutationFn: () => profileApi.updateProfile({ firstName, lastName, region }),
@@ -43,8 +42,6 @@ export function ProfileTab() {
       setTimeout(() => setSaved(false), 2500);
     },
   });
-
-  if (isLoading) return <LoadingSpinner />;
 
   return (
     <div className="bg-white border rounded-lg p-6 max-w-md space-y-5">
@@ -66,7 +63,7 @@ export function ProfileTab() {
       <div className="space-y-2">
         <Label>Email</Label>
         <Input
-          value={profile?.email ?? ""}
+          value={profile.email}
           disabled
           className="bg-gray-50 text-gray-400"
         />

@@ -13,7 +13,8 @@ export function PaymentStatusPage() {
     queryKey: ["payment", auctionId],
     queryFn: () => getPaymentByAuction(auctionId!),
     enabled: !!auctionId,
-    refetchInterval: (data) => (data?.status === "Pending" ? 3000 : false),
+    refetchInterval: (query) =>
+      query.state.data?.status === "Pending" ? 3000 : false,
   });
 
   if (isLoading) return <LoadingSpinner />;

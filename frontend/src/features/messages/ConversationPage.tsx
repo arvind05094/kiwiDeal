@@ -5,10 +5,10 @@ import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Send } from "lucide-react";
 import { getMessages, sendMessage, markAsRead } from "./api";
 import { useMessageHub } from "./hooks/useMessageHub";
-import { useAuth } from "@/features/auth/AuthContext";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "../auth/useAuth";
 
 export function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -23,11 +23,7 @@ export function ConversationPage() {
     queryFn: () => getMessages(conversationId!),
     enabled: !!conversationId,
   });
-
-  const { messages, addMessage } = useMessageHub(
-    conversationId!,
-    initialMessages,
-  );
+  const { messages } = useMessageHub(conversationId!, initialMessages);
   useEffect(() => {
     if (conversationId) markAsRead(conversationId);
   }, [conversationId]);

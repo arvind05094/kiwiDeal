@@ -4,8 +4,8 @@ import type { ListingDto } from "@/shared/types/common";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { listingsApi } from "@/features/listings/api";
-import { useAuth } from "@/features/auth/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/features/auth/useAuth";
 
 interface ListingCardProps {
   listing: ListingDto;

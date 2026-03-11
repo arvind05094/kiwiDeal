@@ -3,7 +3,6 @@ import { OverviewTab } from "./tabs/OverviewTab";
 import { ProfileTab } from "./tabs/ProfileTab";
 import { MyListingsTab } from "./tabs/MyListingsTab";
 import { BuyingTab } from "./tabs/BuyingTab";
-import { InboxPage } from "@/features/messages/InboxPage";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -11,7 +10,6 @@ const TABS = [
   { id: "profile", label: "Profile" },
   { id: "listings", label: "My Listings" },
   { id: "buying", label: "Buying" },
-  { id: "inbox", label: "Inbox" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -29,8 +27,6 @@ export function MyAccountPage() {
         return <MyListingsTab />;
       case "buying":
         return <BuyingTab />;
-      case "inbox":
-        return <InboxPage />;
     }
   }
 

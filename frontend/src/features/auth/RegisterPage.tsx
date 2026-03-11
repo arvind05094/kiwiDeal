@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/features/auth/AuthContext";
 import { registerApi } from "@/features/auth/api";
 import { setAccessToken } from "@/shared/api/client";
 import { NZ_REGIONS } from "@/shared/types/common";
@@ -15,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "./useAuth";
 
 export function RegisterPage() {
   const { login } = useAuth();
@@ -29,7 +29,7 @@ export function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError(null);
     setFieldErrors({});

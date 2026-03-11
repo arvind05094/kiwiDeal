@@ -28,3 +28,10 @@ export interface AccountOverviewDto {
   totalRevenue: number;
   totalSales: number;
 }
+
+export interface UserRatingDto {
+  stars: number;
+  comment: string | null;
+  raterName: string;
+  createdAt: string;
+}

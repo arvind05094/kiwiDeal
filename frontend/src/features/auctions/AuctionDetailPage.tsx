@@ -8,13 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
-import { useAuth } from "@/shared/hooks/useAuth";
 import { auctionsApi } from "./api";
 import { listingsApi } from "@/features/listings/api";
 import { useAuctionHub } from "./useAuctionHub";
 import type { AuctionBidDto } from "@/shared/types/common";
 import type { BidPlacedMessage, AuctionClosedMessage } from "./useAuctionHub";
 import { createAuctionCheckout, getPaymentByListing } from "../payments/api";
+import { useAuth } from "../auth/useAuth";
 
 export function AuctionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -98,8 +98,10 @@ export function AuctionDetailPage() {
       setBidAmount("");
       setBidError("");
     },
-    onError: (err: any) => {
-      setBidError(err.response?.data?.detail ?? "Failed to place bid.");
+    onError: (err: unknown) => {
+      const detail = (err as { response?: { data?: { detail?: string } } })
+        .response?.data?.detail;
+      setBidError(detail ?? "Failed to place bid.");
     },
   });
 
@@ -348,7 +350,9 @@ export function AuctionDetailPage() {
                             auctionId: auction.id,
                           });
                           window.location.href = checkoutUrl;
-                        } catch {}
+                        } catch {
+                          //intentional
+                        }
                       }}
                     >
                       Pay Now

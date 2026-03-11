@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listingsApi } from "./api";
@@ -7,12 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingSpinner } from "@/shared/components/LoadingSpinner";
-import type { ProblemDetails } from "@/shared/types/common";
+import type { ListingDto, ProblemDetails } from "@/shared/types/common";
 
 export function EditListingPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const { data: listing, isLoading } = useQuery({
     queryKey: ["listing", id],
@@ -20,36 +18,37 @@ export function EditListingPage() {
     enabled: !!id,
   });
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-
-  useEffect(() => {
-    if (listing) {
-      setTitle(listing.title);
-      setDescription(listing.description);
-    }
-  }, [listing]);
-
-  const updateMutation = useMutation({
-    mutationFn: () => listingsApi.updateListing(id!, { title, description }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["listing", id] });
-      navigate(`/listings/${id}`);
-    },
-    onError: (err: any) => {
-      const data: ProblemDetails = err.response?.data;
-      if (data?.errors) setFieldErrors(data.errors);
-    },
-  });
-
-  const err = (field: string) => fieldErrors[field]?.[0];
-
   if (isLoading) return <LoadingSpinner />;
   if (!listing)
     return (
       <div className="text-center py-24 text-gray-400">Listing not found.</div>
     );
+
+  return <EditListingForm id={id!} listing={listing} />;
+}
+
+function EditListingForm({ id, listing }: { id: string; listing: ListingDto }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [title, setTitle] = useState(listing.title);
+  const [description, setDescription] = useState(listing.description);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+  const updateMutation = useMutation({
+    mutationFn: () => listingsApi.updateListing(id, { title, description }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listing", id] });
+      navigate(`/listings/${id}`);
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: ProblemDetails } }).response
+        ?.data;
+      if (data?.errors) setFieldErrors(data.errors);
+    },
+  });
+
+  const err = (field: string) => fieldErrors[field]?.[0];
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">

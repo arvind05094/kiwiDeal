@@ -18,8 +18,8 @@ public class MessageHubContext(IHubContext<MessageHub> hubContext) : IMessageHub
             .Group(conversationId.ToString())
             .SendAsync("MessageReceived", new
             {
+                id = messageId,
                 conversationId,
-                messageId,
                 senderId,
                 senderName,
                 content,

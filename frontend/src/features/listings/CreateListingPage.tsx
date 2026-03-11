@@ -170,7 +170,7 @@ export function CreateListingPage() {
         </div>
 
         {/* Category + Region */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Category</Label>
             <Select value={category} onValueChange={setCategory}>
@@ -244,7 +244,7 @@ export function CreateListingPage() {
                 <p className="text-xs text-red-500">{err("StartingPrice")}</p>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="startTime">Start Time</Label>
                 <Input

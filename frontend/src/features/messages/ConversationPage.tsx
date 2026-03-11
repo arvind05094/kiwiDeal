@@ -23,7 +23,11 @@ export function ConversationPage() {
     queryFn: () => getMessages(conversationId!),
     enabled: !!conversationId,
   });
-  const { messages } = useMessageHub(conversationId!, initialMessages);
+  const { messages, addMessage } = useMessageHub(
+    conversationId!,
+    initialMessages,
+  );
+
   useEffect(() => {
     if (conversationId) markAsRead(conversationId);
   }, [conversationId]);
@@ -31,12 +35,11 @@ export function ConversationPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
   const sendMutation = useMutation({
     mutationFn: () => sendMessage(conversationId!, { content }),
-    onSuccess: () => {
+    onSuccess: (sentMessage) => {
       setContent("");
-      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+      addMessage(sentMessage);
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
   });

@@ -9,4 +9,4 @@ public record StartConversationCommand(
     string SenderName,
     Guid RecipientId,
     string RecipientName,
-    string InitialMessage) : IRequest<Result<ConversationDto>>;
+    string? InitialMessage) : IRequest<Result<ConversationDto>>;

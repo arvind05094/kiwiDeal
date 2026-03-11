@@ -203,8 +203,6 @@ export function ListingDetailPage() {
                           const conversation = await startConversation({
                             recipientId: listing.sellerId,
                             recipientName: listing.sellerName,
-                            initialMessage:
-                              "Hi, I'm interested in this listing.",
                           });
                           queryClient.setQueryData<ConversationDto[]>(
                             ["conversations"],

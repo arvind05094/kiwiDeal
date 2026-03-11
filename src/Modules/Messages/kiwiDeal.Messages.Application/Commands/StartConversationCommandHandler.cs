@@ -38,18 +38,21 @@ public class StartConversationCommandHandler(
 
         var conversation = conversationResult.Value;
 
-        var messageResult = Message.Create(
-            conversation.Id,
-            request.SenderId,
-            request.SenderName,
-            request.InitialMessage);
+        if (!string.IsNullOrWhiteSpace(request.InitialMessage))
+        {
+            var messageResult = Message.Create(
+                conversation.Id,
+                request.SenderId,
+                request.SenderName,
+                request.InitialMessage);
 
-        if (messageResult.IsFailure)
-            return Result.Failure<ConversationDto>(messageResult.Error);
+            if (messageResult.IsFailure)
+                return Result.Failure<ConversationDto>(messageResult.Error);
 
-        var addResult = conversation.AddMessage(messageResult.Value);
-        if (addResult.IsFailure)
-            return Result.Failure<ConversationDto>(addResult.Error);
+            var addResult = conversation.AddMessage(messageResult.Value);
+            if (addResult.IsFailure)
+                return Result.Failure<ConversationDto>(addResult.Error);
+        }
 
         await conversationRepository.AddAsync(conversation, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -59,7 +62,7 @@ public class StartConversationCommandHandler(
             Id = conversation.Id.Value,
             OtherUserId = request.RecipientId,
             OtherUserName = request.RecipientName,
-            LastMessagePreview = request.InitialMessage,
+            LastMessagePreview = request.InitialMessage ?? "",
             UpdatedAt = conversation.UpdatedAt
         });
     }

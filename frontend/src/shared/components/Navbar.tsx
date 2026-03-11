@@ -64,7 +64,8 @@ export function Navbar() {
             type="submit"
             className="bg-gray-900 hover:bg-gray-700 text-white"
           >
-            Search
+            <Search className="h-4 w-4 sm:hidden" />
+            <span className="hidden sm:inline">Search</span>
           </Button>
         </form>
 
@@ -92,9 +93,9 @@ export function Navbar() {
                 onClick={() => navigate("/listings/new")}
                 className="bg-orange-500 hover:bg-orange-600 text-white active:scale-95 transition-all duration-150"
               >
-                Post Listing
+                <span className="hidden sm:inline">Post Listing</span>
+                <span className="sm:hidden text-lg leading-none">+</span>
               </Button>
-
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">

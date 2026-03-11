@@ -421,22 +421,24 @@ export function AuctionDetailPage() {
                     {bids.map((bid) => (
                       <li
                         key={bid.id}
-                        className="flex items-center justify-between text-sm"
+                        className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-sm"
                       >
                         <Link
                           to={`/users/${bid.bidderId}`}
-                          className="font-medium hover:underline hover:text-orange-500 transition-colors"
+                          className="font-medium hover:underline hover:text-orange-500 transition-colors min-w-0 truncate"
                         >
                           {bid.bidderName}
                         </Link>
-                        <span className="text-gray-500">
-                          ${bid.amount.toFixed(2)}
-                        </span>
-                        <span className="text-gray-400 text-xs">
-                          {formatDistanceToNow(new Date(bid.createdAt), {
-                            addSuffix: true,
-                          })}
-                        </span>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-gray-500">
+                            ${bid.amount.toFixed(2)}
+                          </span>
+                          <span className="text-gray-400 text-xs">
+                            {formatDistanceToNow(new Date(bid.createdAt), {
+                              addSuffix: true,
+                            })}
+                          </span>
+                        </div>
                       </li>
                     ))}
                   </ul>

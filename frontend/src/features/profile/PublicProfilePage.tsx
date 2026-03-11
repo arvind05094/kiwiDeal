@@ -66,7 +66,7 @@ export function PublicProfilePage() {
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Profile header */}
-      <div className="bg-white border rounded-lg p-6 flex gap-6 items-start justify-between w-full">
+      <div className="bg-white border rounded-lg p-6 flex flex-col sm:flex-row gap-6 items-start sm:justify-between w-full">
         {/* Left: Avatar */}
         <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-semibold text-gray-600 shrink-0">
           {profile.firstName[0]}
@@ -174,7 +174,7 @@ export function PublicProfilePage() {
 
         {/* Right: Action Button Panel */}
         {isAuthenticated && !isOwnProfile && (
-          <div className="self-start ml-auto shrink-0 pt-1">
+          <div className="self-start sm:ml-auto shrink-0 pt-1">
             {/* Added pt-1 just to perfectly align it with the baseline of the name heading */}
             <Button
               variant="outline"
@@ -185,7 +185,6 @@ export function PublicProfilePage() {
                   const conversation = await startConversation({
                     recipientId: id!,
                     recipientName: `${profile.firstName} ${profile.lastName}`,
-                    initialMessage: "Hi, I'd like to get in touch.",
                   });
                   navigate(`/messages/${conversation.id}`);
                 } catch {

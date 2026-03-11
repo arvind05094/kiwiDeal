@@ -1,7 +1,7 @@
 export interface StartConversationRequest {
   recipientId: string;
   recipientName: string;
-  initialMessage: string;
+  initialMessage?: string;
 }
 export interface SendMessageRequest {
   content: string;

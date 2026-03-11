@@ -32,7 +32,7 @@ export function MyListingsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1 border-b">
+      <div className="flex gap-1 border-b overflow-x-auto">
         {FILTERS.map((f) => (
           <button
             key={f.value}
@@ -41,7 +41,7 @@ export function MyListingsTab() {
               setPage(1);
             }}
             className={cn(
-              "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+              "px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors",
               status === f.value
                 ? "border-orange-500 text-orange-600"
                 : "border-transparent text-gray-500 hover:text-gray-800",

@@ -485,3 +485,5 @@ $RECYCLE.BIN/
 frontend/dist
 frontend/.env.local
 frontend/.env*.local
+
+cookies.txt

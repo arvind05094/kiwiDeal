@@ -7,10 +7,14 @@ public sealed class PaymentsDbContextFactory : IDesignTimeDbContextFactory<Payme
 {
     public PaymentsDbContext CreateDbContext(string[] args)
     {
+        var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__PaymentsConnection")
+            ?? throw new InvalidOperationException("ConnectionStrings__PaymentsConnection environment variable is not set.");
+
         var optionsBuilder = new DbContextOptionsBuilder<PaymentsDbContext>();
         optionsBuilder
-            .UseNpgsql("Host=localhost;Port=5432;Database=kiwidealddb;Username=kiwiadmin;Password=kiwipassword")
+            .UseNpgsql(connStr)
             .UseSnakeCaseNamingConvention();
+
         return new PaymentsDbContext(optionsBuilder.Options);
     }
 }

@@ -7,10 +7,12 @@ public sealed class AuctionsDbContextFactory : IDesignTimeDbContextFactory<Aucti
 {
     public AuctionsDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AuctionsDbContext>();
+        var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__AuctionsConnection")
+            ?? throw new InvalidOperationException("ConnectionStrings__AuctionsConnection environment variable is not set.");
 
+        var optionsBuilder = new DbContextOptionsBuilder<AuctionsDbContext>();
         optionsBuilder
-            .UseNpgsql("Host=localhost;Port=5432;Database=kiwidealddb;Username=kiwiadmin;Password=kiwipassword")
+            .UseNpgsql(connStr)
             .UseSnakeCaseNamingConvention();
 
         return new AuctionsDbContext(optionsBuilder.Options);

@@ -17,6 +17,7 @@ public sealed class MessagesDbContext(DbContextOptions<MessagesDbContext> option
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("messages");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MessagesDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
         modelBuilder.ApplyStronglyTypedIdConverters();
@@ -54,11 +55,9 @@ public sealed class MessagesDbContext(DbContextOptions<MessagesDbContext> option
                 {
                     TypeNameHandling = TypeNameHandling.None
                 });
-
                 var outboxMessage = OutboxMessage.Create(domainEvent, payload);
                 OutboxMessages.Add(outboxMessage);
             }
-
             aggregate.ClearDomainEvents();
         }
     }

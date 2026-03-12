@@ -14,8 +14,10 @@ public sealed class ListingsDbContext(DbContextOptions<ListingsDbContext> option
     public DbSet<Listing> Listings => Set<Listing>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ListingWatchlist> ListingWatchlists => Set<ListingWatchlist>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("listings");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ListingsDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
         modelBuilder.ApplyStronglyTypedIdConverters();
@@ -53,11 +55,9 @@ public sealed class ListingsDbContext(DbContextOptions<ListingsDbContext> option
                 {
                     TypeNameHandling = TypeNameHandling.None
                 });
-
                 var outboxMessage = OutboxMessage.Create(domainEvent, payload);
                 OutboxMessages.Add(outboxMessage);
             }
-
             aggregate.ClearDomainEvents();
         }
     }

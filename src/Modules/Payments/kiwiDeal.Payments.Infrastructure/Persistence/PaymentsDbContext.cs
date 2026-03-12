@@ -16,6 +16,7 @@ public sealed class PaymentsDbContext(DbContextOptions<PaymentsDbContext> option
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("payments");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PaymentsDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
         modelBuilder.ApplyStronglyTypedIdConverters();

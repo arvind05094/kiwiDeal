@@ -1,4 +1,3 @@
-
 using kiwiDeal.Auctions.Domain.Entities;
 using kiwiDeal.Auctions.Domain.Repositories;
 using kiwiDeal.SharedKernel.Entities;
@@ -17,11 +16,13 @@ public sealed class AuctionsDbContext(DbContextOptions<AuctionsDbContext> option
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("auctions");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuctionsDbContext).Assembly);
         modelBuilder.ApplySoftDeleteQueryFilters();
         modelBuilder.ApplyStronglyTypedIdConverters();
         base.OnModelCreating(modelBuilder);
     }
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         FlushDomainEventsToOutbox();
@@ -53,11 +54,9 @@ public sealed class AuctionsDbContext(DbContextOptions<AuctionsDbContext> option
                 {
                     TypeNameHandling = TypeNameHandling.None
                 });
-
                 var outboxMessage = OutboxMessage.Create(domainEvent, payload);
                 OutboxMessages.Add(outboxMessage);
             }
-
             aggregate.ClearDomainEvents();
         }
     }

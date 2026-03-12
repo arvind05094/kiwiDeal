@@ -487,3 +487,5 @@ frontend/.env.local
 frontend/.env*.local
 
 cookies.txt
+
+appsettings.Development.json

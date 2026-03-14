@@ -27,7 +27,9 @@ public sealed class PaymentRepository(PaymentsDbContext dbContext) : IPaymentRep
     Guid listingId,
     CancellationToken cancellationToken = default)
     => await dbContext.Payments
-        .FirstOrDefaultAsync(p => p.ListingId == listingId, cancellationToken);
+        .Where(p => p.ListingId == listingId)
+        .OrderByDescending(p => p.CreatedAt)
+        .FirstOrDefaultAsync(cancellationToken);
     public void Add(Payment payment)
         => dbContext.Payments.Add(payment);
 

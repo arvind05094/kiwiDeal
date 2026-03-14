@@ -73,6 +73,10 @@ public sealed class StripeService(
             StripeConfiguration.ApiKey = options.Value.SecretKey;
             var service = new SessionService();
             var session = await service.GetAsync(sessionId, cancellationToken: cancellationToken);
+
+            if (string.IsNullOrEmpty(session.Url))
+                return Result.Failure<string>(Error.Unexpected("Checkout session is no longer available."));
+
             return Result.Success(session.Url);
         }
         catch (StripeException ex)

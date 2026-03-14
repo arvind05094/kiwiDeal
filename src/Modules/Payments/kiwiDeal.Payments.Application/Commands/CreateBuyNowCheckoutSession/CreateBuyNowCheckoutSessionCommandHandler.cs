@@ -32,7 +32,10 @@ public sealed class CreateBuyNowCheckoutSessionCommandHandler(
                 if (urlResult.IsSuccess)
                     return Result.Success(urlResult.Value);
             }
-            return Result.Failure<string>(PaymentErrors.ActiveSessionExists);
+
+            // Stale session — mark it failed and let the buyer start a fresh checkout.
+            existing.Fail();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         if (existing is not null && existing.Status == PaymentStatus.Completed)
             return Result.Failure<string>(PaymentErrors.AlreadyProcessed);

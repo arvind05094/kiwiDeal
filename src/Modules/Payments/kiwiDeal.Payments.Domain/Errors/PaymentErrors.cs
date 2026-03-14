@@ -9,6 +9,4 @@ public static class PaymentErrors
 
     public static readonly Error NotFound = Error.NotFound(
         "Payment was not found.");
-    public static readonly Error ActiveSessionExists =
-    new(ErrorCode.Conflict, "An active checkout session already exists for this listing.");
 }

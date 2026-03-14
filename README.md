@@ -38,7 +38,7 @@ A full-stack marketplace platform for buying, selling, and auctioning items — 
 | Frontend     | React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui |
 | State / Data | TanStack Query, Axios                                 |
 | Real-time    | SignalR (WebSockets)                                  |
-| Backend      | .NET 9, ASP.NET Core, MediatR, FluentValidation       |
+| Backend      | .NET 10, ASP.NET Core, MediatR, FluentValidation      |
 | Architecture | Modular Monolith, Clean Architecture, CQRS, DDD       |
 | Auth         | JWT (access + refresh tokens)                         |
 | Database     | PostgreSQL 17 via Neon (schema-per-module)            |

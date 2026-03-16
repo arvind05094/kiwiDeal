@@ -1,6 +1,7 @@
 using FluentAssertions;
 using kiwiDeal.Users.Api.Requests;
 using kiwiDeal.Users.Application.DTOs;
+using kiwiDeal.Users.Domain.Enums;
 using kiwiDeal.Users.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +39,7 @@ public class AuthControllerTests : IAsyncLifetime
     [Fact]
     public async Task Register_ValidRequest_Returns201()
     {
-        var request = new RegisterRequest("validuser@test.com", "Password123", "New", "User");
+        var request = new RegisterRequest("validuser@test.com", "Password123", "New", "User", Region.Auckland);
 
         var response = await _client.PostAsJsonAsync("/api/v1/auth/register", request);
 
@@ -54,7 +55,7 @@ public class AuthControllerTests : IAsyncLifetime
     [Fact]
     public async Task Register_DuplicateEmail_Returns409()
     {
-        var request = new RegisterRequest("duplicate@test.com", "Password123", "John", "Doe");
+        var request = new RegisterRequest("duplicate@test.com", "Password123", "John", "Doe", Region.Auckland);
 
         await _client.PostAsJsonAsync("/api/v1/auth/register", request);
         var response = await _client.PostAsJsonAsync("/api/v1/auth/register", request);
@@ -65,7 +66,7 @@ public class AuthControllerTests : IAsyncLifetime
     [Fact]
     public async Task Register_InvalidEmail_Returns400()
     {
-        var request = new RegisterRequest("notanemail", "Password123", "John", "Doe");
+        var request = new RegisterRequest("notanemail", "Password123", "John", "Doe", Region.Auckland);
 
         var response = await _client.PostAsJsonAsync("/api/v1/auth/register", request);
 
@@ -75,7 +76,7 @@ public class AuthControllerTests : IAsyncLifetime
     [Fact]
     public async Task Login_ValidCredentials_Returns200WithToken()
     {
-        var registerRequest = new RegisterRequest("login@test.com", "Password123", "Login", "User");
+        var registerRequest = new RegisterRequest("login@test.com", "Password123", "Login", "User", Region.Auckland);
         var registerResponse = await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
         registerResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
@@ -98,7 +99,7 @@ public class AuthControllerTests : IAsyncLifetime
     [Fact]
     public async Task Login_WrongPassword_Returns401()
     {
-        var registerRequest = new RegisterRequest("wrongpass@test.com", "Password123", "Wrong", "Pass");
+        var registerRequest = new RegisterRequest("wrongpass@test.com", "Password123", "Wrong", "Pass", Region.Auckland);
         await _client.PostAsJsonAsync("/api/v1/auth/register", registerRequest);
 
         var loginRequest = new LoginRequest("wrongpass@test.com", "WrongPassword");

@@ -2,6 +2,7 @@ using FluentAssertions;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Users.Application.Commands;
 using kiwiDeal.Users.Domain.Entities;
+using kiwiDeal.Users.Domain.Enums;
 using kiwiDeal.Users.Domain.Repositories;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -29,7 +30,7 @@ public class RegisterCommandHandlerTests
     [Fact]
     public async Task Handle_ValidCommand_ReturnsSuccess()
     {
-        var command = new RegisterCommand("test@test.com", "Password123", "John", "Doe");
+        var command = new RegisterCommand("test@test.com", "Password123", "John", "Doe", Region.Auckland);
 
         _userRepository.GetByEmailAsync(command.Email, Arg.Any<CancellationToken>())
             .Returns((User?)null);
@@ -51,9 +52,9 @@ public class RegisterCommandHandlerTests
     [Fact]
     public async Task Handle_EmailAlreadyInUse_ReturnsFailure()
     {
-        var command = new RegisterCommand("test@test.com", "Password123", "John", "Doe");
+        var command = new RegisterCommand("test@test.com", "Password123", "John", "Doe", Region.Auckland);
 
-        var existingUser = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var existingUser = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
 
         _userRepository.GetByEmailAsync(command.Email, Arg.Any<CancellationToken>())
             .Returns(existingUser);

@@ -60,7 +60,7 @@ public sealed class AuthController(ISender sender) : ControllerBase
     [HttpPost("refresh")]
     [AllowAnonymous]
     public async Task<IActionResult> Refresh(
-        [FromBody] RefreshTokenRequest request,
+        [FromBody] RefreshTokenRequest? request,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request?.RefreshToken))

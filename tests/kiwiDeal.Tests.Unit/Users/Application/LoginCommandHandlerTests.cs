@@ -3,6 +3,7 @@ using kiwiDeal.SharedKernel.Interfaces;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.Users.Application.Commands;
 using kiwiDeal.Users.Domain.Entities;
+using kiwiDeal.Users.Domain.Enums;
 using kiwiDeal.Users.Domain.Repositories;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -31,7 +32,7 @@ public class LoginCommandHandlerTests
     public async Task Handle_ValidCredentials_ReturnsSuccess()
     {
         var command = new LoginCommand("test@test.com", "Password123");
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
 
         _userRepository.GetByEmailAsync(command.Email, Arg.Any<CancellationToken>())
             .Returns(user);
@@ -70,7 +71,7 @@ public class LoginCommandHandlerTests
     public async Task Handle_WrongPassword_ReturnsFailure()
     {
         var command = new LoginCommand("test@test.com", "WrongPassword");
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
 
         _userRepository.GetByEmailAsync(command.Email, Arg.Any<CancellationToken>())
             .Returns(user);

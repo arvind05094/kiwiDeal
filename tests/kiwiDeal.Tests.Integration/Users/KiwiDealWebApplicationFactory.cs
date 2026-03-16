@@ -217,8 +217,15 @@ public sealed class FakeStripeService : IStripeService
     public Task<Result<StripeCheckoutSession>> CreateCheckoutSessionAsync(
         Guid paymentId,
         decimal amount,
-        CancellationToken cancellationToken = default)
+        string productName,
+        CancellationToken cancellationToken = default,
+        Guid? listingId = null)
         => Task.FromResult(Result.Success(new StripeCheckoutSession("cs_test_fake_session_id", "https://checkout.stripe.com/test/session")));
+
+    public Task<Result<string>> GetCheckoutSessionUrlAsync(
+        string sessionId,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult(Result.Success("https://checkout.stripe.com/test/session"));
 }
 
 public sealed class IntegrationTestPaymentsUnitOfWork(PaymentsDbContext paymentsDb)

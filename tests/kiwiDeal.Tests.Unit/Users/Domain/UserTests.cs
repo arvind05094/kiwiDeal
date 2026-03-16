@@ -1,5 +1,6 @@
 using FluentAssertions;
 using kiwiDeal.Users.Domain.Entities;
+using kiwiDeal.Users.Domain.Enums;
 
 namespace kiwiDeal.Tests.Unit.Users.Domain;
 
@@ -8,7 +9,7 @@ public class UserTests
     [Fact]
     public void Create_ValidInput_ReturnsSuccess()
     {
-        var result = User.Create("test@test.com", "hashedpassword", "John", "Doe");
+        var result = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Email.Should().Be("test@test.com");
@@ -20,7 +21,7 @@ public class UserTests
     [Fact]
     public void Create_EmptyEmail_ReturnsFailure()
     {
-        var result = User.Create("", "hashedpassword", "John", "Doe");
+        var result = User.Create("", "hashedpassword", "John", "Doe", Region.Auckland);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Message.Should().Contain("Email is required");
@@ -29,7 +30,7 @@ public class UserTests
     [Fact]
     public void Create_EmptyPasswordHash_ReturnsFailure()
     {
-        var result = User.Create("test@test.com", "", "John", "Doe");
+        var result = User.Create("test@test.com", "", "John", "Doe", Region.Auckland);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Message.Should().Contain("Password hash is required");
@@ -38,7 +39,7 @@ public class UserTests
     [Fact]
     public void Create_EmptyFirstName_ReturnsFailure()
     {
-        var result = User.Create("test@test.com", "hashedpassword", "", "Doe");
+        var result = User.Create("test@test.com", "hashedpassword", "", "Doe", Region.Auckland);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Message.Should().Contain("First name is required");
@@ -47,7 +48,7 @@ public class UserTests
     [Fact]
     public void Create_EmptyLastName_ReturnsFailure()
     {
-        var result = User.Create("test@test.com", "hashedpassword", "John", "");
+        var result = User.Create("test@test.com", "hashedpassword", "John", "", Region.Auckland);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Message.Should().Contain("Last name is required");
@@ -56,7 +57,7 @@ public class UserTests
     [Fact]
     public void AddRefreshToken_ValidToken_AddsToCollection()
     {
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
         var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
         user.AddRefreshToken("token123", expiresAt);
@@ -69,7 +70,7 @@ public class UserTests
     [Fact]
     public void AddRefreshToken_SecondToken_RevokesFirst()
     {
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
         var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
         user.AddRefreshToken("token1", expiresAt);
@@ -82,7 +83,7 @@ public class UserTests
     [Fact]
     public void GetActiveRefreshToken_ValidToken_ReturnsSuccess()
     {
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
         user.AddRefreshToken("token123", DateTimeOffset.UtcNow.AddDays(7));
 
         var result = user.GetActiveRefreshToken("token123");
@@ -94,7 +95,7 @@ public class UserTests
     [Fact]
     public void GetActiveRefreshToken_InvalidToken_ReturnsFailure()
     {
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
 
         var result = user.GetActiveRefreshToken("nonexistent");
 
@@ -104,7 +105,7 @@ public class UserTests
     [Fact]
     public void Delete_SetsIsDeletedAndRevokesTokens()
     {
-        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe").Value;
+        var user = User.Create("test@test.com", "hashedpassword", "John", "Doe", Region.Auckland).Value;
         user.AddRefreshToken("token123", DateTimeOffset.UtcNow.AddDays(7));
 
         user.Delete();

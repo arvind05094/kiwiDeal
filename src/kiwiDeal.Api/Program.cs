@@ -7,6 +7,7 @@ using kiwiDeal.Auctions.Application.Commands;
 using kiwiDeal.Listings.Api;
 using kiwiDeal.Listings.Application.Events;
 using kiwiDeal.Messages.Api;
+using kiwiDeal.Notifications.Api;
 using kiwiDeal.Payments.Api;
 using kiwiDeal.SharedKernel.Behaviours;
 using kiwiDeal.SharedKernel.Contracts;
@@ -64,6 +65,8 @@ builder.Services.AddMediatR(cfg =>
     typeof(kiwiDeal.Payments.Application.Commands.CreateCheckoutSession.CreateCheckoutSessionCommand).Assembly);
     cfg.RegisterServicesFromAssembly(
     typeof(kiwiDeal.Messages.Application.Commands.StartConversationCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(
+    typeof(kiwiDeal.Notifications.Application.Queries.GetNotificationsQuery).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehaviour<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
@@ -114,6 +117,7 @@ registry.Register<ListingCancelledEvent>();
 registry.Register<ListingSoldEvent>();
 registry.Register<PaymentCompletedEvent>();
 registry.Register<PaymentFailedEvent>();
+registry.Register<MessageSentEvent>();
 
 
 builder.Services.AddSingleton<IOutboxTypeRegistry>(registry);
@@ -123,6 +127,7 @@ builder.Services.AddListingsModule(builder.Configuration);
 builder.Services.AddAuctionsModule(builder.Configuration);
 builder.Services.AddPaymentsModule(builder.Configuration);
 builder.Services.AddMessagesModule(builder.Configuration);
+builder.Services.AddNotificationsModule(builder.Configuration);
 builder.Services.AddHostedService<OutboxWorker>();
 builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>
@@ -157,6 +162,7 @@ app.MapControllers();
 app.MapHub<AuctionHub>("/hubs/auctions");
 app.MapHub<ListingHub>("/hubs/listings");
 app.MapHub<MessageHub>("/hubs/messages");
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapHealthChecks("/health");
 app.Run();
 

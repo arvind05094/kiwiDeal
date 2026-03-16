@@ -11,6 +11,8 @@
   <ProjectReference Include="..\Modules\Messages\kiwiDeal.Messages.Infrastructure\kiwiDeal.Messages.Infrastructure.csproj" />
 <ProjectReference Include="..\Modules\Messages\kiwiDeal.Messages.Api\kiwiDeal.Messages.Api.csproj" />
 	  <ProjectReference Include="..\Modules\Notifications\kiwiDeal.Notifications.Application\kiwiDeal.Notifications.Application.csproj" />
+	  <ProjectReference Include="..\Modules\Notifications\kiwiDeal.Notifications.Infrastructure\kiwiDeal.Notifications.Infrastructure.csproj" />
+	  <ProjectReference Include="..\Modules\Notifications\kiwiDeal.Notifications.Api\kiwiDeal.Notifications.Api.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />

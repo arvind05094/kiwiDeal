@@ -14,9 +14,11 @@ public class PaymentTests
     {
         return Payment.Create(
             auctionId ?? Guid.NewGuid(),
+            Guid.NewGuid(),
             winnerId ?? Guid.NewGuid(),
             sellerId ?? Guid.NewGuid(),
-            amount).Value;
+            amount,
+            "Auction").Value;
     }
 
     [Fact]
@@ -26,11 +28,11 @@ public class PaymentTests
         var winnerId = Guid.NewGuid();
         var sellerId = Guid.NewGuid();
 
-        var result = Payment.Create(auctionId, winnerId, sellerId, 250m);
+        var result = Payment.Create(auctionId, Guid.NewGuid(), winnerId, sellerId, 250m, "Auction");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.AuctionId.Should().Be(auctionId);
-        result.Value.WinnerId.Should().Be(winnerId);
+        result.Value.BuyerId.Should().Be(winnerId);
         result.Value.SellerId.Should().Be(sellerId);
         result.Value.Amount.Should().Be(250m);
         result.Value.Status.Should().Be(PaymentStatus.Pending);
@@ -71,7 +73,7 @@ public class PaymentTests
         payment.Complete("cs_test_abc123");
 
         payment.DomainEvents.Should().HaveCount(1);
-        payment.DomainEvents[0].Should().BeOfType<kiwiDeal.Payments.Domain.Events.PaymentCompletedEvent>();
+        payment.DomainEvents[0].Should().BeOfType<kiwiDeal.SharedKernel.Contracts.PaymentCompletedEvent>();
     }
 
     [Fact]
@@ -105,6 +107,6 @@ public class PaymentTests
         payment.Fail();
 
         payment.DomainEvents.Should().HaveCount(1);
-        payment.DomainEvents[0].Should().BeOfType<kiwiDeal.Payments.Domain.Events.PaymentFailedEvent>();
+        payment.DomainEvents[0].Should().BeOfType<kiwiDeal.SharedKernel.Contracts.PaymentFailedEvent>();
     }
 }

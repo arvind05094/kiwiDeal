@@ -48,11 +48,14 @@ public class PaymentsEndpointTests : IAsyncLifetime
         Guid? sellerId = null,
         decimal amount = 100m)
     {
+        var listingId = Guid.NewGuid();
         var payment = Payment.Create(
             auctionId ?? Guid.NewGuid(),
+            listingId,
             winnerId ?? Guid.NewGuid(),
             sellerId ?? Guid.NewGuid(),
-            amount).Value;
+            amount,
+            "Auction").Value;
 
         var options = new DbContextOptionsBuilder<PaymentsDbContext>()
             .UseNpgsql(_factory.ConnectionString)
@@ -63,7 +66,7 @@ public class PaymentsEndpointTests : IAsyncLifetime
         await db.Payments.AddAsync(payment);
         await db.SaveChangesAsync();
 
-        return payment.AuctionId;
+        return payment.AuctionId!.Value;
     }
 
     private async Task<Guid> SeedCompletedPaymentAsync()
@@ -72,7 +75,9 @@ public class PaymentsEndpointTests : IAsyncLifetime
             Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
-            200m).Value;
+            Guid.NewGuid(),
+            200m,
+            "Auction").Value;
 
         payment.Complete("cs_test_existing123");
 
@@ -85,7 +90,7 @@ public class PaymentsEndpointTests : IAsyncLifetime
         await db.Payments.AddAsync(payment);
         await db.SaveChangesAsync();
 
-        return payment.AuctionId;
+        return payment.AuctionId!.Value;
     }
 
     [Fact]

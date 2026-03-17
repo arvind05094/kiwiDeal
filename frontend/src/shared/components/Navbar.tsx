@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/features/auth/useAuth";
+import { NotificationBell } from "@/features/notifications/NotificationBell";
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -80,6 +81,8 @@ export function Navbar() {
                 <Heart className="h-4 w-4" />
                 <span className="hidden sm:inline">Watchlist</span>
               </Link>
+
+              <NotificationBell />
 
               <Link
                 to="/messages"

@@ -2,15 +2,19 @@ using kiwiDeal.Messages.Application.DTOs;
 using kiwiDeal.Messages.Domain.Entities;
 using kiwiDeal.Messages.Domain.Errors;
 using kiwiDeal.Messages.Domain.Repositories;
+using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.SharedKernel.Results;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace kiwiDeal.Messages.Application.Commands;
 
 public class SendMessageCommandHandler(
     IConversationRepository conversationRepository,
     IMessagesUnitOfWork unitOfWork,
-    IMessageHubContext hubContext) : IRequestHandler<SendMessageCommand, Result<MessageDto>>
+    IMessageHubContext hubContext,
+    IPublisher publisher,
+    ILogger<SendMessageCommandHandler> logger) : IRequestHandler<SendMessageCommand, Result<MessageDto>>
 {
     public async Task<Result<MessageDto>> Handle(
         SendMessageCommand request,
@@ -43,25 +47,39 @@ public class SendMessageCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await hubContext.SendMessageReceived(
-            conversation.Id.Value,
-            message.Id.Value,
-            message.SenderId,
-            message.SenderName,
-            message.Content,
-            message.CreatedAt,
-            cancellationToken);
-
         var recipientId = conversation.SenderId == request.SenderId
             ? conversation.RecipientId
             : conversation.SenderId;
 
-        await hubContext.SendConversationUpdated(
-            recipientId,
-            conversation.Id.Value,
-            message.Content,
-            message.CreatedAt,
-            cancellationToken);
+        try
+        {
+            await hubContext.SendMessageReceived(
+                conversation.Id.Value,
+                message.Id.Value,
+                message.SenderId,
+                message.SenderName,
+                message.Content,
+                message.CreatedAt,
+                cancellationToken);
+
+            await hubContext.SendConversationUpdated(
+                recipientId,
+                conversation.Id.Value,
+                message.Content,
+                message.CreatedAt,
+                cancellationToken);
+
+            await publisher.Publish(new MessageSentEvent(
+                conversation.Id.Value,
+                recipientId,
+                message.SenderId,
+                message.SenderName,
+                message.Content), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to push live updates for message {MessageId} in conversation {ConversationId}", message.Id.Value, conversation.Id.Value);
+        }
 
         return Result.Success(new MessageDto
         {

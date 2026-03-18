@@ -3,6 +3,8 @@ using kiwiDeal.Messages.Application.Commands;
 using kiwiDeal.Messages.Domain.Entities;
 using kiwiDeal.Messages.Domain.Repositories;
 using kiwiDeal.SharedKernel.Results;
+using MediatR;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace kiwiDeal.Tests.Unit.Messages.Application.Commands;
@@ -12,11 +14,13 @@ public class SendMessageCommandHandlerTests
     private readonly IConversationRepository _conversationRepository = Substitute.For<IConversationRepository>();
     private readonly IMessagesUnitOfWork _unitOfWork = Substitute.For<IMessagesUnitOfWork>();
     private readonly IMessageHubContext _hubContext = Substitute.For<IMessageHubContext>();
+    private readonly IPublisher _publisher = Substitute.For<IPublisher>();
+    private readonly ILogger<SendMessageCommandHandler> _logger = Substitute.For<ILogger<SendMessageCommandHandler>>();
     private readonly SendMessageCommandHandler _handler;
 
     public SendMessageCommandHandlerTests()
     {
-        _handler = new SendMessageCommandHandler(_conversationRepository, _unitOfWork, _hubContext);
+        _handler = new SendMessageCommandHandler(_conversationRepository, _unitOfWork, _hubContext, _publisher, _logger);
     }
 
     [Fact]

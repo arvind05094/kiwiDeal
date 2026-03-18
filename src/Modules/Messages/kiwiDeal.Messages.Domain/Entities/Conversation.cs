@@ -1,7 +1,6 @@
 using kiwiDeal.SharedKernel.Entities;
 using kiwiDeal.SharedKernel.Results;
 using kiwiDeal.SharedKernel.Interfaces;
-using kiwiDeal.SharedKernel.Contracts;
 using kiwiDeal.Messages.Domain.Errors;
 
 namespace kiwiDeal.Messages.Domain.Entities;
@@ -57,14 +56,6 @@ public class Conversation : AggregateRoot, ISoftDeletable
     {
         _messages.Add(message);
         TouchUpdatedAt();
-
-        var recipientId = SenderId == message.SenderId ? RecipientId : SenderId;
-        RaiseDomainEvent(new MessageSentEvent(
-            Id.Value,
-            recipientId,
-            message.SenderId,
-            message.SenderName,
-            message.Content));
 
         return Result.Success();
     }

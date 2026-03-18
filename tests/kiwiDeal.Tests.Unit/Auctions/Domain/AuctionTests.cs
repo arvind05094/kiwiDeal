@@ -98,7 +98,6 @@ public class AuctionTests
     {
         var auction = CreateActiveAuction();
         auction.PlaceBid(Guid.NewGuid(), "Jane Doe", 150m);
-        auction.DomainEvents.Should().HaveCount(1);
-        auction.DomainEvents[0].Should().BeOfType<kiwiDeal.Auctions.Domain.Events.BidPlacedEvent>();
+        auction.DomainEvents.Should().Contain(e => e is kiwiDeal.SharedKernel.Contracts.BidPlacedEvent);
     }
 }

@@ -64,8 +64,8 @@ public sealed class CreateAuctionCommandValidator : AbstractValidator<CreateAuct
         RuleFor(x => x.StartingPrice).GreaterThanOrEqualTo(0);
         RuleFor(x => x.StartTime)
             .NotEmpty()
-            .GreaterThanOrEqualTo(_ => DateTimeOffset.UtcNow)
-            .WithMessage("Start time must be in the future.");
+            .GreaterThanOrEqualTo(_ => DateTimeOffset.UtcNow.AddMinutes(-1))
+            .WithMessage("Start time cannot be in the past.");
 
         RuleFor(x => x.EndTime)
             .NotEmpty()

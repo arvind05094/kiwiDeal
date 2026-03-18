@@ -25,5 +25,11 @@
     <ProjectReference Include="..\..\src\Modules\Payments\kiwiDeal.Payments.Domain\kiwiDeal.Payments.Domain.csproj" />
     <ProjectReference Include="..\..\src\Modules\Payments\kiwiDeal.Payments.Application\kiwiDeal.Payments.Application.csproj" />
     <ProjectReference Include="..\..\src\SharedKernel\kiwiDeal.SharedKernel\kiwiDeal.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\kiwiDeal.Notifications.Domain\kiwiDeal.Notifications.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\kiwiDeal.Notifications.Application\kiwiDeal.Notifications.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Messages\kiwiDeal.Messages.Domain\kiwiDeal.Messages.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Messages\kiwiDeal.Messages.Application\kiwiDeal.Messages.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Listings\kiwiDeal.Listings.Domain\kiwiDeal.Listings.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Listings\kiwiDeal.Listings.Application\kiwiDeal.Listings.Application.csproj" />
   </ItemGroup>
 </Project>

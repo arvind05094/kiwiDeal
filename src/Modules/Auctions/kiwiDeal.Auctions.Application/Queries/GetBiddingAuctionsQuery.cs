@@ -30,20 +30,32 @@ public sealed class GetBiddingAuctionsQueryHandler(
             ? summariesResult.Value.ToDictionary(s => s.Id)
             : new Dictionary<Guid, ListingSummaryDto>();
 
-        var dtos = paged.Items.Select(a => new AuctionDto(
-            a.Id.Value,
-            a.ListingId,
-            a.ListingTitle,
-            a.SellerId,
-            a.StartingPrice,
-            a.CurrentHighestBid,
-            a.CurrentHighestBidderId,
-            a.StartTime,
-            a.EndTime,
-            a.ClosedAt,
-            a.Status.ToString(),
-            [],
-            summaries.GetValueOrDefault(a.ListingId)?.ThumbnailUrl)).ToList();
+        var dtos = new List<AuctionDto>();
+        foreach (var a in paged.Items)
+        {
+            string? paymentStatus = null;
+            if (a.Status.ToString() == "Closed")
+            {
+                var paymentResult = await mediator.Send(new GetPaymentStatusByAuctionQuery(a.Id.Value), cancellationToken);
+                paymentStatus = paymentResult.IsSuccess ? paymentResult.Value : "Pending";
+            }
+
+            dtos.Add(new AuctionDto(
+                a.Id.Value,
+                a.ListingId,
+                a.ListingTitle,
+                a.SellerId,
+                a.StartingPrice,
+                a.CurrentHighestBid,
+                a.CurrentHighestBidderId,
+                a.StartTime,
+                a.EndTime,
+                a.ClosedAt,
+                a.Status.ToString(),
+                [],
+                summaries.GetValueOrDefault(a.ListingId)?.ThumbnailUrl,
+                paymentStatus));
+        }
 
         return Result.Success(PagedResult<AuctionDto>.Create(
             dtos, paged.TotalCount, new PaginationParams(query.PageNumber, query.PageSize)));

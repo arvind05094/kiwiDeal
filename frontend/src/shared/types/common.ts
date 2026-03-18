@@ -76,6 +76,7 @@ export interface AuctionDto {
   bids: AuctionBidDto[];
   closedAt?: string;
   thumbnailUrl?: string;
+  paymentStatus?: string;
 }
 
 export interface UserResponse {

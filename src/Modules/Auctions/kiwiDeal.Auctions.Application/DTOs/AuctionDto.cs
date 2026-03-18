@@ -13,4 +13,5 @@ public sealed record AuctionDto(
     DateTimeOffset? ClosedAt,
     string Status,
     IReadOnlyList<AuctionBidDto> Bids,
-    string? ThumbnailUrl);
+    string? ThumbnailUrl,
+    string? PaymentStatus = null);

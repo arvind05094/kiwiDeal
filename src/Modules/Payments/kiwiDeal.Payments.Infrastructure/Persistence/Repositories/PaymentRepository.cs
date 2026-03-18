@@ -38,7 +38,7 @@ public sealed class PaymentRepository(PaymentsDbContext dbContext) : IPaymentRep
     CancellationToken cancellationToken = default)
     {
         var query = dbContext.Payments
-            .Where(p => p.SellerId == sellerId && p.PaymentType == "FixedPrice");
+            .Where(p => p.SellerId == sellerId && p.PaymentType == "FixedPrice" && p.Status == PaymentStatus.Completed);
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
             .OrderByDescending(p => p.CreatedAt)
@@ -53,7 +53,7 @@ public sealed class PaymentRepository(PaymentsDbContext dbContext) : IPaymentRep
         CancellationToken cancellationToken = default)
     {
         var query = dbContext.Payments
-            .Where(p => p.BuyerId == buyerId && p.PaymentType == "FixedPrice");
+            .Where(p => p.BuyerId == buyerId && p.PaymentType == "FixedPrice" && p.Status == PaymentStatus.Completed);
         var totalCount = await query.CountAsync(cancellationToken);
         var items = await query
             .OrderByDescending(p => p.CreatedAt)

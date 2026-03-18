@@ -11,7 +11,7 @@ interface BuyingCardProps {
   region?: string;
   sublabel: string;
   statusLabel?: string;
-  statusColor?: "orange" | "blue" | "gray";
+  statusColor?: "orange" | "blue" | "gray" | "green";
 }
 
 export function BuyingCard({
@@ -75,7 +75,9 @@ export function BuyingCard({
                   ? "text-orange-500"
                   : statusColor === "blue"
                     ? "text-blue-600"
-                    : "text-gray-400"
+                    : statusColor === "green"
+                      ? "text-green-600"
+                      : "text-gray-400"
               }`}
             >
               {statusLabel}

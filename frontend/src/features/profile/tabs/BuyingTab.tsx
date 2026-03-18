@@ -94,10 +94,14 @@ export function BuyingTab() {
                     filter === "Active" && a.currentHighestBidderId
                       ? "Outbid"
                       : filter === "Won"
-                        ? "Awaiting payment"
+                        ? (a.paymentStatus === "Completed" ? "Paid" : "Awaiting payment")
                         : undefined
                   }
-                  statusColor={filter === "Won" ? "orange" : "orange"}
+                  statusColor={
+                    filter === "Won" && a.paymentStatus === "Completed"
+                      ? "green"
+                      : "orange"
+                  }
                 />
               ))}
             </div>

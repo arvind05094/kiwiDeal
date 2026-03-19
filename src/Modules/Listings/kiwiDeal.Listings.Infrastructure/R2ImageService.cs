@@ -15,7 +15,7 @@ public sealed class R2ImageService : IImageService
     private readonly AmazonS3Client _s3Client;
     private readonly string _bucketName;
     private readonly string _publicUrl;
-    private const int MaxFileSizeBytes = 1 * 1024 * 1024;
+    private const int MaxFileSizeBytes = 8 * 1024 * 1024;
     private const int MaxWidthPx = 1200;
     private const int JpegQuality = 80;
 
@@ -86,7 +86,8 @@ public sealed class R2ImageService : IImageService
             BucketName = _bucketName,
             Key = key,
             InputStream = outputStream,
-            ContentType = "image/jpeg"
+            ContentType = "image/jpeg",
+            DisablePayloadSigning = true
         }, cancellationToken);
 
         return Result.Success($"{_publicUrl}/{key}");

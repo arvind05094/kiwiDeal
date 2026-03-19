@@ -66,7 +66,11 @@ export function CreateListingPage() {
     onError: (err: unknown) => {
       const data = (err as { response?: { data?: ProblemDetails } }).response
         ?.data;
-      if (data?.errors) setFieldErrors(data.errors);
+      if (data?.errors) {
+        setFieldErrors(data.errors);
+      } else {
+        setFieldErrors({ Images: ["Image upload failed."] });
+      }
     },
   });
 
@@ -314,6 +318,9 @@ export function CreateListingPage() {
               </label>
             )}
           </div>
+          <p className="text-xs text-gray-400">
+            JPG, PNG or WEBP, up to 8MB each.
+          </p>
           {err("Images") && (
             <p className="text-xs text-red-500">{err("Images")}</p>
           )}

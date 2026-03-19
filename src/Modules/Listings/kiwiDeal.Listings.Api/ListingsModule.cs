@@ -23,7 +23,7 @@ public static class ListingsModule
         services.AddScoped<IListingsUnitOfWork, ListingsUnitOfWork>();
         services.AddScoped<IOutboxMessageProvider>(sp => sp.GetRequiredService<ListingsDbContext>());
         services.AddScoped<IListingRepository, ListingRepository>();
-        services.AddScoped<IImageService, AzureBlobImageService>();
+        services.AddScoped<IImageService, R2ImageService>();
 
         return services;
     }

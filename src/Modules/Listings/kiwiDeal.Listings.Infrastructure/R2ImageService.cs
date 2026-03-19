@@ -1,5 +1,6 @@
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.S3.Model;
 using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Results;
 using Microsoft.Extensions.Configuration;
@@ -9,10 +10,11 @@ using SixLabors.ImageSharp.Processing;
 
 namespace kiwiDeal.Listings.Infrastructure;
 
-public sealed class AzureBlobImageService : IImageService
+public sealed class R2ImageService : IImageService
 {
-    private readonly BlobServiceClient _blobServiceClient;
-    private const string ContainerName = "kiwideal-images";
+    private readonly AmazonS3Client _s3Client;
+    private readonly string _bucketName;
+    private readonly string _publicUrl;
     private const int MaxFileSizeBytes = 1 * 1024 * 1024;
     private const int MaxWidthPx = 1200;
     private const int JpegQuality = 80;
@@ -26,10 +28,21 @@ public sealed class AzureBlobImageService : IImageService
             "image/jpeg", "image/jpg", "image/png", "image/webp"
         };
 
-    public AzureBlobImageService(IConfiguration configuration)
+    public R2ImageService(IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("AzureBlobStorage")!;
-        _blobServiceClient = new BlobServiceClient(connectionString);
+        var accountId = configuration["R2:AccountId"]!;
+        var accessKey = configuration["R2:AccessKey"]!;
+        var secretKey = configuration["R2:SecretKey"]!;
+        _bucketName = configuration["R2:BucketName"]!;
+        _publicUrl = configuration["R2:PublicUrl"]!.TrimEnd('/');
+
+        var config = new AmazonS3Config
+        {
+            ServiceURL = $"https://{accountId}.r2.cloudflarestorage.com",
+            ForcePathStyle = true
+        };
+
+        _s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
     }
 
     public async Task<Result<string>> UploadImageAsync(
@@ -66,23 +79,22 @@ public sealed class AzureBlobImageService : IImageService
         outputStream.Position = 0;
 
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        var blobName = $"listings/{listingId}/{timestamp}.jpg";
+        var key = $"listings/{listingId}/{timestamp}.jpg";
 
-        var containerClient = _blobServiceClient.GetBlobContainerClient(ContainerName);
-        await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob, cancellationToken: cancellationToken);
+        await _s3Client.PutObjectAsync(new PutObjectRequest
+        {
+            BucketName = _bucketName,
+            Key = key,
+            InputStream = outputStream,
+            ContentType = "image/jpeg"
+        }, cancellationToken);
 
-        var blobClient = containerClient.GetBlobClient(blobName);
-        await blobClient.UploadAsync(outputStream, new BlobHttpHeaders { ContentType = "image/jpeg" }, cancellationToken: cancellationToken);
-
-        return Result.Success(blobClient.Uri.ToString());
+        return Result.Success($"{_publicUrl}/{key}");
     }
 
     public async Task DeleteImageAsync(string imageUrl, CancellationToken cancellationToken = default)
     {
-        var uri = new Uri(imageUrl);
-        var blobName = string.Join("/", uri.Segments[2..]);
-        var containerClient = _blobServiceClient.GetBlobContainerClient(ContainerName);
-        var blobClient = containerClient.GetBlobClient(blobName);
-        await blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+        var key = imageUrl[(imageUrl.IndexOf(_publicUrl, StringComparison.Ordinal) + _publicUrl.Length + 1)..];
+        await _s3Client.DeleteObjectAsync(_bucketName, key, cancellationToken);
     }
 }

@@ -492,3 +492,5 @@ appsettings.Development.json
 
 *.env
 .env*
+
+.env

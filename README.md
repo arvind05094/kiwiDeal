@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="frontend/public/favicon.svg" width="64" height="64" alt="kiwiDeal logo" />
-</p>
-
 <h1 align="center">kiwiDeal</h1>
 
 <p align="center">

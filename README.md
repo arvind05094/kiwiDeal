@@ -1,171 +1,156 @@
-# KiwiDeal
+<p align="center">
+  <img src="frontend/public/favicon.svg" width="64" height="64" alt="kiwiDeal logo" />
+</p>
 
-A full-stack marketplace platform for buying, selling, and auctioning items — built with a .NET 9 modular monolith backend and a React 19 frontend.
+<h1 align="center">kiwiDeal</h1>
 
-**Live:** https://kiwi-deal.vercel.app
+<p align="center">
+  A modern online marketplace for buying, selling, and auctioning goods across New Zealand.
+</p>
+
+<p align="center">
+  <a href="https://kiwideal.pages.dev"><strong>🔗 Live Demo</strong></a> ·
+  <a href="https://kiwideal-pqxq.onrender.com/scalar">API Docs</a>
+</p>
+
+<p align="center">
+  <em>Note: the backend is hosted on Render's free tier and may take 30-60s to wake up on first request.</em>
+</p>
+
+---
+
+## Overview
+
+kiwiDeal is a full-stack marketplace platform combining fixed-price listings and live auctions. Sellers list items for a fixed price or run timed auctions with real-time bidding; buyers browse, bid, message sellers, and pay securely via Stripe — with live notifications throughout via SignalR.
+
+The backend is a **.NET 10 modular monolith** — six independently structured modules (Users, Listings, Auctions, Payments, Messages, Notifications) sharing one deployable API, communicating via an outbox-based event pipeline.
 
 ---
 
 ## Features
 
-- Browse and post fixed-price listings or auction-style listings
-- Real-time bidding with automatic bid-extension logic (snipe protection)
-- Stripe-powered checkout for both buy-now and auction wins
-- Real-time messaging between buyers and sellers
-- User profiles with ratings and reviews
-- Watchlist to track favourite listings
-- Image uploads via Azure Blob Storage
-- JWT authentication with silent token refresh
+- **Listings** — fixed-price or auction-style, up to 3 images, browse/search by category & region
+- **Auctions** — real-time bidding via SignalR, scheduled auto-activation/closing, watchlist
+- **Messaging** — direct buyer-seller chat with live inbox updates
+- **Notifications** — live in-app alerts for bids, messages, payments
+- **Payments** — Stripe Checkout, webhook-driven order status updates
+- **Auth** — JWT access/refresh tokens, user ratings & reviews
 
 ---
 
-## Architecture
+## Screenshots
 
-### Overview
+| Listings                                             | Live Bidding                                              |
+| ---------------------------------------------------- | --------------------------------------------------------- |
+| ![Post a listing](docs/screenshot-post-listings.png) | ![Live bid history](docs/screenshot-live-bid-history.png) |
 
-![Architecture Overview](docs/architecture_summary.png)
-
-### Detailed
-
-![Detailed Architecture](docs/architecture_detailed.png)
+| Checkout                                  | Live Messages & Notifications                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| ![Checkout](docs/screenshot-checkout.png) | ![Live messages and notifications](docs/screenshot-live-message-notifications.png) |
 
 ---
 
 ## Tech Stack
 
-| Layer        | Technology                                            |
-| ------------ | ----------------------------------------------------- |
-| Frontend     | React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui |
-| State / Data | TanStack Query, Axios                                 |
-| Real-time    | SignalR (WebSockets)                                  |
-| Backend      | .NET 10, ASP.NET Core, MediatR, FluentValidation      |
-| Architecture | Modular Monolith, Clean Architecture, CQRS, DDD       |
-| Auth         | JWT (access + refresh tokens)                         |
-| Database     | PostgreSQL 17 via Neon (schema-per-module)            |
-| ORM          | Entity Framework Core with EF Migrations              |
-| Storage      | Azure Blob Storage                                    |
-| Payments     | Stripe (Checkout Sessions + Webhooks)                 |
-| Hosting      | Vercel (frontend), Render (backend), Neon (DB)        |
+**Backend** — .NET 10, MediatR, EF Core (Npgsql), FluentValidation, SignalR, JWT Auth, API Versioning + Scalar
+
+**Frontend** — React 19 + Vite + TypeScript, TanStack Query, Tailwind + shadcn/ui, React Router, SignalR client, Axios
+
+**Infrastructure** — Neon (Postgres), Cloudflare R2 (images), Stripe, Render (backend), Cloudflare Pages (frontend)
 
 ---
 
-## Project Structure
+## Architecture
 
-```
-kiwiDeal/
-├── src/
-│   ├── kiwiDeal.Api/                  # Composition root — entry point, hubs, middleware
-│   ├── SharedKernel/                  # Result pattern, domain events, outbox, base entities
-│   └── Modules/
-│       ├── Users/                     # Auth, profiles, ratings
-│       ├── Listings/                  # Fixed-price listings, images, watchlist
-│       ├── Auctions/                  # Bidding, auction lifecycle, background workers
-│       ├── Payments/                  # Stripe integration, webhook handling
-│       ├── Messages/                  # Conversations, real-time delivery
-│       └── Notifications/             # (planned)
-└── frontend/
-    └── src/
-        ├── features/                  # auth, listings, auctions, payments, messages, profile
-        └── shared/                    # API client, components, hooks, types
-```
+kiwiDeal is a **modular monolith**: one deployable app composed of independent modules, each with its own `Domain`, `Application`, `Infrastructure`, and `Api` layers. Modules don't call each other directly — they communicate through a shared **outbox**, keeping boundaries clean without microservice overhead.
 
-Each module follows Clean Architecture layers:
-
-```
-Module/
-├── kiwiDeal.[Module].Api/             # Controllers, request DTOs, DI registration
-├── kiwiDeal.[Module].Application/     # Commands, queries, handlers, validators
-├── kiwiDeal.[Module].Domain/          # Entities, value objects, repository interfaces
-└── kiwiDeal.[Module].Infrastructure/  # EF DbContext, migrations, repository impls
-```
+![Architecture diagram](docs/architecture-diagram.png)
 
 ---
 
-## Local Development
+## Getting Started (Local Development)
 
 ### Prerequisites
 
-- .NET 9 SDK
-- Node.js 20+
-- PostgreSQL (or a Neon connection string)
-- Azure Storage account (or Azurite for local emulation)
-- Stripe account (test mode)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 20+](https://nodejs.org/) and npm
+- [Docker](https://www.docker.com/) (for local Postgres)
 
-### Backend
+### 1. Start the database
 
-```powershell
-$env:ConnectionStrings__UsersConnection    = "Host=...;Database=neondb;Search Path=users"
-$env:ConnectionStrings__ListingsConnection = "Host=...;Database=neondb;Search Path=listings"
-$env:ConnectionStrings__AuctionsConnection = "Host=...;Database=neondb;Search Path=auctions"
-$env:ConnectionStrings__PaymentsConnection = "Host=...;Database=neondb;Search Path=payments"
-$env:ConnectionStrings__MessagesConnection = "Host=...;Database=neondb;Search Path=messages"
-$env:JwtSettings__Secret                   = "your-secret-key"
-$env:ConnectionStrings__AzureBlobStorage   = "DefaultEndpointsProtocol=..."
-$env:Stripe__SecretKey                     = "sk_test_..."
-$env:Stripe__WebhookSecret                 = "whsec_..."
+```bash
+docker-compose up -d
+```
 
+This starts a local Postgres instance (`localhost:5432`) with the per-module schemas pre-created via `scripts/init-schemas.sql`.
+
+### 2. Configure backend secrets
+
+The API reads configuration via .NET user-secrets (or environment variables) — never commit real secrets. Required keys are listed in [Environment Variables](#environment-variables) below.
+
+```bash
+dotnet user-secrets set "ConnectionStrings:UsersConnection" "Host=localhost;Port=5432;Database=kiwidealddb;Username=kiwiadmin;Password=kiwipassword;Search Path=users" --project src/kiwiDeal.Api
+# ...repeat for each module's connection string, JWT settings, Stripe keys, R2 credentials
+```
+
+### 3. Apply database migrations
+
+```bash
+dotnet ef database update --project src/Modules/Users/kiwiDeal.Users.Infrastructure --startup-project src/kiwiDeal.Api --context UsersDbContext
+# ...repeat for Listings, Auctions, Payments, Messages, Notifications
+```
+
+### 4. Run the backend
+
+```bash
 dotnet run --project src/kiwiDeal.Api
-# API available at http://localhost:5158
-# Scalar API docs at http://localhost:5158/scalar/v1
 ```
 
-### Run Migrations
+API available at `http://localhost:5158`, with interactive docs at `/scalar`.
 
-```powershell
-$env:ConnectionStrings__[Module]Connection = "Host=...;Search Path=[schema]"
-dotnet ef database update --project src/Modules/[Module]/kiwiDeal.[Module].Infrastructure --context [Module]DbContext
-```
-
-Replace `[Module]` with: `Users`, `Listings`, `Auctions`, `Payments`, `Messages`
-
-### Frontend
+### 5. Run the frontend
 
 ```bash
 cd frontend
 npm install
-echo "VITE_API_URL=http://localhost:5158/api/v1" > .env.local
 npm run dev
-# App available at http://localhost:5173
 ```
+
+Frontend available at `http://localhost:5173`. Set `VITE_API_URL=http://localhost:5158/api/v1` in `frontend/.env.local` if not already configured.
+
+---
+
+## Environment Variables
+
+| Variable                                                                 | Description                                                                                                 |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `ConnectionStrings__{Module}Connection`                                  | Postgres connection string per module schema (Users, Listings, Auctions, Payments, Messages, Notifications) |
+| `JwtSettings__Secret` / `Issuer` / `Audience` / `ExpiryMinutes`          | JWT signing config                                                                                          |
+| `Stripe__SecretKey` / `WebhookSecret` / `SuccessUrl` / `CancelUrl`       | Stripe API key, webhook signing secret, redirect URLs                                                       |
+| `R2__AccountId` / `AccessKey` / `SecretKey` / `BucketName` / `PublicUrl` | Cloudflare R2 credentials for image storage                                                                 |
+| `AllowedOrigins`                                                         | CORS allowed origin (frontend URL)                                                                          |
+| `VITE_API_URL` (frontend)                                                | Base URL of the backend API                                                                                 |
 
 ---
 
 ## Deployment
 
-| Service  | Platform   | Config                                   |
-| -------- | ---------- | ---------------------------------------- |
-| Frontend | Vercel     | Root: `frontend`, build: `npm run build` |
-| Backend  | Render     | Docker, `./Dockerfile`, port `8080`      |
-| Database | Neon       | PostgreSQL 17, `ap-southeast-2`          |
-| Storage  | Azure Blob | Container: `kiwideal-images`             |
-| Payments | Stripe     | Webhook: `/api/v1/payments/webhook`      |
+- **Backend** — deployed to [Render](https://render.com) as a Docker web service, built from the root `Dockerfile`
+- **Frontend** — deployed to [Cloudflare Pages](https://pages.cloudflare.com), built from `frontend/` (`npm run build` → `dist`)
+- **Database** — [Neon](https://neon.tech) serverless Postgres, one database with a schema per module
+- **Images** — [Cloudflare R2](https://developers.cloudflare.com/r2/), public bucket for listing images
+- **Payments** — [Stripe](https://stripe.com), with a webhook endpoint configured at `/api/v1/payments/webhook` for `checkout.session.completed` / `checkout.session.expired`
 
 ---
 
-## API
+## Testing
 
-Base URL: `https://kiwideal.onrender.com/api/v1`
+```bash
+# Unit tests
+dotnet test tests/kiwiDeal.Tests.Unit
 
-| Module   | Endpoint                     | Method     |
-| -------- | ---------------------------- | ---------- |
-| Auth     | `/auth/register`             | POST       |
-| Auth     | `/auth/login`                | POST       |
-| Auth     | `/auth/refresh`              | POST       |
-| Users    | `/users/me`                  | GET / PUT  |
-| Users    | `/users/{id}/rate`           | POST       |
-| Listings | `/listings`                  | GET / POST |
-| Listings | `/listings/{id}`             | GET / PUT  |
-| Auctions | `/auctions`                  | POST       |
-| Auctions | `/auctions/{id}/bid`         | POST       |
-| Payments | `/payments/checkout`         | POST       |
-| Payments | `/payments/webhook`          | POST       |
-| Messages | `/messages/conversation`     | POST       |
-| Messages | `/messages/{conversationId}` | GET        |
+# Integration tests (spins up Postgres via Testcontainers)
+dotnet test tests/kiwiDeal.Tests.Integration
+```
 
-Interactive docs available via Scalar at `/scalar/v1`.
-
----
-
-## License
-
-MIT
+Integration tests use [Testcontainers](https://testcontainers.com/) to run against a real Postgres instance — Docker must be running.

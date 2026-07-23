@@ -8,7 +8,7 @@
 
 ---
 
-## What is this? (the plain-English version)
+## What is this?
 
 kiwiDeal is an online marketplace — think of a local TradeMe or eBay. You can:
 

@@ -1,6 +1,4 @@
-using Amazon.Runtime;
-using Amazon.S3;
-using Amazon.S3.Model;
+using Supabase;
 using kiwiDeal.Listings.Domain.Repositories;
 using kiwiDeal.SharedKernel.Results;
 using Microsoft.Extensions.Configuration;
@@ -12,9 +10,8 @@ namespace kiwiDeal.Listings.Infrastructure;
 
 public sealed class R2ImageService : IImageService
 {
-    private readonly AmazonS3Client _s3Client;
+    private readonly Supabase.Client _supabaseClient;
     private readonly string _bucketName;
-    private readonly string _publicUrl;
     private const int MaxFileSizeBytes = 8 * 1024 * 1024;
     private const int MaxWidthPx = 1200;
     private const int JpegQuality = 80;
@@ -30,19 +27,15 @@ public sealed class R2ImageService : IImageService
 
     public R2ImageService(IConfiguration configuration)
     {
-        var accountId = configuration["R2:AccountId"]!;
-        var accessKey = configuration["R2:AccessKey"]!;
-        var secretKey = configuration["R2:SecretKey"]!;
-        _bucketName = configuration["R2:BucketName"]!;
-        _publicUrl = configuration["R2:PublicUrl"]!.TrimEnd('/');
+        var url = configuration["Supabase:Url"]!;
+        var key = configuration["Supabase:Key"]!;
+        _bucketName = configuration["Supabase:BucketName"]!;
 
-        var config = new AmazonS3Config
-        {
-            ServiceURL = $"https://{accountId}.r2.cloudflarestorage.com",
-            ForcePathStyle = true
-        };
+        var options = new SupabaseOptions { AutoConnectRealtime = false };
+        _supabaseClient = new Supabase.Client(url, key, options);
 
-        _s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
+        // Block-initialize the client synchonously since this is a constructor injection block
+        _supabaseClient.InitializeAsync().Wait();
     }
 
     public async Task<Result<string>> UploadImageAsync(
@@ -81,21 +74,29 @@ public sealed class R2ImageService : IImageService
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var key = $"listings/{listingId}/{timestamp}.jpg";
 
-        await _s3Client.PutObjectAsync(new PutObjectRequest
-        {
-            BucketName = _bucketName,
-            Key = key,
-            InputStream = outputStream,
-            ContentType = "image/jpeg",
-            DisablePayloadSigning = true
-        }, cancellationToken);
+        // Upload to Supabase Storage Bucket
+        await _supabaseClient.Storage
+            .From(_bucketName)
+            .Upload(outputStream.ToArray(), key);
 
-        return Result.Success($"{_publicUrl}/{key}");
+        // Retrieve native public address
+        string publicUrl = _supabaseClient.Storage
+            .From(_bucketName)
+            .GetPublicUrl(key);
+
+        return Result.Success(publicUrl);
     }
 
     public async Task DeleteImageAsync(string imageUrl, CancellationToken cancellationToken = default)
     {
-        var key = imageUrl[(imageUrl.IndexOf(_publicUrl, StringComparison.Ordinal) + _publicUrl.Length + 1)..];
-        await _s3Client.DeleteObjectAsync(_bucketName, key, cancellationToken);
+        // Extracts file path pattern out of a standard url string
+        var uri = new Uri(imageUrl);
+        var segments = uri.AbsolutePath.Split(new[] { $"/{_bucketName}/" }, StringSplitOptions.None);
+
+        if (segments.Length > 1)
+        {
+            var key = segments[1];
+            await _supabaseClient.Storage.From(_bucketName).Remove(new List<string> { key });
+        }
     }
 }

@@ -46,7 +46,7 @@ public sealed class R2ImageService : IImageService
         CancellationToken cancellationToken = default)
     {
         if (imageStream.Length > MaxFileSizeBytes)
-            return Result.Failure<string>(Error.ValidationFailed("File size exceeds the maximum allowed size of 1MB."));
+            return Result.Failure<string>(Error.ValidationFailed("File size exceeds the maximum allowed size of 8MB."));
 
         var extension = Path.GetExtension(fileName);
         if (!AllowedExtensions.Contains(extension))

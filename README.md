@@ -1,8 +1,10 @@
+```markdown
 # kiwiDeal
 
 **Buy it now, or bid to win.** A full-stack marketplace where Kiwis list, auction, and sell goods — with live bidding, real-time chat, and secure checkout.
 
-🔗 **[Try the live demo →](https://kiwideal.pages.dev)** · [API docs](https://kiwideal-pqxq.onrender.com/scalar)
+🔗 **[Try the live demo →](https://kiwideal-aml.pages.dev/listings)** · **[API docs →](https://kiwideal-x70k.onrender.com/scalar/)**  
+👤 **Connect:** [LinkedIn](https://www.linkedin.com/in/arvind-chauhan-dev/) · [Email](mailto:arvind05094@gmail.com)
 
 > **Heads-up:** the backend runs on a free cloud tier that sleeps when idle, so the **first request after a quiet spell can take ~10 seconds** to wake up. Everything is fast once it's warm.
 
@@ -20,7 +22,7 @@ Every important thing that happens — a new bid, a reply, a completed payment �
 
 ### Try it in 60 seconds
 
-1. Open the [live demo](https://kiwideal.pages.dev) and register (any email + password — it's a demo, no verification).
+1. Open the [live demo](https://kiwideal-aml.pages.dev/listings) and register (any email + password — it's a demo, no verification).
 2. Post a **listing** (fixed-price or auction) with a photo.
 3. Open it in a second browser tab, **place a bid**, and watch the price update live in the first tab.
 4. **Message** the seller or run a test **checkout** to see the order flow end to end.
@@ -41,15 +43,15 @@ Every important thing that happens — a new bid, a reply, a completed payment �
 
 ## Screenshots
 
-| Listings                                             | Live bidding                                              |
-| ---------------------------------------------------- | --------------------------------------------------------- |
+| Listings | Live bidding |
+| --- | --- |
 | ![Post a listing](docs/screenshot-post-listings.png) | ![Live bid history](docs/screenshot-live-bid-history.png) |
-| _Post an item as fixed-price or auction_             | _Bids stream in live as they're placed_                   |
+| _Post an item as fixed-price or auction_ | _Bids stream in live as they're placed_ |
 
-| Checkout                                  | Live messages & notifications                                                      |
-| ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| Checkout | Live messages & notifications |
+| --- | --- |
 | ![Checkout](docs/screenshot-checkout.png) | ![Live messages and notifications](docs/screenshot-live-message-notifications.png) |
-| _Stripe-powered secure checkout_          | _Messages and alerts arrive in real time_                                          |
+| _Stripe-powered secure checkout_ | _Messages and alerts arrive in real time_ |
 
 ---
 
@@ -66,6 +68,7 @@ flowchart LR
     API -->|SignalR| Live[Everyone watching<br/>the auction sees the new bid]
     DB --> OB[Outbox worker]
     OB --> N[Notifications module<br/>alerts the outbid buyer]
+
 ```
 
 **Cross-module events (the outbox):**
@@ -76,6 +79,7 @@ flowchart LR
     Save --> Box[(Outbox table)]
     Box --> W[Background outbox worker<br/>polls & dispatches]
     W --> M2[Other modules react<br/>Payments, Notifications, ...]
+
 ```
 
 Because the domain change and its event are written in the **same transaction**, an event can never be lost or fire for a change that rolled back — the classic guarantee the outbox pattern buys you.
@@ -86,23 +90,21 @@ Because the domain change and its event are written in the **same transaction**,
 
 Each module is structured in clean layers — `Domain` (entities, rules), `Application` (CQRS handlers via MediatR), `Infrastructure` (EF Core, external services), and `Api` (controllers, hubs) — and owns its **own Postgres schema**. A small `SharedKernel` holds only the cross-cutting contracts: event definitions, the outbox, `Result` types, and MediatR pipeline behaviours (auth, validation, logging).
 
-![Architecture diagram](docs/architecture-diagram.png)
-
 ---
 
 ## Tech stack
 
-| Area          | Technology                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| **Backend**   | .NET 10, ASP.NET Core Web API, modular monolith, CQRS (MediatR), FluentValidation           |
-| **Data**      | EF Core (Npgsql), PostgreSQL with a schema per module, transactional outbox                 |
-| **Real-time** | SignalR hubs for auctions, listings, messages, and notifications                            |
-| **Auth**      | JWT access/refresh tokens, per-module authorization behaviour                               |
-| **API**       | Versioned endpoints with interactive Scalar docs                                            |
-| **Frontend**  | React 19, TypeScript, Vite, TanStack Query, Tailwind CSS v4, shadcn/ui, React Router        |
-| **Payments**  | Stripe Checkout + webhooks                                                                  |
-| **Cloud**     | Render (API), Cloudflare Pages (frontend), Neon serverless Postgres, Cloudflare R2 (images) |
-| **Testing**   | xUnit unit tests + Testcontainers-backed integration tests                                  |
+| Area | Technology |
+| --- | --- |
+| **Backend** | .NET 10, ASP.NET Core Web API, modular monolith, CQRS (MediatR), FluentValidation |
+| **Data** | EF Core (Npgsql), PostgreSQL with a schema per module, transactional outbox |
+| **Real-time** | SignalR hubs for auctions, listings, messages, and notifications |
+| **Auth** | JWT access/refresh tokens, per-module authorization behaviour |
+| **API** | Versioned endpoints with interactive Scalar docs (`/scalar`) |
+| **Frontend** | React 19, TypeScript, Vite, TanStack Query, Tailwind CSS v4, shadcn/ui, React Router |
+| **Payments** | Stripe Checkout + webhooks |
+| **Cloud** | Render (API), Cloudflare Pages (frontend), Neon serverless Postgres, Supabase Storage (images) |
+| **Testing** | xUnit unit tests + Testcontainers-backed integration tests |
 
 ---
 
@@ -110,12 +112,12 @@ Each module is structured in clean layers — `Domain` (entities, rules), `Appli
 
 A few things worth calling out for a technical review:
 
-- **Modular monolith with real boundaries** — six modules, each with its own layers _and its own database schema_, so nothing couples through a shared table.
-- **Transactional outbox** — domain changes and their events commit together; a background worker (with retry tracking) dispatches them, giving reliable, at-least-once cross-module messaging.
-- **Real-time by default** — dedicated SignalR hubs push bids, messages, and notifications the instant they happen, no polling.
-- **Scheduled auction lifecycle** — background workers activate and close auctions on time, and optimistic concurrency (row versioning) keeps simultaneous bids correct.
-- **Webhook-driven payments** — order status is updated from Stripe webhooks (`checkout.session.completed` / `expired`), never inferred from the redirect.
-- **Consistent request pipeline** — MediatR behaviours apply authentication, validation, and logging uniformly, and a `Result` type carries typed errors instead of exceptions for control flow.
+* **Modular monolith with real boundaries** — six modules, each with its own layers *and its own database schema*, so nothing couples through a shared table.
+* **Transactional outbox** — domain changes and their events commit together; a background worker (with retry tracking) dispatches them, giving reliable, at-least-once cross-module messaging.
+* **Real-time by default** — dedicated SignalR hubs push bids, messages, and notifications the instant they happen, no polling.
+* **Scheduled auction lifecycle** — background workers activate and close auctions on time, and optimistic concurrency (row versioning) keeps simultaneous bids correct.
+* **Webhook-driven payments** — order status is updated from Stripe webhooks (`checkout.session.completed` / `expired`), never inferred from the redirect.
+* **Consistent request pipeline** — MediatR behaviours apply authentication, validation, and logging uniformly, and a `Result` type carries typed errors instead of exceptions for control flow.
 
 ---
 
@@ -128,7 +130,7 @@ A few things worth calling out for a technical review:
 docker-compose up -d
 
 # 2. Configure secrets via .NET user-secrets (never commit real values).
-#    Set one connection string per module, plus JWT / Stripe / R2 keys.
+#    Set one connection string per module, plus JWT / Stripe / Supabase keys.
 dotnet user-secrets set "ConnectionStrings:UsersConnection" \
   "Host=localhost;Port=5432;Database=kiwidealddb;Username=kiwiadmin;Password=kiwipassword;Search Path=users" \
   --project src/kiwiDeal.Api
@@ -142,6 +144,7 @@ dotnet ef database update \
 
 # 4. Run the API — available at http://localhost:5158, docs at /scalar
 dotnet run --project src/kiwiDeal.Api
+
 ```
 
 ```bash
@@ -149,20 +152,22 @@ dotnet run --project src/kiwiDeal.Api
 cd frontend
 npm install
 npm run dev   # set VITE_API_URL=http://localhost:5158/api/v1 in frontend/.env.local
+
 ```
 
 ---
 
 ## Environment variables
 
-| Variable                                                                 | Description                                                                                                 |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `ConnectionStrings__{Module}Connection`                                  | Postgres connection string per module schema (Users, Listings, Auctions, Payments, Messages, Notifications) |
-| `JwtSettings__Secret` / `Issuer` / `Audience` / `ExpiryMinutes`          | JWT signing config                                                                                          |
-| `Stripe__SecretKey` / `WebhookSecret` / `SuccessUrl` / `CancelUrl`       | Stripe API key, webhook signing secret, redirect URLs                                                       |
-| `R2__AccountId` / `AccessKey` / `SecretKey` / `BucketName` / `PublicUrl` | Cloudflare R2 credentials for image storage                                                                 |
-| `AllowedOrigins`                                                         | CORS allowed origin (frontend URL)                                                                          |
-| `VITE_API_URL` _(frontend)_                                              | Base URL of the backend API                                                                                 |
+| Variable | Description |
+| --- | --- |
+| `ConnectionStrings__{Module}Connection` | Postgres connection string per module schema (Users, Listings, Auctions, Payments, Messages, Notifications) |
+| `JwtSettings__Secret` / `Issuer` / `Audience` / `ExpiryMinutes` | JWT signing config |
+| `Stripe__SecretKey` / `WebhookSecret` / `SuccessUrl` / `CancelUrl` | Stripe API key, webhook signing secret, redirect URLs |
+| `Supabase__BucketName` / `Endpoint` / `Key` / `Region` / `Url` | Supabase Storage configuration for listing images |
+| `AllowedOrigins` | CORS allowed origin (`https://kiwideal-aml.pages.dev`) |
+| `ASPNETCORE_ENVIRONMENT` | Host environment setting (`Production`) |
+| `VITE_API_URL` *(frontend)* | Base URL of the backend API (`https://kiwideal-x70k.onrender.com/api/v1`) |
 
 ---
 
@@ -174,17 +179,18 @@ dotnet test tests/kiwiDeal.Tests.Unit
 
 # Integration tests — spins up a real Postgres via Testcontainers (Docker required)
 dotnet test tests/kiwiDeal.Tests.Integration
+
 ```
 
 ---
 
 ## Deployment
 
-- **Backend** — [Render](https://render.com) Docker web service, built from the root `Dockerfile`.
-- **Frontend** — [Cloudflare Pages](https://pages.cloudflare.com), built from `frontend/` (`npm run build` → `dist`).
-- **Database** — [Neon](https://neon.tech) serverless Postgres, one database with a schema per module.
-- **Images** — [Cloudflare R2](https://developers.cloudflare.com/r2/), public bucket for listing photos.
-- **Payments** — [Stripe](https://stripe.com), webhook at `/api/v1/payments/webhook` for `checkout.session.completed` / `expired`.
+* **Backend** — [Render](https://render.com) Docker web service (`https://kiwideal-x70k.onrender.com`), built from the root `Dockerfile`.
+* **Frontend** — [Cloudflare Pages](https://pages.cloudflare.com) (`https://kiwideal-aml.pages.dev`), built from `frontend/` (`npm run build` → `dist`).
+* **Database** — [Neon](https://neon.tech) serverless Postgres, single database instance with dedicated schemas per module (`users`, `listings`, `auctions`, `payments`, `messages`, `notifications`).
+* **Images** — [Supabase Storage](https://supabase.com/docs/guides/storage) (`kiwideal-bucket`), public bucket for listing photos.
+* **Payments** — [Stripe](https://stripe.com), webhook handler at `/api/v1/payments/webhook` for `checkout.session.completed` / `expired`.
 
 ---
 
@@ -205,8 +211,9 @@ src/
 frontend/                # React + TypeScript app
 tests/                   # Unit and Testcontainers-backed integration suites
 scripts/                 # init-schemas.sql (per-module Postgres schemas)
+
 ```
 
 ---
 
-_Built as a portfolio project to demonstrate a real-time, event-driven modular monolith in .NET — clean module boundaries, a transactional outbox, and live SignalR experiences on cloud-native infrastructure._
+*Built as a portfolio project to demonstrate a real-time, event-driven modular monolith in .NET — clean module boundaries, a transactional outbox, and live SignalR experiences on cloud-native infrastructure.*
